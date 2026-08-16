@@ -17,3 +17,8 @@ def truncate_with_ellipsis(text: str, max_length: int) -> str:
     if len(text) <= max_length:
         return text
     return text[:max_length - 3] + "..."
+
+
+def slugify_heading(text: str) -> str:
+    """Normalize a heading for use in a simple section identifier."""
+    return normalize_whitespace(text).lower()

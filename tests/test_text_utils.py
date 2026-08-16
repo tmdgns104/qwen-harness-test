@@ -5,7 +5,7 @@ from pathlib import Path
 SRC_DIR = Path(__file__).resolve().parents[1] / "src"
 sys.path.insert(0, str(SRC_DIR))
 
-from text_utils import normalize_whitespace, truncate_with_ellipsis
+from text_utils import normalize_whitespace, slugify_heading, truncate_with_ellipsis
 
 
 class NormalizeWhitespaceTests(unittest.TestCase):
@@ -43,6 +43,17 @@ class TruncateWithEllipsisTests(unittest.TestCase):
 
     def test_preserves_prefix_before_ellipsis(self) -> None:
         self.assertEqual(truncate_with_ellipsis("안녕하세요Qwen", 6), "안녕하...")
+
+
+class SlugifyHeadingTests(unittest.TestCase):
+    def test_normalizes_case_and_whitespace(self) -> None:
+        self.assertEqual(
+            slugify_heading("  Hello   Qwen World  "),
+            "hello-qwen-world",
+        )
+
+    def test_preserves_non_whitespace_characters(self) -> None:
+        self.assertEqual(slugify_heading("  RAG   설계  "), "rag-설계")
 
 
 if __name__ == "__main__":
