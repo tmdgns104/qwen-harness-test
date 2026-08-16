@@ -16,4 +16,4 @@ def truncate_with_ellipsis(text: str, max_length: int) -> str:
     """Truncate text to max_length, using ... when truncation is needed."""
     if len(text) <= max_length:
         return text
-    return text[:max_length] + "..."
+    return text[:max_length - 3] + "..."
