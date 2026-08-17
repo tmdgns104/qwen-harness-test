@@ -59,3 +59,51 @@ def parse_change_scope(markdown: str) -> ChangeScope:
         allowed=tuple(allowed_items),
         forbidden=tuple(forbidden_items)
     )
+
+
+def path_matches(path: str, pattern: str) -> bool:
+    """
+    Determine if a repository-relative path matches a given pattern.
+    
+    Normalizes both inputs by replacing backslashes with forward slashes.
+    Supports exact matching and trailing /** for recursive directory matching.
+    Does not support other glob syntax (e.g., *.py).
+    """
+    # Normalize backslashes to forward slashes
+    normalized_path = path.replace("\\", "/")
+    normalized_pattern = pattern.replace("\\", "/")
+    
+    # Check for exact match first
+    if normalized_path == normalized_pattern:
+        return True
+    
+    # Check for recursive directory pattern ending in /**
+    if normalized_pattern.endswith("/**"):
+        prefix = normalized_pattern[:-3]  # Remove /**
+        if normalized_path.startswith(prefix + "/"):
+            return True
+    
+    return False
+
+
+def is_path_allowed(path: str, scope: ChangeScope) -> bool:
+    """
+    Determine if a path is allowed based on the given scope.
+    
+    Order of precedence:
+    1. If path matches any forbidden pattern, return False.
+    2. Otherwise, if path matches any allowed pattern, return True.
+    3. Otherwise, return False (default deny).
+    """
+    # Check forbidden patterns first
+    for forbidden_pattern in scope.forbidden:
+        if path_matches(path, forbidden_pattern):
+            return False
+    
+    # Check allowed patterns
+    for allowed_pattern in scope.allowed:
+        if path_matches(path, allowed_pattern):
+            return True
+    
+    # Default deny
+    return False
