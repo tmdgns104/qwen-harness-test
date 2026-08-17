@@ -71,6 +71,17 @@ class ParseChangeScopeTests(unittest.TestCase):
         self.assertEqual(scope.allowed, ("src/app.py",))
         self.assertEqual(scope.forbidden, ("all other Repository files",))
 
+    def test_trims_outer_whitespace_before_backtick_removal(self) -> None:
+        markdown = """## Allowed Changes
+-   `src/app.py`   
+
+## Forbidden Changes
+-   `tests/**`   
+"""
+        scope = parse_change_scope(markdown)
+        self.assertEqual(scope.allowed, ("src/app.py",))
+        self.assertEqual(scope.forbidden, ("tests/**",))
+
     def test_missing_allowed_section_raises(self) -> None:
         markdown = """## Forbidden Changes
 - `tests/**`
