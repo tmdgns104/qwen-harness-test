@@ -152,5 +152,166 @@ class PathScopeMatcherTests(unittest.TestCase):
         self.assertFalse(harness_core.is_path_allowed("README.md", scope))
 
 
+class GitEvidenceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        self._tempdir = tempfile.TemporaryDirectory()
+        self.repo = Path(self._tempdir.name)
+        self._git("init", "-q")
+        self._git("config", "user.email", "hc003@example.test")
+        self._git("config", "user.name", "HC003 Test")
+        (self.repo / "tracked.txt").write_text("base\n", encoding="utf-8")
+        (self.repo / "delete.txt").write_text("delete\n", encoding="utf-8")
+        self._git("add", "tracked.txt", "delete.txt")
+        self._git("commit", "-q", "-m", "baseline")
+
+    def tearDown(self) -> None:
+        self._tempdir.cleanup()
+
+    def _git(self, *args: str) -> str:
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "-C", str(self.repo), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+
+    def _hc(self):
+        import tools.harness_core as harness_core
+        return harness_core
+
+    def test_clean_baseline_captures_head_and_unchanged_is_empty(self) -> None:
+        hc = self._hc()
+        baseline = hc.capture_git_baseline(str(self.repo))
+        self.assertEqual(baseline.head, self._git("rev-parse", "HEAD"))
+        self.assertEqual(hc.get_changed_paths(str(self.repo), baseline), ())
+        from dataclasses import FrozenInstanceError
+        with self.assertRaises(FrozenInstanceError):
+            baseline.head = "changed"
+
+    def test_subdirectory_is_rejected_by_both_public_apis(self) -> None:
+        hc = self._hc()
+        subdir = self.repo / "subdir"
+        subdir.mkdir()
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(subdir))
+        baseline = hc.GitBaseline(head=self._git("rev-parse", "HEAD"))
+        with self.assertRaises(ValueError):
+            hc.get_changed_paths(str(subdir), baseline)
+
+    def test_dirty_states_reject_baseline(self) -> None:
+        hc = self._hc()
+        tracked = self.repo / "tracked.txt"
+        tracked.write_text("unstaged\n", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+        self._git("restore", "tracked.txt")
+
+        tracked.write_text("staged\n", encoding="utf-8")
+        self._git("add", "tracked.txt")
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+        self._git("restore", "--staged", "tracked.txt")
+        self._git("restore", "tracked.txt")
+
+        (self.repo / "untracked.txt").write_text("new\n", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+        (self.repo / "untracked.txt").unlink()
+
+    def test_ignored_untracked_is_clean_and_tracked_ignore_match_is_evidence(self) -> None:
+        hc = self._hc()
+        (self.repo / ".gitignore").write_text("ignored.tmp\ntracked.txt\n", encoding="utf-8")
+        self._git("add", ".gitignore")
+        self._git("commit", "-q", "-m", "ignore rules")
+        (self.repo / "ignored.tmp").write_text("ignored\n", encoding="utf-8")
+
+        baseline = hc.capture_git_baseline(str(self.repo))
+        self.assertEqual(hc.get_changed_paths(str(self.repo), baseline), ())
+
+        (self.repo / "tracked.txt").write_text("changed\n", encoding="utf-8")
+        self.assertEqual(
+            hc.get_changed_paths(str(self.repo), baseline),
+            ("tracked.txt",),
+        )
+
+    def test_changed_paths_cover_staged_unstaged_untracked_deleted_spaces_unique_sorted(self) -> None:
+        hc = self._hc()
+        baseline = hc.capture_git_baseline(str(self.repo))
+
+        tracked = self.repo / "tracked.txt"
+        tracked.write_text("staged version\n", encoding="utf-8")
+        self._git("add", "tracked.txt")
+        tracked.write_text("unstaged version\n", encoding="utf-8")
+
+        (self.repo / "added.txt").write_text("added\n", encoding="utf-8")
+        self._git("add", "added.txt")
+        (self.repo / "untracked.txt").write_text("new\n", encoding="utf-8")
+        (self.repo / "delete.txt").unlink()
+
+        spaced = self.repo / "dir with space" / "file name.txt"
+        spaced.parent.mkdir()
+        spaced.write_text("space\n", encoding="utf-8")
+
+        self.assertEqual(
+            hc.get_changed_paths(str(self.repo), baseline),
+            (
+                "added.txt",
+                "delete.txt",
+                "dir with space/file name.txt",
+                "tracked.txt",
+                "untracked.txt",
+            ),
+        )
+
+    def test_committed_change_after_baseline_is_reported(self) -> None:
+        hc = self._hc()
+        baseline = hc.capture_git_baseline(str(self.repo))
+        (self.repo / "tracked.txt").write_text("committed\n", encoding="utf-8")
+        self._git("add", "tracked.txt")
+        self._git("commit", "-q", "-m", "after baseline")
+        self.assertEqual(
+            hc.get_changed_paths(str(self.repo), baseline),
+            ("tracked.txt",),
+        )
+
+    def test_rename_reports_old_and_new_paths(self) -> None:
+        hc = self._hc()
+        baseline = hc.capture_git_baseline(str(self.repo))
+        self._git("mv", "tracked.txt", "renamed.txt")
+        self.assertEqual(
+            hc.get_changed_paths(str(self.repo), baseline),
+            ("renamed.txt", "tracked.txt"),
+        )
+
+    def test_non_repository_and_invalid_baseline_fail_closed(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        hc = self._hc()
+
+        with tempfile.TemporaryDirectory() as other:
+            with self.assertRaises(RuntimeError):
+                hc.capture_git_baseline(other)
+
+        baseline = hc.GitBaseline(head="definitely-not-a-valid-commit")
+        with self.assertRaises(RuntimeError):
+            hc.get_changed_paths(str(self.repo), baseline)
+
+    def test_git_command_failure_fails_closed(self) -> None:
+        import os
+        from unittest.mock import patch
+
+        hc = self._hc()
+        with patch.dict(os.environ, {"PATH": ""}):
+            with self.assertRaises(RuntimeError):
+                hc.capture_git_baseline(str(self.repo))
+
+
 if __name__ == "__main__":
     unittest.main()
