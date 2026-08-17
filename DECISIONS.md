@@ -56,3 +56,61 @@ Each Task must include its own Acceptance Criteria and Verification and must be 
 - `/work` and `/verify` may later consume Python-generated Evidence rather than recreating objective checks through LLM reasoning.
 - Evidence Collector work is resumed only in this smaller incremental form.
 - ECC-inspired routing and LangGraph orchestration remain later phases and are not introduced as part of this decision.
+
+## ADR-002 - Agent-Independent Native Local Worker Architecture
+
+### Status
+Accepted
+
+### Context
+The original local Worker path was coupled to OpenCode + local Qwen.
+
+Subsequent experiments showed that:
+- qwen2.5-coder:7b did not reliably produce executable tool calls through OpenCode or Qwen Code;
+- Qwen3:8B produced structured tool calls through the native Ollama API;
+- a Python-controlled native Ollama tool-call/result continuation loop succeeded against a real Repository file;
+- correct tool calling does not guarantee correct semantic or implementation output;
+- deterministic scope, Git, test, invariant, and Evidence checks therefore remain necessary;
+- little-coder provides a useful external reference for small-local-model Harness techniques such as bounded retry, model-aware reasoning paths, context control, and tool-quality checks.
+
+### Decision
+Adopt an agent-independent local Worker architecture.
+
+The Harness Core must not depend on OpenCode-specific behavior or any single Agent frontend.
+
+The current default local Worker candidate is:
+
+Deterministic Python Harness
+-> native Ollama API
+-> Qwen3:8B
+
+OpenCode remains an optional alternative Worker/backend and future benchmark candidate.
+Codex remains an optional high-capability executor and is not required for Harness Core operation.
+
+The deterministic Python Harness owns mechanically checkable behavior including tool permission/execution boundaries, Task scope enforcement, Git Evidence, verification execution, invariants, Evidence assembly, and final PASS/FAIL gating.
+
+Qwen remains responsible for semantic reasoning and small scoped implementation work. Qwen self-reported PASS is not authoritative.
+
+### Worker Strategy
+- Use a low-cost fast path first, currently native Ollama with `think:false`.
+- A bounded higher-reasoning slow path may be used after fast-path failure.
+- Repeated failure terminates as FAIL or BLOCKED.
+- Exact retry counts and model parameters may be tuned from benchmark Evidence.
+- Do not indefinitely increase prompt complexity after repeated failure.
+
+### Safety Policy
+Initial behavior is fail-closed.
+
+Malformed or invalid tool calls must not be silently repaired and executed. Tool execution authority belongs to deterministic Harness code rather than the LLM.
+
+### Reference Policy
+little-coder may be used as a reference implementation for proven small-local-model techniques, but Qwen Harness will not copy it wholesale.
+
+The existing Task / Git / Test / Evidence safety model remains the core of Qwen Harness.
+
+### Consequences
+- ADR-001 remains Accepted and unchanged.
+- HC-001 through HC-007 remain the deterministic Harness Core implementation sequence.
+- Worker backend integration can be implemented behind an agent-independent boundary.
+- OpenCode can later be compared against the native Worker path using the same regression Evidence.
+- ECC-inspired routing, sub-agents, and LangGraph remain later-phase work.

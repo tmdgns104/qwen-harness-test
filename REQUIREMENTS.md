@@ -6,9 +6,13 @@
 
 The Harness must allow Repository work to continue when Codex is unavailable or its token/usage limit is exhausted.
 
-### FR-002 - Local Qwen execution path
+### FR-002 - Local Worker execution path
 
-OpenCode + local Qwen must be usable as the local implementation Worker path for small Repository Tasks.
+The Harness must provide a local implementation Worker path that does not require Codex or a paid model.
+
+The current default local Worker candidate is native Ollama API + Qwen3:8B.
+
+OpenCode may remain an optional alternative Worker/backend.
 
 ### FR-003 - Small Task execution
 
@@ -44,6 +48,22 @@ Codex must remain an optional high-capability executor rather than a mandatory d
 
 When a Task is too difficult or too large for Qwen, the workflow must allow the Task to be decomposed into smaller Qwen-safe Tasks before considering escalation.
 
+### FR-011 - Worker/backend independence
+
+Task contracts, scope checks, Git Evidence, verification, and completion gates must not depend on OpenCode-specific behavior or any single Worker frontend/backend.
+
+### FR-012 - Harness-owned tool boundary
+
+Tool permission and execution boundaries must be enforced by deterministic Harness code.
+
+An LLM request alone must not authorize Repository operations.
+
+### FR-013 - Bounded retry and safe stop
+
+Worker retries must be bounded.
+
+Repeated failure must terminate as FAIL or BLOCKED rather than loop indefinitely or increase prompt complexity without limit.
+
 ## Verification Requirements
 
 - Actual changed paths must be checkable independently from Worker self-report.
@@ -59,13 +79,13 @@ When a Task is too difficult or too large for Qwen, the workflow must allow the 
 - The Harness Core should remain understandable and minimal before adding orchestration complexity.
 - Local execution should remain usable without a paid model.
 - Qwen Worker responsibilities should stay narrow.
-- Architecture changes require an explicit Human/ChatGPT decision and must not be inferred by the Worker.
+- Architecture changes require explicit Human approval. ChatGPT provides technical analysis and recommendations. A Worker must not infer or approve Architecture changes.
 
 ## Milestone 1 Boundary
 
 Milestone 1 requires:
 
-- OpenCode + Qwen can execute small Repository Tasks.
+- A local Worker can execute small Repository Tasks without requiring Codex or a paid model.
 - Git/Test or other objective Evidence can independently verify the result.
 - Failure can stop safely without automatically advancing.
 
