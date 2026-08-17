@@ -21,4 +21,4 @@ def truncate_with_ellipsis(text: str, max_length: int) -> str:
 
 def slugify_heading(text: str) -> str:
     """Normalize a heading for use in a simple section identifier."""
-    return normalize_whitespace(text).lower()
+    return normalize_whitespace(text).replace(' ', '-').lower()

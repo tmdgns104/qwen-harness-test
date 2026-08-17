@@ -6,4 +6,4 @@ from text_utils import slugify_heading
 
 def build_section_anchor(title: str, prefix: str) -> str:
     """Build a prefixed section anchor from a heading."""
-    return f"{prefix}-{title}"
+    return f"{prefix}:{slugify_heading(title)}"
