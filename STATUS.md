@@ -1,1 +1,1 @@
-Current Task: QH-V2-ARCH-001
+Current Task: HC-001
