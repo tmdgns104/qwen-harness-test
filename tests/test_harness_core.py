@@ -227,6 +227,15 @@ class GitExecutionAndRootTests(unittest.TestCase):
         returned = hc._require_git_top_level(windows_spelling)
         self.assertEqual(Path(returned).resolve(), self.repo.resolve())
 
+    def test_equivalent_dot_path_is_accepted(self) -> None:
+        import os
+        from pathlib import Path
+
+        hc = self._hc()
+        equivalent = str(self.repo) + os.sep + "."
+        returned = hc._require_git_top_level(equivalent)
+        self.assertEqual(Path(returned).resolve(), self.repo.resolve())
+
     def test_run_git_returns_stdout_for_read_only_command(self) -> None:
         hc = self._hc()
         result = hc._run_git(str(self.repo), ("rev-parse", "--show-toplevel"))
