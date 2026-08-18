@@ -236,6 +236,17 @@ class GitExecutionAndRootTests(unittest.TestCase):
         returned = hc._require_git_top_level(equivalent)
         self.assertEqual(Path(returned).resolve(), self.repo.resolve())
 
+    def test_windows_case_spelling_is_equivalent(self) -> None:
+        import os
+        from pathlib import Path
+
+        if os.name != "nt":
+            self.skipTest("Windows filesystem identity contract")
+        hc = self._hc()
+        equivalent = str(self.repo).lower()
+        returned = hc._require_git_top_level(equivalent)
+        self.assertEqual(Path(returned).resolve(), self.repo.resolve())
+
     def test_run_git_returns_stdout_for_read_only_command(self) -> None:
         hc = self._hc()
         result = hc._run_git(str(self.repo), ("rev-parse", "--show-toplevel"))
