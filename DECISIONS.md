@@ -114,3 +114,28 @@ The existing Task / Git / Test / Evidence safety model remains the core of Qwen 
 - Worker backend integration can be implemented behind an agent-independent boundary.
 - OpenCode can later be compared against the native Worker path using the same regression Evidence.
 - ECC-inspired routing, sub-agents, and LangGraph remain later-phase work.
+
+## ADR-003 - Verified Problem Resolution and Automation Escalation
+
+Status: Accepted
+
+### Decision
+
+- Verified operational failures and their verified resolutions are recorded in `docs/verified_problem_resolutions.md`.
+- When the same failure shape appears again, reuse the recorded verified resolution and Evidence instead of rediscovering the recovery procedure from scratch.
+- Repeated or error-prone manual recovery procedures should be promoted to a small Python utility through a separate approved Task.
+- Automation promotion does not override Architecture, current Task scope, or the HC-001 through HC-007 implementation sequence.
+- Worker Adapter implementation remains deferred until the Architecture explicitly permits it.
+
+### Rationale
+
+Operational failures observed during Harness development included CMD parsing, accidental artifacts, candidate isolation, overly broad cleanup, nested escaping, malformed Worker output, and opaque payload corruption. Recording only the failure without the verified resolution would not prevent recurrence.
+
+The Repository therefore preserves both the problem and the Evidence-backed recovery method, while repeated manual procedures become automation candidates rather than permanent shell rituals.
+
+### Constraints
+
+- A documented workaround is not permission to modify Forbidden files.
+- A Python utility requires its own approved Task before Repository implementation.
+- Deterministic Harness Core sequencing defined by ADR-001 remains unchanged.
+- This ADR does not authorize Worker Adapter implementation.
