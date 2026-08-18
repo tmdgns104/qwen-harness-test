@@ -3,6 +3,7 @@
 import os
 import re
 import subprocess
+import shlex
 from dataclasses import dataclass
 
 
@@ -326,3 +327,41 @@ def parse_verification_commands(markdown: str) -> VerificationContract:
     if not commands:
         raise ValueError("No explicitly marked verification commands")
     return VerificationContract(commands=tuple(commands))
+
+@dataclass(frozen=True)
+class VerificationCommandResult:
+    command: str
+    exit_code: int
+    stdout: str
+    stderr: str
+
+
+def run_verification_commands(contract: VerificationContract, cwd: str) -> tuple[VerificationCommandResult, ...]:
+    if not contract.commands:
+        raise ValueError("VerificationContract must contain at least one command")
+    prepared = []
+    for command in contract.commands:
+        if not command.strip():
+            raise ValueError("Empty command is invalid")
+        try:
+            tokens = shlex.split(command, posix=True)
+        except ValueError:
+            raise ValueError("Malformed quoting in command")
+        if any(token in ("&&", "||", "|", ";") for token in tokens):
+            raise ValueError("Unsupported shell control operator in command")
+        prepared.append((command, tokens))
+    results = []
+    for command, tokens in prepared:
+        try:
+            result = subprocess.run(
+                tokens,
+                cwd=cwd,
+                shell=False,
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            results.append(VerificationCommandResult(command, result.returncode, result.stdout, result.stderr))
+        except OSError as e:
+            raise RuntimeError(f"Failed to start process: {e}") from e
+    return tuple(results)

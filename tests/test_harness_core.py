@@ -830,5 +830,27 @@ class VerificationCommandExecutionTests(unittest.TestCase):
         with self.assertRaises(FrozenInstanceError):
             result.exit_code = 1
 
+    def test_whitespace_only_command_fails_before_process_execution(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=("   ",))
+        with patch("tools.harness_core.subprocess.run") as run:
+            with self.assertRaises(ValueError):
+                hc.run_verification_commands(contract, r"C:\repo")
+        run.assert_not_called()
+
+    def test_invalid_later_command_fails_before_any_process_execution(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        operator = chr(38) * 2
+        invalid = "python second.py " + operator + " python third.py"
+        contract = hc.VerificationContract(commands=("python first.py", invalid))
+        with patch("tools.harness_core.subprocess.run") as run:
+            with self.assertRaises(ValueError):
+                hc.run_verification_commands(contract, r"C:\repo")
+        run.assert_not_called()
+
 if __name__ == "__main__":
     unittest.main()
