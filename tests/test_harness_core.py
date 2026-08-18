@@ -257,7 +257,131 @@ class GitExecutionAndRootTests(unittest.TestCase):
         hc = self._hc()
         with self.assertRaises(RuntimeError):
             hc._run_git(str(self.repo), ("rev-parse", "--verify", "not-a-real-ref"))
+class GitBaselineCaptureTests(unittest.TestCase):
+    def setUp(self) -> None:
+        import tempfile
+        from pathlib import Path
 
+        self._tempdir = tempfile.TemporaryDirectory()
+        self.repo = Path(self._tempdir.name)
+        self._git("init", "-q")
+        self._git("config", "user.email", "hc003b@example.test")
+        self._git("config", "user.name", "HC003B Test")
+        (self.repo / "tracked.txt").write_text("base\n", encoding="utf-8")
+        (self.repo / "delete.txt").write_text("delete\n", encoding="utf-8")
+        self._git("add", "tracked.txt", "delete.txt")
+        self._git("commit", "-q", "-m", "baseline")
+
+    def tearDown(self) -> None:
+        self._tempdir.cleanup()
+
+    def _git(self, *args: str) -> str:
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "-C", str(self.repo), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+
+    def _hc(self):
+        import tools.harness_core as harness_core
+
+        return harness_core
+
+    def test_clean_repository_captures_current_head_and_is_frozen(self) -> None:
+        from dataclasses import FrozenInstanceError
+
+        hc = self._hc()
+        baseline = hc.capture_git_baseline(str(self.repo))
+
+        self.assertEqual(baseline.head, self._git("rev-parse", "HEAD"))
+        with self.assertRaises(FrozenInstanceError):
+            baseline.head = "changed"
+
+    def test_actual_git_top_level_is_accepted(self) -> None:
+        hc = self._hc()
+
+        baseline = hc.capture_git_baseline(str(self.repo))
+
+        self.assertEqual(baseline.head, self._git("rev-parse", "HEAD"))
+
+    def test_valid_worktree_subdirectory_raises_value_error(self) -> None:
+        hc = self._hc()
+        subdir = self.repo / "subdir"
+        subdir.mkdir()
+
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(subdir))
+
+    def test_non_repository_directory_raises_runtime_error(self) -> None:
+        import tempfile
+
+        hc = self._hc()
+
+        with tempfile.TemporaryDirectory() as other:
+            with self.assertRaises(RuntimeError):
+                hc.capture_git_baseline(other)
+
+    def test_unstaged_tracked_modification_rejects_baseline(self) -> None:
+        hc = self._hc()
+        (self.repo / "tracked.txt").write_text("changed\n", encoding="utf-8")
+
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+
+    def test_staged_tracked_modification_rejects_baseline(self) -> None:
+        hc = self._hc()
+        (self.repo / "tracked.txt").write_text("changed\n", encoding="utf-8")
+        self._git("add", "tracked.txt")
+
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+
+    def test_staged_addition_rejects_baseline(self) -> None:
+        hc = self._hc()
+        (self.repo / "added.txt").write_text("added\n", encoding="utf-8")
+        self._git("add", "added.txt")
+
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+
+    def test_staged_deletion_rejects_baseline(self) -> None:
+        hc = self._hc()
+        self._git("rm", "-q", "delete.txt")
+
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+
+    def test_untracked_non_ignored_file_rejects_baseline(self) -> None:
+        hc = self._hc()
+        (self.repo / "untracked.txt").write_text("new\n", encoding="utf-8")
+
+        with self.assertRaises(ValueError):
+            hc.capture_git_baseline(str(self.repo))
+
+    def test_untracked_ignored_file_does_not_reject_baseline(self) -> None:
+        hc = self._hc()
+        (self.repo / ".gitignore").write_text("ignored.tmp\n", encoding="utf-8")
+        self._git("add", ".gitignore")
+        self._git("commit", "-q", "-m", "ignore rule")
+        (self.repo / "ignored.tmp").write_text("ignored\n", encoding="utf-8")
+
+        baseline = hc.capture_git_baseline(str(self.repo))
+
+        self.assertEqual(baseline.head, self._git("rev-parse", "HEAD"))
+
+    def test_required_git_failure_fails_closed(self) -> None:
+        import os
+        from unittest.mock import patch
+
+        hc = self._hc()
+
+        with patch.dict(os.environ, {"PATH": ""}):
+            with self.assertRaises(RuntimeError):
+                hc.capture_git_baseline(str(self.repo))
 
 @unittest.skip("HC-003 parent contract deferred until HC-003C")
 class GitEvidenceTests(unittest.TestCase):
