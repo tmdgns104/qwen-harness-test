@@ -1,1 +1,1 @@
-Current Task: QH-V2-MD-002
+Current Task: QH-V2-SPEC-002
