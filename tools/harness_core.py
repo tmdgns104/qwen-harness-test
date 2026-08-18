@@ -238,3 +238,27 @@ def capture_git_baseline(repo_root: str) -> GitBaseline:
     head_sha = head_result.stdout.strip()
 
     return GitBaseline(head=head_sha)
+
+
+def get_changed_paths(repo_root: str, baseline: GitBaseline) -> tuple[str, ...]:
+    """Return deterministic repository-relative paths changed since baseline."""
+    _require_git_top_level(repo_root)
+
+    tracked = _run_git(
+        repo_root,
+        ("diff", "--no-renames", "--name-only", "-z", baseline.head, "--"),
+        text=False,
+    )
+    untracked = _run_git(
+        repo_root,
+        ("ls-files", "--others", "--exclude-standard", "-z"),
+        text=False,
+    )
+
+    changed: set[str] = set()
+    for output in (tracked.stdout, untracked.stdout):
+        for raw_path in output.split(bytes([0])):
+            if raw_path:
+                changed.add(os.fsdecode(raw_path).replace("\\", "/"))
+
+    return tuple(sorted(changed))
