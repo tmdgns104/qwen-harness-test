@@ -1,6 +1,8 @@
 """Deterministic core helpers for Qwen Harness V2."""
 
+import os
 import re
+import subprocess
 from dataclasses import dataclass
 
 
@@ -107,3 +109,88 @@ def is_path_allowed(path: str, scope: ChangeScope) -> bool:
     
     # Default deny
     return False
+
+
+def _run_git(
+    repo_root: str,
+    args: tuple[str, ...],
+    *,
+    text: bool = True,
+) -> subprocess.CompletedProcess:
+    """
+    Execute a Git command within the specified repository root.
+    
+    Args:
+        repo_root: The path to the repository root (or worktree).
+        args: Tuple of arguments for the git command (e.g., ("rev-parse", "--show-toplevel")).
+        text: If True, decode stdout/stderr as UTF-8; if False, return raw bytes.
+    
+    Returns:
+        A CompletedProcess instance with the result of the Git command.
+    
+    Raises:
+        RuntimeError: If process creation fails (OSError/FileNotFoundError) or if Git returns a non-zero exit code.
+    """
+    # Construct the command list using subprocess defaults (no shell)
+    cmd = ["git", "-C", repo_root] + list(args)
+    
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=text,
+            check=False  # We will handle non-zero exit codes manually
+        )
+    except OSError as e:
+        # Catch process creation failures (e.g., git not found, permission denied)
+        raise RuntimeError(f"Failed to execute Git command: {e}") from e
+    
+    if result.returncode != 0:
+        # Raise an error for non-zero exit codes
+        raise RuntimeError(f"Git command failed with exit code {result.returncode}: {result.stderr}")
+    
+    return result
+
+
+def _require_git_top_level(repo_root: str) -> str:
+    """
+    Validate and resolve the top-level path of a Git repository.
+    
+    Args:
+        repo_root: A path that is either the actual repository root or a subdirectory within it.
+    
+    Returns:
+        The normalized, resolved path to the Git repository's top-level directory.
+    
+    Raises:
+        RuntimeError: If the provided path is not inside a valid Git repository (Git command fails).
+        ValueError: If the provided path is a subdirectory within a valid worktree but not the root.
+    """
+    # Use _run_git to get the actual top-level path reported by Git
+    result = _run_git(repo_root, ("rev-parse", "--show-toplevel"))
+    
+    git_top_level = result.stdout.strip()
+    
+    # Normalize both paths for comparison (handle Windows / vs \ differences)
+    normalized_repo_root = os.path.normpath(repo_root)
+    normalized_git_top_level = os.path.normpath(git_top_level)
+    
+    # Resolve to absolute paths to handle relative paths and symlinks correctly
+    resolved_repo_root = os.path.realpath(normalized_repo_root)
+    resolved_git_top_level = os.path.realpath(normalized_git_top_level)
+    
+    # Check if the provided path is exactly the repository root (or equivalent)
+    if resolved_repo_root == resolved_git_top_level:
+        return git_top_level
+    
+    # If not equal, check containment logic
+    # The supplied canonical path must NOT be contained within the Git top-level
+    # If it is contained, it is a subdirectory and must raise ValueError
+    if resolved_repo_root.startswith(resolved_git_top_level + os.sep) or resolved_repo_root == resolved_git_top_level:
+        # This case handles the scenario where repo_root is a subdirectory of the actual top level.
+        # Since we already checked equality above, if we are here and they differ,
+        # and repo_root starts with git_top_level (plus separator), it's a subdir.
+        raise ValueError(f"Provided path '{repo_root}' is a subdirectory of the repository root '{resolved_git_top_level}', not the root itself.")
+    
+    # If we reach here, the provided path is outside the repository entirely
+    raise RuntimeError(f"Path '{repo_root}' is not inside a valid Git repository (expected top-level: {resolved_git_top_level})")
