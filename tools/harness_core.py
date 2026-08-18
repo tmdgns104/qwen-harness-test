@@ -262,3 +262,67 @@ def get_changed_paths(repo_root: str, baseline: GitBaseline) -> tuple[str, ...]:
                 changed.add(os.fsdecode(raw_path).replace("\\", "/"))
 
     return tuple(sorted(changed))
+
+@dataclass(frozen=True)
+class VerificationContract:
+    """Explicit verification commands parsed from Task Markdown."""
+    commands: tuple[str, ...]
+
+
+def parse_verification_commands(markdown: str) -> VerificationContract:
+    """Parse only explicitly marked commands from the Verification section."""
+    lines = markdown.splitlines()
+    start = None
+    for index, line in enumerate(lines):
+        if line == "## Verification":
+            start = index + 1
+            break
+    if start is None:
+        raise ValueError("Missing Verification section")
+
+    section = []
+    for line in lines[start:]:
+        if line.startswith("## "):
+            break
+        section.append(line)
+
+    markers = {"Run exactly:", "Run:", "Then run:"}
+    commands = []
+    index = 0
+    while index < len(section):
+        marker = section[index]
+        if marker not in markers:
+            index += 1
+            continue
+
+        index += 1
+        while index < len(section) and not section[index].strip():
+            index += 1
+        if index >= len(section):
+            raise ValueError("Verification marker has no command")
+
+        token = section[index].strip()
+        if token.startswith("```"):
+            index += 1
+            block = []
+            while index < len(section) and not section[index].strip().startswith("```"):
+                if section[index].strip():
+                    block.append(section[index].strip())
+                index += 1
+            if index >= len(section) or len(block) != 1:
+                raise ValueError("Verification fence must contain exactly one command")
+            command = block[0]
+            index += 1
+        elif token.startswith("`") and token.endswith("`"):
+            command = token[1:-1].strip()
+            index += 1
+        else:
+            raise ValueError("Unsupported verification command format")
+
+        if not command:
+            raise ValueError("Verification command is empty")
+        commands.append(command)
+
+    if not commands:
+        raise ValueError("No explicitly marked verification commands")
+    return VerificationContract(commands=tuple(commands))

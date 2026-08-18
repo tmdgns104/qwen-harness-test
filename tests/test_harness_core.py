@@ -649,6 +649,25 @@ python second.py
         with self.assertRaises(ValueError):
             hc.parse_verification_commands(markdown)
 
+    def test_marker_with_leading_space_fails_closed(self) -> None:
+        hc = self._hc()
+        markdown = "## Verification\n\n Run exactly:\n\n`echo ok`\n"
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
+    def test_marker_with_trailing_space_fails_closed(self) -> None:
+        hc = self._hc()
+        markdown = "## Verification\n\nRun exactly: \n\n`echo ok`\n"
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
+    def test_verification_heading_with_leading_space_fails_closed(self) -> None:
+        hc = self._hc()
+        markdown = " ## Verification\n\nRun exactly:\n\n`echo ok`\n"
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
+
     def test_verification_contract_is_frozen(self) -> None:
         from dataclasses import FrozenInstanceError
         hc = self._hc()
