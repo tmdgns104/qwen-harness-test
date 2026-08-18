@@ -677,5 +677,158 @@ python second.py
 
 
 
+class VerificationCommandExecutionTests(unittest.TestCase):
+    def _hc(self):
+        import tools.harness_core as harness_core
+
+        return harness_core
+
+    def test_successful_command_captures_result_and_execution_contract(self) -> None:
+        import subprocess
+        from unittest.mock import patch
+
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=("python -m unittest tests.test_harness_core",))
+        completed = subprocess.CompletedProcess(
+            args=["python", "-m", "unittest", "tests.test_harness_core"],
+            returncode=0,
+            stdout="stdout text\n",
+            stderr="stderr text\n",
+        )
+        with patch("tools.harness_core.subprocess.run", return_value=completed) as run:
+            results = hc.run_verification_commands(contract, r"C:\repo")
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].command, "python -m unittest tests.test_harness_core")
+        self.assertEqual(results[0].exit_code, 0)
+        self.assertEqual(results[0].stdout, "stdout text\n")
+        self.assertEqual(results[0].stderr, "stderr text\n")
+        run.assert_called_once_with(
+            ["python", "-m", "unittest", "tests.test_harness_core"],
+            cwd=r"C:\repo",
+            shell=False,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+
+    def test_multiple_commands_execute_in_contract_order(self) -> None:
+        import subprocess
+        from unittest.mock import patch
+
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=("python first.py", "python second.py"))
+        completed = [
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="first", stderr=""),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="second", stderr=""),
+        ]
+        with patch("tools.harness_core.subprocess.run", side_effect=completed) as run:
+            results = hc.run_verification_commands(contract, r"C:\repo")
+
+        self.assertEqual([r.command for r in results], ["python first.py", "python second.py"])
+        self.assertEqual(run.call_count, 2)
+
+    def test_nonzero_exit_code_is_returned_unchanged(self) -> None:
+        import subprocess
+        from unittest.mock import patch
+
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=("python fail.py",))
+        completed = subprocess.CompletedProcess(args=[], returncode=7, stdout="out", stderr="err")
+        with patch("tools.harness_core.subprocess.run", return_value=completed):
+            results = hc.run_verification_commands(contract, r"C:\repo")
+
+        self.assertEqual(results[0].exit_code, 7)
+        self.assertEqual(results[0].stdout, "out")
+        self.assertEqual(results[0].stderr, "err")
+
+    def test_execution_continues_after_nonzero_exit(self) -> None:
+        import subprocess
+        from unittest.mock import patch
+
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=("python fail.py", "python next.py"))
+        completed = [
+            subprocess.CompletedProcess(args=[], returncode=3, stdout="", stderr="fail"),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="next", stderr=""),
+        ]
+        with patch("tools.harness_core.subprocess.run", side_effect=completed) as run:
+            results = hc.run_verification_commands(contract, r"C:\repo")
+
+        self.assertEqual([r.exit_code for r in results], [3, 0])
+        self.assertEqual(run.call_count, 2)
+
+
+    def test_empty_contract_fails_before_process_execution(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=())
+        with patch("tools.harness_core.subprocess.run") as run:
+            with self.assertRaises(ValueError):
+                hc.run_verification_commands(contract, r"C:\repo")
+        run.assert_not_called()
+
+    def test_malformed_quoting_fails_before_process_execution(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        command = "python script.py " + chr(34) + "unterminated"
+        contract = hc.VerificationContract(commands=(command,))
+        with patch("tools.harness_core.subprocess.run") as run:
+            with self.assertRaises(ValueError):
+                hc.run_verification_commands(contract, r"C:\repo")
+        run.assert_not_called()
+
+    def test_shell_control_operator_fails_before_process_execution(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        operator = chr(38) * 2
+        command = "python first.py " + operator + " python second.py"
+        contract = hc.VerificationContract(commands=(command,))
+        with patch("tools.harness_core.subprocess.run") as run:
+            with self.assertRaises(ValueError):
+                hc.run_verification_commands(contract, r"C:\repo")
+        run.assert_not_called()
+
+    def test_quoted_argument_with_spaces_is_one_argv_element(self):
+        import subprocess
+        from unittest.mock import patch
+
+        hc = self._hc()
+        quote = chr(34)
+        command = "python script.py " + quote + "two words" + quote
+        contract = hc.VerificationContract(commands=(command,))
+        completed = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+        with patch("tools.harness_core.subprocess.run", return_value=completed) as run:
+            hc.run_verification_commands(contract, r"C:\repo")
+
+        self.assertEqual(run.call_args.args[0], ["python", "script.py", "two words"])
+
+    def test_process_start_oserror_becomes_runtime_error(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=("missing-command",))
+        with patch("tools.harness_core.subprocess.run", side_effect=OSError("cannot start")) as run:
+            with self.assertRaises(RuntimeError):
+                hc.run_verification_commands(contract, r"C:\repo")
+        run.assert_called_once()
+
+    def test_verification_command_result_is_frozen(self):
+        from dataclasses import FrozenInstanceError
+
+        hc = self._hc()
+        result = hc.VerificationCommandResult(
+            command="python check.py",
+            exit_code=0,
+            stdout="out",
+            stderr="",
+        )
+        with self.assertRaises(FrozenInstanceError):
+            result.exit_code = 1
+
 if __name__ == "__main__":
     unittest.main()
