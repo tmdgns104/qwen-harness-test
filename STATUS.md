@@ -1,1 +1,1 @@
-Current Task: QH-V2-SPEC-002
+Current Task: HC-004A
