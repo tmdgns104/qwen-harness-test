@@ -194,3 +194,47 @@ def _require_git_top_level(repo_root: str) -> str:
     
     # If we reach here, the provided path is outside the repository entirely
     raise RuntimeError(f"Path '{repo_root}' is not inside a valid Git repository (expected top-level: {resolved_git_top_level})")
+
+
+@dataclass(frozen=True)
+class GitBaseline:
+    """Captured Git baseline state at a specific HEAD commit."""
+
+    head: str
+
+
+def capture_git_baseline(repo_root: str) -> GitBaseline:
+    """
+    Capture the current clean Git baseline for the repository root.
+
+    Args:
+        repo_root: The path to the Git repository top-level directory.
+
+    Returns:
+        A frozen GitBaseline instance containing the current HEAD commit SHA.
+
+    Raises:
+        RuntimeError: If the path is not a valid Git repository or Git commands fail.
+        ValueError: If the repository is dirty (tracked changes) or untracked files exist.
+    """
+    # First, validate that repo_root is the actual top-level of the repository
+    _require_git_top_level(repo_root)
+
+    # Run git status --porcelain to check for any cleanliness issues
+    result = _run_git(
+        repo_root,
+        ("status", "--porcelain")
+    )
+
+    status_output = result.stdout
+
+    # Porcelain output is empty if and only if the repository is clean
+    if status_output.strip():
+        # There are tracked unstaged changes, staged changes, or untracked non-ignored files
+        raise ValueError(f"Repository is not clean. Git status:\n{status_output}")
+
+    # Capture the current HEAD commit
+    head_result = _run_git(repo_root, ("rev-parse", "HEAD"))
+    head_sha = head_result.stdout.strip()
+
+    return GitBaseline(head=head_sha)
