@@ -543,6 +543,120 @@ class GitEvidenceTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 hc.capture_git_baseline(str(self.repo))
 
+class VerificationCommandContractTests(unittest.TestCase):
+    def _hc(self):
+        import tools.harness_core as harness_core
+        return harness_core
+
+    def test_parses_run_exactly_inline_code(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+`python -m unittest tests.test_harness_core`
+"""
+        result = hc.parse_verification_commands(markdown)
+        self.assertEqual(result.commands, ("python -m unittest tests.test_harness_core",))
+
+    def test_parses_run_exactly_single_line_fenced_block(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+```text
+python -m unittest tests.test_harness_core
+```
+"""
+        result = hc.parse_verification_commands(markdown)
+        self.assertEqual(result.commands, ("python -m unittest tests.test_harness_core",))
+
+    def test_run_then_run_preserves_command_order(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run:
+
+`python check_docs.py`
+
+Then run:
+
+`git diff --check`
+"""
+        result = hc.parse_verification_commands(markdown)
+        self.assertEqual(result.commands, ("python check_docs.py", "git diff --check"))
+
+    def test_prose_after_valid_command_is_not_executed(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+`python -m unittest tests.test_harness_core`
+
+Then verify actual changed paths against scope.
+"""
+        result = hc.parse_verification_commands(markdown)
+        self.assertEqual(result.commands, ("python -m unittest tests.test_harness_core",))
+
+    def test_verify_with_descriptive_bullets_fails_closed(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Verify with:
+
+- content assertions;
+- `git diff --check`;
+- changed-path comparison.
+"""
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
+
+    def test_missing_verification_section_fails(self) -> None:
+        hc = self._hc()
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands("## Goal\nNothing here\n")
+
+    def test_empty_verification_section_fails(self) -> None:
+        hc = self._hc()
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands("## Verification\n\n## Notes\nNothing\n")
+
+    def test_marker_without_command_fails(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+Then verify something else.
+"""
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
+    def test_multi_command_fenced_block_fails(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+```text
+python first.py
+python second.py
+```
+"""
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
+    def test_verification_contract_is_frozen(self) -> None:
+        from dataclasses import FrozenInstanceError
+        hc = self._hc()
+        contract = hc.VerificationContract(commands=("python check.py",))
+        with self.assertRaises(FrozenInstanceError):
+            contract.commands = ()
+
+
 
 if __name__ == "__main__":
     unittest.main()
