@@ -383,7 +383,6 @@ class GitBaselineCaptureTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 hc.capture_git_baseline(str(self.repo))
 
-@unittest.skip("HC-003 parent contract deferred until HC-003C")
 class GitEvidenceTests(unittest.TestCase):
     def setUp(self) -> None:
         import tempfile
