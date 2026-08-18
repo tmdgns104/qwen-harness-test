@@ -152,6 +152,94 @@ class PathScopeMatcherTests(unittest.TestCase):
         self.assertFalse(harness_core.is_path_allowed("README.md", scope))
 
 
+
+class GitExecutionAndRootTests(unittest.TestCase):
+    def setUp(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        self._tempdir = tempfile.TemporaryDirectory()
+        self.repo = Path(self._tempdir.name)
+        self._git("init", "-q")
+        self._git("config", "user.email", "hc003a@example.test")
+        self._git("config", "user.name", "HC003A Test")
+        (self.repo / "tracked.txt").write_text("base\n", encoding="utf-8")
+        self._git("add", "tracked.txt")
+        self._git("commit", "-q", "-m", "baseline")
+
+    def tearDown(self) -> None:
+        self._tempdir.cleanup()
+
+    def _git(self, *args: str) -> str:
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "-C", str(self.repo), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+
+    def _hc(self):
+        import tools.harness_core as harness_core
+        return harness_core
+
+    def test_actual_git_top_level_is_accepted(self) -> None:
+        from pathlib import Path
+
+        hc = self._hc()
+        returned = hc._require_git_top_level(str(self.repo))
+        self.assertEqual(Path(returned).resolve(), self.repo.resolve())
+
+    def test_valid_worktree_subdirectory_raises_value_error(self) -> None:
+        hc = self._hc()
+        subdir = self.repo / "subdir"
+        subdir.mkdir()
+        with self.assertRaises(ValueError):
+            hc._require_git_top_level(str(subdir))
+
+    def test_non_repository_directory_raises_runtime_error(self) -> None:
+        import tempfile
+
+        hc = self._hc()
+        with tempfile.TemporaryDirectory() as other:
+            with self.assertRaises(RuntimeError):
+                hc._require_git_top_level(other)
+
+    def test_unavailable_git_process_creation_raises_runtime_error(self) -> None:
+        import os
+        from unittest.mock import patch
+
+        hc = self._hc()
+        with patch.dict(os.environ, {"PATH": ""}):
+            with self.assertRaises(RuntimeError):
+                hc._run_git(str(self.repo), ("rev-parse", "--show-toplevel"))
+
+    def test_windows_slash_spellings_are_equivalent(self) -> None:
+        import os
+        from pathlib import Path
+
+        if os.name != "nt":
+            self.skipTest("Windows path spelling contract")
+        hc = self._hc()
+        windows_spelling = str(self.repo).replace("/", "\\")
+        returned = hc._require_git_top_level(windows_spelling)
+        self.assertEqual(Path(returned).resolve(), self.repo.resolve())
+
+    def test_run_git_returns_stdout_for_read_only_command(self) -> None:
+        hc = self._hc()
+        result = hc._run_git(str(self.repo), ("rev-parse", "--show-toplevel"))
+        self.assertEqual(result.returncode, 0)
+        self.assertTrue(result.stdout.strip())
+
+    def test_run_git_nonzero_result_raises_runtime_error(self) -> None:
+        hc = self._hc()
+        with self.assertRaises(RuntimeError):
+            hc._run_git(str(self.repo), ("rev-parse", "--verify", "not-a-real-ref"))
+
+
+@unittest.skip("HC-003 parent contract deferred until HC-003C")
 class GitEvidenceTests(unittest.TestCase):
     def setUp(self) -> None:
         import tempfile
