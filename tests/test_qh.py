@@ -368,6 +368,28 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("error:", result.stderr.lower())
         self.assertEqual(self._git("status", "--porcelain").stdout, before)
 
+    def test_review_accepts_committed_allowed_path_since_explicit_baseline(self):
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        (self.repo / "seed.txt").write_text("changed\n", encoding="utf-8")
+        self._git("add", "seed.txt")
+        self._git("commit", "-m", "commit allowed task change")
+        self.assertEqual(self._git("status", "--porcelain").stdout, "")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "review", baseline],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = result.stdout.lower()
+        self.assertIn("seed.txt", output)
+        self.assertIn("allowed", output)
+        self.assertIn("unexpected changed paths: no", output)
+        self.assertIn("final gate: pass", output)
+
 
 if __name__ == "__main__":
     unittest.main()
