@@ -14,3 +14,19 @@ def read_repo_text(repo_root: str | Path, relative_path: str) -> str:
     if path.is_dir():
         raise ValueError("directories are not readable as text files")
     return path.read_text(encoding="utf-8")
+
+
+def write_repo_text(
+    repo_root: str | Path,
+    relative_path: str,
+    content: str,
+    *,
+    allowed_changes: tuple[str, ...],
+    forbidden_changes: tuple[str, ...],
+) -> str:
+    requested = Path(relative_path)
+    if requested.as_posix() not in allowed_changes:
+        raise ValueError("path is not allowed")
+    path = Path(repo_root) / requested
+    path.write_text(content, encoding="utf-8")
+    return requested.as_posix()
