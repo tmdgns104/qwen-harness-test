@@ -1214,6 +1214,300 @@ class EvidenceAssemblyTests(unittest.TestCase):
         read_bytes.assert_not_called()
         sha256.assert_not_called()
 
+class FinalGateTests(unittest.TestCase):
+    def _hc(self):
+        import tools.harness_core as harness_core
+
+        return harness_core
+
+    def _scope(self):
+        hc = self._hc()
+        return hc.ChangeScope(
+            allowed=("src/**", "README.md"),
+            forbidden=("src/private/**",),
+        )
+
+    def _baseline(self):
+        hc = self._hc()
+        return hc.GitBaseline(head="baseline-head")
+
+    def _positive_evidence(self):
+        hc = self._hc()
+        scope = self._scope()
+        baseline = self._baseline()
+        return hc.assemble_evidence(
+            scope,
+            baseline,
+            ("src/app.py",),
+            (hc.VerificationCommandResult("python ok.py", 0, "ok", ""),),
+            (hc.ExactContentResult("a.txt", "A", True, True),),
+            (hc.Sha256Result("a.bin", "0" * 64, "0" * 64, True, True),),
+        )
+
+    def test_final_gate_result_is_frozen_and_has_exact_fields(self):
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        self.assertEqual(
+            tuple(field.name for field in fields(hc.FinalGateResult)),
+            ("passed", "failures"),
+        )
+        result = hc.FinalGateResult(passed=True, failures=())
+        with self.assertRaises(FrozenInstanceError):
+            result.passed = False
+
+    def test_completely_positive_evidence_passes(self):
+        hc = self._hc()
+        result = hc.evaluate_final_gate(self._positive_evidence())
+        self.assertEqual(result, hc.FinalGateResult(True, ()))
+
+    def test_scope_failure_uses_recomputed_hc002_result(self):
+        hc = self._hc()
+        scope = self._scope()
+        baseline = self._baseline()
+        evidence = hc.HarnessEvidence(
+            scope=scope,
+            baseline=baseline,
+            changed_paths=("src/private/secret.py",),
+            path_scope_results=(hc.PathScopeEvidence("src/private/secret.py", False),),
+            verification_results=(),
+            exact_content_results=(),
+            sha256_results=(),
+        )
+        result = hc.evaluate_final_gate(evidence)
+        self.assertEqual(result, hc.FinalGateResult(False, ("scope",)))
+
+    def test_nonzero_verification_exit_codes_produce_one_failure_category(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(
+            self._scope(),
+            self._baseline(),
+            (),
+            (
+                hc.VerificationCommandResult("python fail1.py", 1, "", "one"),
+                hc.VerificationCommandResult("python fail2.py", 7, "", "two"),
+            ),
+        )
+        result = hc.evaluate_final_gate(evidence)
+        self.assertEqual(result, hc.FinalGateResult(False, ("verification",)))
+
+    def test_exact_content_mismatch_fails(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(
+            self._scope(),
+            self._baseline(),
+            (),
+            exact_content_results=(
+                hc.ExactContentResult("a.txt", "EXPECTED", True, False),
+            ),
+        )
+        result = hc.evaluate_final_gate(evidence)
+        self.assertEqual(result, hc.FinalGateResult(False, ("exact_content",)))
+
+    def test_sha256_mismatch_fails(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(
+            self._scope(),
+            self._baseline(),
+            (),
+            sha256_results=(
+                hc.Sha256Result("a.bin", "0" * 64, "1" * 64, True, False),
+            ),
+        )
+        result = hc.evaluate_final_gate(evidence)
+        self.assertEqual(result, hc.FinalGateResult(False, ("sha256",)))
+
+    def test_tampered_scope_result_adds_consistency_and_scope(self):
+        hc = self._hc()
+        scope = self._scope()
+        evidence = hc.HarnessEvidence(
+            scope=scope,
+            baseline=self._baseline(),
+            changed_paths=("src/private/secret.py",),
+            path_scope_results=(hc.PathScopeEvidence("src/private/secret.py", True),),
+            verification_results=(),
+            exact_content_results=(),
+            sha256_results=(),
+        )
+        result = hc.evaluate_final_gate(evidence)
+        self.assertEqual(
+            result,
+            hc.FinalGateResult(False, ("evidence_consistency", "scope")),
+        )
+
+    def test_exact_true_while_missing_is_inconsistent(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(
+            self._scope(),
+            self._baseline(),
+            (),
+            exact_content_results=(
+                hc.ExactContentResult("a.txt", "A", False, True),
+            ),
+        )
+        result = hc.evaluate_final_gate(evidence)
+        self.assertEqual(
+            result,
+            hc.FinalGateResult(False, ("evidence_consistency",)),
+        )
+
+    def test_sha_true_while_missing_or_actual_none_is_inconsistent(self):
+        hc = self._hc()
+        cases = (
+            hc.Sha256Result("a.bin", "0" * 64, "0" * 64, False, True),
+            hc.Sha256Result("b.bin", "0" * 64, None, True, True),
+        )
+        for sha_result in cases:
+            with self.subTest(path=sha_result.path):
+                evidence = hc.assemble_evidence(
+                    self._scope(),
+                    self._baseline(),
+                    (),
+                    sha256_results=(sha_result,),
+                )
+                result = hc.evaluate_final_gate(evidence)
+                self.assertEqual(
+                    result,
+                    hc.FinalGateResult(False, ("evidence_consistency",)),
+                )
+
+    def test_sha_true_with_mismatched_actual_digest_is_inconsistent(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(
+            self._scope(),
+            self._baseline(),
+            (),
+            sha256_results=(
+                hc.Sha256Result("a.bin", "0" * 64, "1" * 64, True, True),
+            ),
+        )
+        result = hc.evaluate_final_gate(evidence)
+        self.assertEqual(
+            result,
+            hc.FinalGateResult(False, ("evidence_consistency",)),
+        )
+
+    def test_multiple_failures_are_unique_and_in_fixed_order(self):
+        hc = self._hc()
+        scope = self._scope()
+        evidence = hc.HarnessEvidence(
+            scope=scope,
+            baseline=self._baseline(),
+            changed_paths=("src/private/secret.py",),
+            path_scope_results=(hc.PathScopeEvidence("src/private/secret.py", True),),
+            verification_results=(
+                hc.VerificationCommandResult("python fail1.py", 1, "", "one"),
+                hc.VerificationCommandResult("python fail2.py", 7, "", "two"),
+            ),
+            exact_content_results=(
+                hc.ExactContentResult("a.txt", "A", True, False),
+                hc.ExactContentResult("b.txt", "B", True, False),
+            ),
+            sha256_results=(
+                hc.Sha256Result("a.bin", "0" * 64, "1" * 64, True, False),
+                hc.Sha256Result("b.bin", "2" * 64, "3" * 64, True, False),
+            ),
+        )
+
+        result = hc.evaluate_final_gate(evidence)
+
+        self.assertEqual(
+            result,
+            hc.FinalGateResult(
+                False,
+                (
+                    "evidence_consistency",
+                    "scope",
+                    "verification",
+                    "exact_content",
+                    "sha256",
+                ),
+            ),
+        )
+
+    def test_empty_optional_evidence_can_pass(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(
+            self._scope(),
+            self._baseline(),
+            (),
+        )
+
+        result = hc.evaluate_final_gate(evidence)
+
+        self.assertEqual(result, hc.FinalGateResult(True, ()))
+
+    def test_sha_consistency_comparison_is_case_insensitive(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(
+            self._scope(),
+            self._baseline(),
+            (),
+            sha256_results=(
+                hc.Sha256Result("a.bin", "A" * 64, "a" * 64, True, True),
+            ),
+        )
+
+        result = hc.evaluate_final_gate(evidence)
+
+        self.assertEqual(result, hc.FinalGateResult(True, ()))
+
+    def test_reuses_one_recomputed_hc002_scope_fact_per_changed_path(self):
+        from unittest.mock import call, patch
+
+        hc = self._hc()
+        scope = self._scope()
+        changed_paths = ("src/app.py", "src/private/secret.py", "src/app.py")
+        evidence = hc.HarnessEvidence(
+            scope=scope,
+            baseline=self._baseline(),
+            changed_paths=changed_paths,
+            path_scope_results=(
+                hc.PathScopeEvidence("src/app.py", True),
+                hc.PathScopeEvidence("src/private/secret.py", False),
+                hc.PathScopeEvidence("src/app.py", True),
+            ),
+            verification_results=(),
+            exact_content_results=(),
+            sha256_results=(),
+        )
+
+        with patch(
+            "tools.harness_core.is_path_allowed",
+            side_effect=(True, False, True),
+        ) as is_allowed:
+            result = hc.evaluate_final_gate(evidence)
+
+        self.assertEqual(
+            is_allowed.call_args_list,
+            [
+                call("src/app.py", scope),
+                call("src/private/secret.py", scope),
+                call("src/app.py", scope),
+            ],
+        )
+        self.assertEqual(result, hc.FinalGateResult(False, ("scope",)))
+
+    def test_final_gate_performs_no_git_process_file_or_hash_operations(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        evidence = self._positive_evidence()
+
+        with (
+            patch("tools.harness_core._run_git") as run_git,
+            patch("tools.harness_core.subprocess.run") as run_process,
+            patch("pathlib.Path.read_bytes") as read_bytes,
+            patch("tools.harness_core.hashlib.sha256") as sha256,
+        ):
+            result = hc.evaluate_final_gate(evidence)
+
+        self.assertEqual(result, hc.FinalGateResult(True, ()))
+        run_git.assert_not_called()
+        run_process.assert_not_called()
+        read_bytes.assert_not_called()
+        sha256.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
