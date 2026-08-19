@@ -77,6 +77,24 @@ class RepositoryReadToolsTests(unittest.TestCase):
             self.assertEqual((repo / "allowed.txt").read_text(encoding="utf-8"), content)
             self.assertEqual(result, "allowed.txt")
 
+    def test_write_repo_text_replaces_allowed_file_with_exact_content(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            target = repo / "allowed.txt"
+            target.write_text("OLD\n", encoding="utf-8")
+            content = "NEW\nCONTENT\n"
+
+            result = write_repo_text(
+                repo,
+                "allowed.txt",
+                content,
+                allowed_changes=("allowed.txt",),
+                forbidden_changes=(),
+            )
+
+            self.assertEqual(target.read_text(encoding="utf-8"), content)
+            self.assertEqual(result, "allowed.txt")
+
 
 if __name__ == "__main__":
     unittest.main()
