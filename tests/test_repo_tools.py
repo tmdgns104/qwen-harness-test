@@ -27,6 +27,17 @@ class RepositoryReadToolsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 read_repo_text(repo, str(outside))
 
+    def test_read_repo_text_rejects_path_traversal_outside_repository(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            outside = root / "outside.txt"
+            outside.write_text("OUTSIDE\n", encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                read_repo_text(repo, "../outside.txt")
+
 
 if __name__ == "__main__":
     unittest.main()
