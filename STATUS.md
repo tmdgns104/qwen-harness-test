@@ -1,9 +1,9 @@
-Current Task: QH-V2-PERF-001 - COMPLETE - VERIFIED - commit bdd36c5
+Current Task: QH-V2-PERF-002 - ACTIVE
 
-Previous Task: QH-V2-ARCH-005 - COMPLETE - VERIFIED - commit 4871243
+Previous Task: QH-V2-PERF-001 - COMPLETE - VERIFIED - commit bdd36c5
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: fea9d7499f7a60ee96f44d43b55ec3f5f5643093
+Task Baseline: 90b25c2d0476e7c286506378f664a48a39885315
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
