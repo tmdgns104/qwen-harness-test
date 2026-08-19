@@ -1,8 +1,8 @@
-Current Task: QH-V2-ARCH-003 - COMPLETE - VERIFIED - commit 1233379
+Current Task: QH-V2-AUTO-001 - ACTIVE - DETERMINISTIC WORKFLOW AUTOMATION
 
-Previous Task: QH-V2-WC-001 - COMPLETE - VERIFIED - commit 2ee6119
+Previous Task: QH-V2-ARCH-003 - COMPLETE - VERIFIED - commit 1233379
 
-Next Planned Task: Deterministic Harness workflow automation implementation Task - NOT STARTED
+Next Planned Task: Native Ollama Worker Adapter - NOT STARTED
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
@@ -26,4 +26,6 @@ Handoff:
 
 - QH-V2-ARCH-003 Task baseline commit: 1dc953e.
 - ADR-005 workflow automation priority decision completed and committed: 1233379.
-- Deterministic workflow automation implementation Task is next and has not started.
+- QH-V2-AUTO-001 Task baseline commit: d1e215c.
+- Deterministic workflow automation implementation is now the active Task.
+- Native Ollama Worker Adapter remains NOT STARTED.
