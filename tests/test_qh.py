@@ -102,5 +102,42 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("scope", output)
 
 
+    def test_start_updates_only_top_level_lifecycle_fields_and_preserves_handoff_history(self):
+        current = "Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234"
+        historical = "- Historical note: Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234"
+        (self.repo / "STATUS.md").write_text(
+            current + "\\n\\n"
+            + "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\\n\\n"
+            + "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\\n\\n"
+            + "Handoff:\\n"
+            + historical + "\\n",
+            encoding="utf-8",
+        )
+        (self.repo / "tasks" / "QH-V2-TEST-002.md").write_text(
+            "## Status\\n\\nAPPROVED - READY FOR CONTRACT BASELINE\\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "lifecycle start baseline")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "start", "QH-V2-TEST-002"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        status = (self.repo / "STATUS.md").read_text(encoding="utf-8")
+        self.assertTrue(status.startswith(
+            "Current Task: QH-V2-TEST-002 - ACTIVE\\n\\n"
+            "Previous Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234\\n\\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED"
+        ))
+        self.assertIn(historical, status)
+        self.assertEqual(status.count(current), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
