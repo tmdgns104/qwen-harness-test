@@ -48,14 +48,28 @@ def command_status(repo_root: Path) -> int:
     return 0
 
 
+def command_preflight(repo_root: Path) -> int:
+    _require_git_top_level(str(repo_root))
+    task_id, task_path, task_markdown = _load_current_task(repo_root)
+    parse_change_scope(task_markdown)
+    git_status = _run_git(str(repo_root), ("status", "--porcelain")).stdout
+    print(f"Current Task: {task_id}")
+    print(f"Task File: {task_path.relative_to(repo_root).as_posix()}")
+    print(f"Git State: {"clean" if not git_status.strip() else "dirty"}")
+    print("Task Scope: valid")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status",))
+    parser.add_argument("command", choices=("status", "preflight"))
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
     try:
         if args.command == "status":
             return command_status(repo_root)
+        if args.command == "preflight":
+            return command_preflight(repo_root)
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
