@@ -32,6 +32,11 @@ def write_repo_text(
         raise ValueError("path is forbidden")
     if normalized not in allowed_changes:
         raise ValueError("path is not allowed")
-    path = Path(repo_root) / requested
+    root = Path(repo_root).resolve()
+    path = (root / requested).resolve()
+    try:
+        path.relative_to(root)
+    except ValueError as exc:
+        raise ValueError("path escapes repository root") from exc
     path.write_text(content, encoding="utf-8")
     return requested.as_posix()
