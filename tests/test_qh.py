@@ -353,6 +353,21 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("unexpected changed paths: yes", output)
         self.assertIn("final gate: fail", output)
 
+    def test_review_rejects_invalid_explicit_baseline_without_modifying_repo(self):
+        before = self._git("status", "--porcelain").stdout
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "review", "definitely-not-a-commit"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("error:", result.stderr.lower())
+        self.assertEqual(self._git("status", "--porcelain").stdout, before)
+
 
 if __name__ == "__main__":
     unittest.main()
