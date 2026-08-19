@@ -1,10 +1,12 @@
 """Deterministic core helpers for Qwen Harness V2."""
 
 import os
+import hashlib
 import re
 import subprocess
 import shlex
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -365,3 +367,62 @@ def run_verification_commands(contract: VerificationContract, cwd: str) -> tuple
         except OSError as e:
             raise RuntimeError(f"Failed to start process: {e}") from e
     return tuple(results)
+
+
+@dataclass(frozen=True)
+class ExactContentResult:
+    path: str
+    expected_content: str
+    exists: bool
+    matches: bool
+
+
+@dataclass(frozen=True)
+class Sha256Result:
+    path: str
+    expected_sha256: str
+    actual_sha256: str | None
+    exists: bool
+    matches: bool
+
+
+def _resolve_invariant_target(repo_root: str, path: str) -> Path:
+    relative = Path(path)
+    if relative.is_absolute() or relative.drive:
+        raise ValueError("Invariant path must be Repository-relative")
+    try:
+        root = Path(repo_root).resolve()
+        target = (root / relative).resolve()
+    except OSError as exc:
+        raise RuntimeError(f"Failed to resolve invariant path: {exc}") from exc
+    if not target.is_relative_to(root):
+        raise ValueError("Invariant path escapes Repository root")
+    return target
+
+
+def check_exact_content(repo_root: str, path: str, expected_content: str) -> ExactContentResult:
+    target = _resolve_invariant_target(repo_root, path)
+    if not target.exists():
+        return ExactContentResult(path, expected_content, False, False)
+    if not target.is_file():
+        raise ValueError("Invariant target must be a regular file")
+    try:
+        actual = target.read_bytes()
+    except OSError as exc:
+        raise RuntimeError(f"Failed to read invariant target: {exc}") from exc
+    return ExactContentResult(path, expected_content, True, actual == expected_content.encode("utf-8"))
+
+
+def check_sha256(repo_root: str, path: str, expected_sha256: str) -> Sha256Result:
+    if re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256) is None:
+        raise ValueError("Expected SHA-256 must contain exactly 64 hexadecimal characters")
+    target = _resolve_invariant_target(repo_root, path)
+    if not target.exists():
+        return Sha256Result(path, expected_sha256, None, False, False)
+    if not target.is_file():
+        raise ValueError("Invariant target must be a regular file")
+    try:
+        actual = hashlib.sha256(target.read_bytes()).hexdigest()
+    except OSError as exc:
+        raise RuntimeError(f"Failed to read or hash invariant target: {exc}") from exc
+    return Sha256Result(path, expected_sha256, actual, True, actual.lower() == expected_sha256.lower())
