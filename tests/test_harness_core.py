@@ -1053,6 +1053,167 @@ class InvariantCheckTests(unittest.TestCase):
                 with self.assertRaises(RuntimeError):
                     hc.check_sha256(str(root), "target.bin", "0" * 64)
 
+class EvidenceAssemblyTests(unittest.TestCase):
+    def _hc(self):
+        import tools.harness_core as harness_core
+
+        return harness_core
+
+    def _scope(self):
+        hc = self._hc()
+        return hc.ChangeScope(
+            allowed=("src/**", "README.md"),
+            forbidden=("src/private/**",),
+        )
+
+    def _baseline(self):
+        hc = self._hc()
+        return hc.GitBaseline(head="baseline-head")
+
+    def test_public_evidence_types_are_frozen_and_have_exact_fields(self):
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        self.assertEqual(
+            tuple(field.name for field in fields(hc.PathScopeEvidence)),
+            ("path", "allowed"),
+        )
+        self.assertEqual(
+            tuple(field.name for field in fields(hc.HarnessEvidence)),
+            (
+                "scope",
+                "baseline",
+                "changed_paths",
+                "path_scope_results",
+                "verification_results",
+                "exact_content_results",
+                "sha256_results",
+            ),
+        )
+
+        result = hc.PathScopeEvidence(path="src/app.py", allowed=True)
+        with self.assertRaises(FrozenInstanceError):
+            result.allowed = False
+
+    def test_assembles_scope_facts_in_order_and_preserves_duplicate_paths(self):
+        from dataclasses import FrozenInstanceError
+
+        hc = self._hc()
+        scope = self._scope()
+        baseline = self._baseline()
+        changed_paths = (
+            "src/app.py",
+            "src/private/secret.py",
+            "src/app.py",
+        )
+
+        evidence = hc.assemble_evidence(scope, baseline, changed_paths)
+
+        self.assertIs(evidence.scope, scope)
+        self.assertIs(evidence.baseline, baseline)
+        self.assertEqual(evidence.changed_paths, changed_paths)
+        self.assertEqual(
+            evidence.path_scope_results,
+            (
+                hc.PathScopeEvidence("src/app.py", True),
+                hc.PathScopeEvidence("src/private/secret.py", False),
+                hc.PathScopeEvidence("src/app.py", True),
+            ),
+        )
+        with self.assertRaises(FrozenInstanceError):
+            evidence.changed_paths = ()
+
+    def test_preserves_earlier_stage_results_in_supplied_order(self):
+        hc = self._hc()
+        scope = self._scope()
+        baseline = self._baseline()
+
+        verification_results = (
+            hc.VerificationCommandResult("python ok.py", 0, "ok", ""),
+            hc.VerificationCommandResult("python fail.py", 7, "", "failed"),
+        )
+        exact_results = (
+            hc.ExactContentResult("a.txt", "A", True, True),
+            hc.ExactContentResult("b.txt", "B", True, False),
+        )
+        sha_results = (
+            hc.Sha256Result("a.bin", "0" * 64, "0" * 64, True, True),
+            hc.Sha256Result("b.bin", "1" * 64, "2" * 64, True, False),
+        )
+
+        evidence = hc.assemble_evidence(
+            scope,
+            baseline,
+            ("src/app.py",),
+            verification_results,
+            exact_results,
+            sha_results,
+        )
+
+        self.assertEqual(evidence.verification_results, verification_results)
+        self.assertEqual(evidence.exact_content_results, exact_results)
+        self.assertEqual(evidence.sha256_results, sha_results)
+        self.assertEqual(evidence.verification_results[1].exit_code, 7)
+        self.assertFalse(evidence.exact_content_results[1].matches)
+        self.assertFalse(evidence.sha256_results[1].matches)
+
+    def test_accepts_empty_changed_paths_and_result_tuples(self):
+        hc = self._hc()
+        evidence = hc.assemble_evidence(self._scope(), self._baseline(), ())
+
+        self.assertEqual(evidence.changed_paths, ())
+        self.assertEqual(evidence.path_scope_results, ())
+        self.assertEqual(evidence.verification_results, ())
+        self.assertEqual(evidence.exact_content_results, ())
+        self.assertEqual(evidence.sha256_results, ())
+
+    def test_reuses_is_path_allowed_once_per_changed_path(self):
+        from unittest.mock import call, patch
+
+        hc = self._hc()
+        scope = self._scope()
+        baseline = self._baseline()
+        changed_paths = ("one.py", "two.py", "one.py")
+
+        with patch(
+            "tools.harness_core.is_path_allowed",
+            side_effect=(True, False, True),
+        ) as is_allowed:
+            evidence = hc.assemble_evidence(scope, baseline, changed_paths)
+
+        self.assertEqual(
+            is_allowed.call_args_list,
+            [call("one.py", scope), call("two.py", scope), call("one.py", scope)],
+        )
+        self.assertEqual(
+            evidence.path_scope_results,
+            (
+                hc.PathScopeEvidence("one.py", True),
+                hc.PathScopeEvidence("two.py", False),
+                hc.PathScopeEvidence("one.py", True),
+            ),
+        )
+
+    def test_assembly_performs_no_git_process_file_or_hash_operations(self):
+        from unittest.mock import patch
+
+        hc = self._hc()
+        scope = self._scope()
+        baseline = self._baseline()
+        with (
+            patch("tools.harness_core._run_git") as run_git,
+            patch("tools.harness_core.subprocess.run") as run_process,
+            patch("pathlib.Path.read_bytes") as read_bytes,
+            patch("tools.harness_core.hashlib.sha256") as sha256,
+        ):
+            evidence = hc.assemble_evidence(scope, baseline, ("src/app.py",))
+
+        self.assertEqual(evidence.changed_paths, ("src/app.py",))
+        run_git.assert_not_called()
+        run_process.assert_not_called()
+        read_bytes.assert_not_called()
+        sha256.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
