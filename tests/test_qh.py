@@ -225,5 +225,80 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertNotEqual(self._git("status", "--porcelain").stdout, "")
 
 
+    def test_close_review_failure_does_not_modify_lifecycle_files(self):
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            "Current Task: QH-V2-TEST-001 - ACTIVE\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n",
+            encoding="utf-8",
+        )
+        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
+        task_path.write_text(
+            "# Test Task\n\n## Status\n\nACTIVE\n\n"
+            "## Allowed Changes\n\n- `seed.txt`\n\n"
+            "## Forbidden Changes\n\n- `forbidden.txt`\n\n"
+            '## Verification\n\nRun exactly:\n\n`python -c "import sys; sys.exit(7)"`\n',
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "failing close review baseline")
+        commit = self._git("rev-parse", "HEAD").stdout.strip()
+        original_status = status_path.read_text(encoding="utf-8")
+        original_task = task_path.read_text(encoding="utf-8")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "close", commit],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Final Gate: FAIL", result.stdout)
+        self.assertEqual(status_path.read_text(encoding="utf-8"), original_status)
+        self.assertEqual(task_path.read_text(encoding="utf-8"), original_task)
+
+
+    def test_close_rejects_non_head_commit_without_modifying_lifecycle_files(self):
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            "Current Task: QH-V2-TEST-001 - ACTIVE\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n",
+            encoding="utf-8",
+        )
+        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
+        task_path.write_text(
+            "# Test Task\n\n## Status\n\nACTIVE\n\n"
+            "## Allowed Changes\n\n- `seed.txt`\n\n"
+            "## Forbidden Changes\n\n- `forbidden.txt`\n\n"
+            "## Verification\n\nRun exactly:\n\n`python --version`\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "older completion candidate")
+        old_commit = self._git("rev-parse", "HEAD").stdout.strip()
+        (self.repo / "seed.txt").write_text("newer head\n", encoding="utf-8")
+        self._git("add", ".")
+        self._git("commit", "-m", "newer verified head")
+        original_status = status_path.read_text(encoding="utf-8")
+        original_task = task_path.read_text(encoding="utf-8")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "close", old_commit],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("HEAD", result.stderr)
+        self.assertEqual(status_path.read_text(encoding="utf-8"), original_status)
+        self.assertEqual(task_path.read_text(encoding="utf-8"), original_task)
+
+
 if __name__ == "__main__":
     unittest.main()

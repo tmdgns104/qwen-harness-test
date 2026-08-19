@@ -65,6 +65,58 @@ def command_start(repo_root: Path, target_task_id: str) -> int:
     return 0
 
 
+def _completed_task_markdown(markdown: str) -> str:
+    lines = markdown.splitlines()
+    headings = [index for index, line in enumerate(lines) if line == "## Status"]
+    if len(headings) != 1:
+        raise ValueError(f"Expected exactly one Task Status heading; found {len(headings)}")
+    status_index = headings[0] + 1
+    while status_index < len(lines) and not lines[status_index].strip():
+        status_index += 1
+    if status_index >= len(lines):
+        raise ValueError("Task Status value not found")
+    lines[status_index] = "COMPLETE - VERIFIED"
+    return "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
+
+
+def command_close(repo_root: Path, commit: str) -> int:
+    _require_git_top_level(str(repo_root))
+
+    if command_review(repo_root) != 0:
+        return 1
+
+    commit_type = _run_git(str(repo_root), ("cat-file", "-t", commit)).stdout.strip()
+    if commit_type != "commit":
+        raise ValueError(f"Not a Git commit: {commit}")
+
+    head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
+    resolved_commit = _run_git(str(repo_root), ("rev-parse", commit)).stdout.strip()
+    if resolved_commit != head:
+        raise ValueError(f"Completion commit must match current HEAD: {head}")
+
+    task_id, task_path, task_markdown = _load_current_task(repo_root)
+    status_path = repo_root / "STATUS.md"
+    markdown = status_path.read_text(encoding="utf-8")
+    current_line = _require_single_lifecycle_line(markdown, "Current Task")
+    _require_single_lifecycle_line(markdown, "Previous Task")
+    _require_single_lifecycle_line(markdown, "Next Planned Task")
+
+    if not current_line.startswith(f"Current Task: {task_id} - ACTIVE"):
+        raise ValueError("Current Task is not ACTIVE")
+
+    updated_task = _completed_task_markdown(task_markdown)
+    lines = markdown.splitlines()
+    current_index = lines.index(current_line)
+    lines[current_index] = f"Current Task: {task_id} - COMPLETE - VERIFIED - commit {commit}"
+    updated_status = "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
+
+    status_path.write_text(updated_status, encoding="utf-8")
+    task_path.write_text(updated_task, encoding="utf-8")
+    print(f"Closed Task: {task_id}")
+    print(f"Completion Commit: {commit}")
+    return 0
+
+
 def command_status(repo_root: Path) -> int:
     _require_git_top_level(str(repo_root))
     task_id, task_path, task_markdown = _load_current_task(repo_root)
@@ -154,7 +206,7 @@ def command_review(repo_root: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start"))
+    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close"))
     parser.add_argument("task_id", nargs="?")
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
@@ -163,6 +215,10 @@ def main() -> int:
             if args.task_id is None:
                 raise ValueError("start requires a Task ID")
             return command_start(repo_root, args.task_id)
+        if args.command == "close":
+            if args.task_id is None:
+                raise ValueError("close requires a commit")
+            return command_close(repo_root, args.task_id)
         if args.task_id is not None:
             raise ValueError(f"{args.command} does not accept a Task ID")
         if args.command == "status":
