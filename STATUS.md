@@ -55,4 +55,7 @@ Improvement Checkpoints:
 - Pre-Runner Safety/UX Review is required before Single-Task Runner and will classify baseline automation, scope-evaluation unification, and the remaining known candidates.
 - Post-Milestone 1 Hardening & UX Improvement follows E2E Regression and will revisit CMD simplification, qh doctor, qh status UX, Task scaffolding, Worker smoke standardization, and any new repeated Evidence.
 - Continue to defer automatic commit, automatic Task completion, automatic Architecture modification, automatic next-Task start, and RED/GREEN semantic judgment automation. Human approval remains authoritative.
+- QH-V2-PRR-001 review result: Single-Task Runner is BLOCKED until Task baseline lifecycle/review integration and Repository Edit Tool scope-engine unification are completed and verified.
+- CMD simplification, qh doctor, qh status UX, and Task scaffolding are safe to defer until after E2E.
+- Worker smoke-test standardization remains deferred pending repeated Runner/E2E Evidence.
 - Improvement candidates require separate approved Tasks before implementation.
