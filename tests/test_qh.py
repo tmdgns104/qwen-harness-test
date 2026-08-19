@@ -428,6 +428,25 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("final gate: fail", output)
 
 
+    def test_close_rejects_committed_forbidden_change_since_persisted_baseline(self):
+        status_path = self.repo / "STATUS.md"
+        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
+        before_status = status_path.read_text(encoding="utf-8")
+        before_task = task_path.read_text(encoding="utf-8")
+        (self.repo / "forbidden.txt").write_text("forbidden\n", encoding="utf-8")
+        self._git("add", "forbidden.txt")
+        self._git("commit", "-m", "committed forbidden before close")
+        head = self._git("rev-parse", "HEAD").stdout.strip()
+
+        result = subprocess.run([sys.executable, str(QH), "close", head], cwd=self.repo, capture_output=True, text=True, check=False)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Final Gate: FAIL", result.stdout)
+        self.assertIn("forbidden.txt", result.stdout)
+        self.assertEqual(status_path.read_text(encoding="utf-8"), before_status)
+        self.assertEqual(task_path.read_text(encoding="utf-8"), before_task)
+
+
     def test_review_rejects_invalid_persisted_baseline_without_modifying_repo(self):
         status_path = self.repo / "STATUS.md"
         original = status_path.read_text(encoding="utf-8")
