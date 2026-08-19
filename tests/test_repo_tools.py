@@ -186,5 +186,56 @@ class RepositoryReadToolsTests(unittest.TestCase):
             self.assertTrue(target.is_dir())
 
 
+    def test_write_repo_text_allows_recursive_allowed_pattern(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            target_dir = repo / "allowed" / "nested"
+            target_dir.mkdir(parents=True)
+
+            result = write_repo_text(
+                repo,
+                "allowed/nested/file.txt",
+                "CONTENT\n",
+                allowed_changes=("allowed/**",),
+                forbidden_changes=(),
+            )
+
+            self.assertEqual(
+                (repo / "allowed" / "nested" / "file.txt").read_text(
+                    encoding="utf-8"
+                ),
+                "CONTENT\n",
+            )
+            self.assertEqual(
+                result,
+                "allowed/nested/file.txt",
+            )
+
+    def test_write_repo_text_recursive_forbidden_overrides_allowed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            target_dir = repo / "allowed" / "blocked"
+            target_dir.mkdir(parents=True)
+            target = target_dir / "file.txt"
+            target.write_text(
+                "ORIGINAL\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    "allowed/blocked/file.txt",
+                    "CHANGED\n",
+                    allowed_changes=("allowed/**",),
+                    forbidden_changes=("allowed/blocked/**",),
+                )
+
+            self.assertEqual(
+                target.read_text(encoding="utf-8"),
+                "ORIGINAL\n",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

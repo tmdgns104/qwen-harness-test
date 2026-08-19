@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from tools.harness_core import ChangeScope, is_path_allowed
+
 
 def read_repo_text(repo_root: str | Path, relative_path: str) -> str:
     requested = Path(relative_path)
@@ -28,9 +30,11 @@ def write_repo_text(
     if requested.is_absolute():
         raise ValueError("absolute paths are not allowed")
     normalized = requested.as_posix()
-    if normalized in forbidden_changes:
-        raise ValueError("path is forbidden")
-    if normalized not in allowed_changes:
+    scope = ChangeScope(
+        allowed=allowed_changes,
+        forbidden=forbidden_changes,
+    )
+    if not is_path_allowed(normalized, scope):
         raise ValueError("path is not allowed")
     root = Path(repo_root).resolve()
     path = (root / requested).resolve()
