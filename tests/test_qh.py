@@ -78,5 +78,18 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("Exit Code: 7", result.stdout)
 
 
+    def test_review_reports_allowed_change_verification_and_diff_check(self):
+        (self.repo / "seed.txt").write_text("changed\n", encoding="utf-8")
+        result = subprocess.run([sys.executable, str(QH), "review"], cwd=self.repo, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = result.stdout.lower()
+        self.assertIn("qh-v2-test-001", output)
+        self.assertIn("seed.txt", output)
+        self.assertIn("allowed", output)
+        self.assertIn("verification", output)
+        self.assertIn("diff", output)
+        self.assertEqual(self._git("status", "--porcelain").stdout, " M seed.txt\n")
+
+
 if __name__ == "__main__":
     unittest.main()
