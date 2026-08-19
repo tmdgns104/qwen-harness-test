@@ -1,8 +1,8 @@
-Current Task: QH-V2-AUTO-001 - COMPLETE - VERIFIED - commit f8d6280
+Current Task: QH-V2-OWA-001 - ACTIVE - NATIVE OLLAMA WORKER ADAPTER
 
-Previous Task: QH-V2-ARCH-003 - COMPLETE - VERIFIED - commit 1233379
+Previous Task: QH-V2-AUTO-001 - COMPLETE - VERIFIED - commit f8d6280
 
-Next Planned Task: Native Ollama Worker Adapter - NOT STARTED
+Next Planned Task: Harness-owned Repository Read Tools - NOT STARTED
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
@@ -33,4 +33,6 @@ Handoff:
 - Harness Core regression: 109 tests PASS.
 - Final qh review: Final Gate PASS; unexpected changed paths none.
 - Working tree clean after final Verification.
-- Native Ollama Worker Adapter remains NOT STARTED.
+- QH-V2-OWA-001 Task baseline commit: e334135.
+- Native Ollama Worker Adapter is now the active Task.
+- Repository read/edit tools, Runner, and retry remain NOT STARTED.
