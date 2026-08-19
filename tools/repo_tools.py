@@ -38,5 +38,7 @@ def write_repo_text(
         path.relative_to(root)
     except ValueError as exc:
         raise ValueError("path escapes repository root") from exc
+    if path.is_dir():
+        raise ValueError("directories are not writable as text files")
     path.write_text(content, encoding="utf-8")
     return requested.as_posix()
