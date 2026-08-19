@@ -383,6 +383,47 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("unexpected changed paths: yes", output)
         self.assertIn("final gate: fail", output)
 
+    def test_review_without_argument_rejects_committed_forbidden_path_since_persisted_baseline(self):
+        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
+        task_text = task_path.read_text(encoding="utf-8")
+        task_path.write_text(
+            task_text.replace("- `seed.txt`", "- `seed.txt`\\n- `STATUS.md`"),
+            encoding="utf-8",
+        )
+        self._git("add", str(task_path.relative_to(self.repo)))
+        self._git("commit", "-m", "prepare persisted baseline fixture")
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            status_path.read_text(encoding="utf-8").rstrip("\\n")
+            + f"\\nTask Baseline: {baseline}\\n",
+            encoding="utf-8",
+        )
+        self._git("add", "STATUS.md")
+        self._git("commit", "-m", "record persisted task baseline")
+
+        (self.repo / "forbidden.txt").write_text("forbidden\\n", encoding="utf-8")
+        self._git("add", "forbidden.txt")
+        self._git("commit", "-m", "commit forbidden change after persisted baseline")
+        self.assertEqual(self._git("status", "--porcelain").stdout, "")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "review"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        output = result.stdout.lower()
+        self.assertIn("forbidden.txt", output)
+        self.assertIn("forbidden", output)
+        self.assertIn("unexpected changed paths: yes", output)
+        self.assertIn("final gate: fail", output)
+
+
     def test_review_rejects_invalid_explicit_baseline_without_modifying_repo(self):
         before = self._git("status", "--porcelain").stdout
 
