@@ -227,3 +227,48 @@ Exact CLI arguments, output contracts, and internal implementation details are d
 - Repetitive operational checks can be consolidated before Worker backend integration.
 - Human Gates are preserved.
 - This ADR authorizes the automation phase but does not itself authorize implementation outside a separately approved Task.
+
+## ADR-006 - Pre-Runner Safety/UX and Post-Milestone Hardening Checkpoints
+
+### Status
+Accepted
+
+### Context
+Milestone 1 integration has produced concrete Evidence of repetitive workflow errors, scope-review gaps, and usability friction. Lifecycle automation and Task-range scope review have already been promoted and implemented through approved Tasks, while additional safety and usability candidates remain. The existing Milestone 1 sequence has no explicit checkpoint for deciding which remaining candidates must be addressed before Single-Task Runner integration and which can safely wait until after E2E Regression.
+
+### Decision
+Add two explicit planning checkpoints without changing deterministic Harness authority or automatically authorizing any improvement implementation.
+
+1. A Pre-Runner Safety/UX Review must occur after Harness-owned Scoped Edit Tools and before Single-Task Runner implementation.
+2. That review must classify known candidates as required before Runner, safe to defer until after E2E, or deferred pending more Evidence.
+3. After Milestone 1 E2E Regression, perform a Post-Milestone 1 Hardening & UX Improvement review.
+4. Every resulting implementation still requires its own approved Task and Human Gate.
+
+Known candidates include:
+
+- automatic Task baseline recording and reuse by review
+- unification of Harness Core and Repository Edit Tool scope evaluation
+- reduction of long Windows CMD and inline Python command workflows
+- deterministic qh doctor environment/state troubleshooting
+- clearer qh status current-state, progress, next-gate, and historical-handoff presentation
+- Human-approved Task scaffold generation
+- Worker smoke-test standardization after sufficient repeated Evidence
+
+### Sequence Effect
+The remaining Milestone 1 execution order becomes:
+
+Harness-owned Scoped Edit Tools -> Pre-Runner Safety/UX Review -> Single-Task Runner -> Bounded Retry/Safe Stop -> Minimal Worker-facing CLI -> E2E Regression.
+
+Post-Milestone 1 Hardening & UX Improvement follows successful E2E Regression and is not itself part of Milestone 1 completion.
+
+### Boundaries
+- ADR-004 and ADR-005 remain Accepted and authoritative.
+- This decision does not implement any improvement candidate.
+- It does not authorize Runner, retry, CLI, E2E, Worker, Repository tool, or Architecture implementation changes by itself.
+- Automatic commit, automatic Task completion, automatic next-Task start, automatic Architecture modification, and RED/GREEN semantic judgment remain deferred.
+- Human approval remains authoritative.
+
+### Consequences
+- Single-Task Runner must not begin until the Pre-Runner Safety/UX Review checkpoint is completed or explicitly superseded by a later Accepted decision.
+- Improvement candidates are preserved without forcing premature implementation.
+- UX and troubleshooting work has an explicit post-E2E review point instead of being lost in historical handoff notes.

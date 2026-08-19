@@ -14,7 +14,8 @@ Handoff:
 - Qwen receives no general filesystem or shell authority.
 - HC-004 remains owner of approved verification command execution.
 - Retry remains bounded and above the Worker Adapter.
-- Milestone 1 sequence: Worker Contract -> Native Ollama Adapter -> Harness-owned Repository Read Tools -> Harness-owned Scoped Edit Tools -> Single-Task Runner -> Bounded Retry/Safe Stop -> Minimal CLI -> E2E Regression.
+- Milestone 1 remaining sequence now includes: Harness-owned Scoped Edit Tools -> Pre-Runner Safety/UX Review -> Single-Task Runner -> Bounded Retry/Safe Stop -> Minimal CLI -> E2E Regression.
+- Post-Milestone 1 Hardening & UX Improvement review follows successful E2E Regression.
 - ECC routing, LangGraph orchestration, multi-agent expansion, and automatic Codex escalation remain outside Milestone 1.
 - QH-V2-ARCH-002 Architecture review completed and committed: 13b9077.
 - Working tree was clean after Architecture commit.
@@ -48,9 +49,10 @@ Handoff:
 - Harness-owned Repository Read Tools remains NOT STARTED.
 - This is the final manually prepared Task-start transition before lifecycle assistance is implemented.
 
-Deferred Automation Follow-up:
-- Task lifecycle automation (`qh.py start` / `qh.py close`) is a priority candidate because a real duplicate STATUS.md replacement error occurred during QH-V2-OWA-001. Revisit when Task lifecycle transitions are repeated again; implement only through a separate approved Task.
-- Task-range scope review is a priority candidate. Extend review to inspect changes from the Task baseline commit through HEAD, not only the current working tree. Revisit before Runner/E2E or when another Task requires manual range review.
-- Worker smoke-test standardization is a deferred candidate. Revisit only after native Worker smoke checks repeat during Read Tools, Edit Tools, or Runner work.
+Improvement Checkpoints:
+- QH-V2-AUTO-002 Task lifecycle automation is implemented; the earlier lifecycle candidate is resolved.
+- QH-V2-AUTO-004 Task-range scope review is implemented; the earlier range-review candidate is resolved.
+- Pre-Runner Safety/UX Review is required before Single-Task Runner and will classify baseline automation, scope-evaluation unification, and the remaining known candidates.
+- Post-Milestone 1 Hardening & UX Improvement follows E2E Regression and will revisit CMD simplification, qh doctor, qh status UX, Task scaffolding, Worker smoke standardization, and any new repeated Evidence.
 - Continue to defer automatic commit, automatic Task completion, automatic Architecture modification, automatic next-Task start, and RED/GREEN semantic judgment automation. Human approval remains authoritative.
-- Automation candidates are promoted to implementation Tasks only when workflow order or repeated Evidence justifies them.
+- Improvement candidates require separate approved Tasks before implementation.
