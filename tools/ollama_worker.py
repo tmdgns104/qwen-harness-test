@@ -37,6 +37,14 @@ def call_ollama_worker(
             decoded = json.loads(response.read().decode("utf-8"))
     except URLError as exc:
         return WorkerResponse(transport_ok=False, output_text="", error=str(exc))
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        return WorkerResponse(transport_ok=False, output_text="", error=f"invalid Ollama response: {exc}")
 
-    content = decoded["message"]["content"]
+    try:
+        content = decoded["message"]["content"]
+        if not isinstance(content, str):
+            raise TypeError("message.content must be a string")
+    except (KeyError, TypeError) as exc:
+        return WorkerResponse(transport_ok=False, output_text="", error=f"invalid Ollama response schema: {exc}")
+
     return WorkerResponse(transport_ok=True, output_text=content, error=None)
