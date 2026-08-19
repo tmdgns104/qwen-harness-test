@@ -1,3 +1,4 @@
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -9,26 +10,70 @@ QH = Path(__file__).resolve().parents[1] / "tools" / "qh.py"
 
 
 class QhStatusCliTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.seed_tmp = tempfile.TemporaryDirectory()
+        cls.seed_repo = Path(cls.seed_tmp.name)
+
+        def git(*args):
+            return subprocess.run(
+                ["git", *args],
+                cwd=cls.seed_repo,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+        git("init")
+        git("config", "user.email", "test@example.com")
+        git("config", "user.name", "Test User")
+
+        (cls.seed_repo / "tasks").mkdir()
+        (cls.seed_repo / "STATUS.md").write_text(
+            "Current Task: QH-V2-TEST-001 - ACTIVE\n",
+            encoding="utf-8",
+        )
+        (cls.seed_repo / "tasks" / "QH-V2-TEST-001.md").write_text(
+            "## Allowed Changes\n\n"
+            "- `seed.txt`\n"
+            "- `STATUS.md`\n\n"
+            "## Forbidden Changes\n\n"
+            "- `forbidden.txt`\n\n"
+            "## Verification\n\n"
+            "Run exactly:\n\n"
+            "`python -c \"print(1)\"`\n",
+            encoding="utf-8",
+        )
+        (cls.seed_repo / "seed.txt").write_text(
+            "seed\n",
+            encoding="utf-8",
+        )
+
+        git("add", ".")
+        git("commit", "-m", "baseline")
+        baseline = git("rev-parse", "HEAD").stdout.strip()
+
+        (cls.seed_repo / "STATUS.md").write_text(
+            f"Current Task: QH-V2-TEST-001 - ACTIVE\n"
+            f"Task Baseline: {baseline}\n",
+            encoding="utf-8",
+        )
+
+        git("add", "STATUS.md")
+        git("commit", "-m", "persist task baseline")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.seed_tmp.cleanup()
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = Path(self.tmp.name)
-        self._git("init")
-        self._git("config", "user.email", "test@example.com")
-        self._git("config", "user.name", "Test User")
-        (self.repo / "tasks").mkdir()
-        (self.repo / "STATUS.md").write_text("Current Task: QH-V2-TEST-001 - ACTIVE\n", encoding="utf-8")
-        (self.repo / "tasks" / "QH-V2-TEST-001.md").write_text("## Allowed Changes\n\n- `seed.txt`\n- `STATUS.md`\n\n## Forbidden Changes\n\n- `forbidden.txt`\n\n## Verification\n\nRun exactly:\n\n`python -c \"print(1)\"`\n", encoding="utf-8")
-        (self.repo / "seed.txt").write_text("seed\n", encoding="utf-8")
-        self._git("add", ".")
-        self._git("commit", "-m", "baseline")
-        baseline = self._git("rev-parse", "HEAD").stdout.strip()
-        status_path = self.repo / "STATUS.md"
-        status_path.write_text(
-            f"Current Task: QH-V2-TEST-001 - ACTIVE\nTask Baseline: {baseline}\n",
-            encoding="utf-8",
+        shutil.copytree(
+            self.seed_repo,
+            self.repo,
+            dirs_exist_ok=True,
         )
-        self._git("add", "STATUS.md")
-        self._git("commit", "-m", "persist task baseline")
 
     def tearDown(self):
         self.tmp.cleanup()
