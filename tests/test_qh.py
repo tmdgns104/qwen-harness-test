@@ -139,6 +139,36 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(status.count(current), 1)
 
 
+    def test_start_records_pre_start_head_as_task_baseline(self):
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            "Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n",
+            encoding="utf-8",
+        )
+        (self.repo / "tasks" / "QH-V2-TEST-002.md").write_text(
+            "## Status\n\nAPPROVED - READY FOR CONTRACT BASELINE\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "task baseline persistence fixture")
+        expected_baseline = self._git("rev-parse", "HEAD").stdout.strip()
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "start", "QH-V2-TEST-002"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        status = status_path.read_text(encoding="utf-8")
+        self.assertIn(f"Task Baseline: {expected_baseline}", status)
+        self.assertEqual(status.count("Task Baseline:"), 1)
+
+
     def test_start_rejects_duplicate_current_task_without_modifying_status(self):
         original = (
             "Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234\n\n"
