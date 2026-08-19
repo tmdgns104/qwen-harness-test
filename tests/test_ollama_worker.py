@@ -51,5 +51,18 @@ class OllamaWorkerTests(unittest.TestCase):
         self.assertIsNone(result.error)
 
 
+    def test_network_failure_returns_transport_failure(self):
+        from urllib.error import URLError
+        from tools.ollama_worker import call_ollama_worker
+
+        with patch("tools.ollama_worker.urlopen", side_effect=URLError("connection refused")):
+            result = call_ollama_worker(WorkerRequest(task_text="do small task"))
+
+        self.assertFalse(result.transport_ok)
+        self.assertEqual(result.output_text, "")
+        self.assertIsNotNone(result.error)
+        self.assertIn("connection refused", result.error)
+
+
 if __name__ == "__main__":
     unittest.main()
