@@ -17,10 +17,18 @@ class QhStatusCliTests(unittest.TestCase):
         self._git("config", "user.name", "Test User")
         (self.repo / "tasks").mkdir()
         (self.repo / "STATUS.md").write_text("Current Task: QH-V2-TEST-001 - ACTIVE\n", encoding="utf-8")
-        (self.repo / "tasks" / "QH-V2-TEST-001.md").write_text("## Allowed Changes\n\n- `seed.txt`\n\n## Forbidden Changes\n\n- `forbidden.txt`\n\n## Verification\n\nRun exactly:\n\n`python -c \"print(1)\"`\n", encoding="utf-8")
+        (self.repo / "tasks" / "QH-V2-TEST-001.md").write_text("## Allowed Changes\n\n- `seed.txt`\n- `STATUS.md`\n\n## Forbidden Changes\n\n- `forbidden.txt`\n\n## Verification\n\nRun exactly:\n\n`python -c \"print(1)\"`\n", encoding="utf-8")
         (self.repo / "seed.txt").write_text("seed\n", encoding="utf-8")
         self._git("add", ".")
         self._git("commit", "-m", "baseline")
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            f"Current Task: QH-V2-TEST-001 - ACTIVE\nTask Baseline: {baseline}\n",
+            encoding="utf-8",
+        )
+        self._git("add", "STATUS.md")
+        self._git("commit", "-m", "persist task baseline")
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -227,13 +235,17 @@ class QhStatusCliTests(unittest.TestCase):
         task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
         task_path.write_text(
             "# Test Task\n\n## Status\n\nACTIVE\n\n"
-            "## Allowed Changes\n\n- `seed.txt`\n\n"
+            "## Allowed Changes\n\n- `seed.txt`\n- `STATUS.md`\n\n"
             "## Forbidden Changes\n\n- `forbidden.txt`\n\n"
             '## Verification\n\nRun exactly:\n\n`python -c "print(1)"`\n',
             encoding="utf-8",
         )
         self._git("add", ".")
         self._git("commit", "-m", "close lifecycle baseline")
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        status_path.write_text(status_path.read_text(encoding="utf-8").rstrip("\n") + f"\nTask Baseline: {baseline}\n", encoding="utf-8")
+        self._git("add", "STATUS.md")
+        self._git("commit", "-m", "persist close baseline")
         commit = self._git("rev-parse", "HEAD").stdout.strip()
 
         result = subprocess.run(
@@ -266,13 +278,17 @@ class QhStatusCliTests(unittest.TestCase):
         task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
         task_path.write_text(
             "# Test Task\n\n## Status\n\nACTIVE\n\n"
-            "## Allowed Changes\n\n- `seed.txt`\n\n"
+            "## Allowed Changes\n\n- `seed.txt`\n- `STATUS.md`\n\n"
             "## Forbidden Changes\n\n- `forbidden.txt`\n\n"
             '## Verification\n\nRun exactly:\n\n`python -c "import sys; sys.exit(7)"`\n',
             encoding="utf-8",
         )
         self._git("add", ".")
         self._git("commit", "-m", "failing close review baseline")
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        status_path.write_text(status_path.read_text(encoding="utf-8").rstrip("\n") + f"\nTask Baseline: {baseline}\n", encoding="utf-8")
+        self._git("add", "STATUS.md")
+        self._git("commit", "-m", "persist failing close baseline")
         commit = self._git("rev-parse", "HEAD").stdout.strip()
         original_status = status_path.read_text(encoding="utf-8")
         original_task = task_path.read_text(encoding="utf-8")
@@ -302,13 +318,17 @@ class QhStatusCliTests(unittest.TestCase):
         task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
         task_path.write_text(
             "# Test Task\n\n## Status\n\nACTIVE\n\n"
-            "## Allowed Changes\n\n- `seed.txt`\n\n"
+            "## Allowed Changes\n\n- `seed.txt`\n- `STATUS.md`\n\n"
             "## Forbidden Changes\n\n- `forbidden.txt`\n\n"
             "## Verification\n\nRun exactly:\n\n`python --version`\n",
             encoding="utf-8",
         )
         self._git("add", ".")
         self._git("commit", "-m", "older completion candidate")
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        status_path.write_text(status_path.read_text(encoding="utf-8").rstrip("\n") + f"\nTask Baseline: {baseline}\n", encoding="utf-8")
+        self._git("add", "STATUS.md")
+        self._git("commit", "-m", "persist non-head close baseline")
         old_commit = self._git("rev-parse", "HEAD").stdout.strip()
         (self.repo / "seed.txt").write_text("newer head\n", encoding="utf-8")
         self._git("add", ".")
@@ -384,26 +404,10 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("final gate: fail", output)
 
     def test_review_without_argument_rejects_committed_forbidden_path_since_persisted_baseline(self):
-        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
-        task_text = task_path.read_text(encoding="utf-8")
-        task_path.write_text(
-            task_text.replace("- `seed.txt`", "- `seed.txt`\\n- `STATUS.md`"),
-            encoding="utf-8",
-        )
-        self._git("add", str(task_path.relative_to(self.repo)))
-        self._git("commit", "-m", "prepare persisted baseline fixture")
-        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        status = (self.repo / "STATUS.md").read_text(encoding="utf-8")
+        self.assertEqual(status.count("Task Baseline:"), 1)
 
-        status_path = self.repo / "STATUS.md"
-        status_path.write_text(
-            status_path.read_text(encoding="utf-8").rstrip("\\n")
-            + f"\\nTask Baseline: {baseline}\\n",
-            encoding="utf-8",
-        )
-        self._git("add", "STATUS.md")
-        self._git("commit", "-m", "record persisted task baseline")
-
-        (self.repo / "forbidden.txt").write_text("forbidden\\n", encoding="utf-8")
+        (self.repo / "forbidden.txt").write_text("forbidden\n", encoding="utf-8")
         self._git("add", "forbidden.txt")
         self._git("commit", "-m", "commit forbidden change after persisted baseline")
         self.assertEqual(self._git("status", "--porcelain").stdout, "")

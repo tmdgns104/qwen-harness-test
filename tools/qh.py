@@ -185,18 +185,21 @@ def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
     task_id, task_path, task_markdown = _load_current_task(repo_root)
     scope = parse_change_scope(task_markdown)
     if baseline_commit is None:
-        baseline_head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
-    else:
-        baseline_head = _run_git(
-            str(repo_root),
-            ("rev-parse", "--verify", baseline_commit),
-        ).stdout.strip()
-        baseline_type = _run_git(
-            str(repo_root),
-            ("cat-file", "-t", baseline_head),
-        ).stdout.strip()
-        if baseline_type != "commit":
-            raise ValueError("review baseline must resolve to a commit")
+        status_markdown = (repo_root / "STATUS.md").read_text(encoding="utf-8")
+        baseline_line = _require_single_lifecycle_line(status_markdown, "Task Baseline")
+        baseline_commit = baseline_line.removeprefix("Task Baseline:").strip()
+        if not baseline_commit:
+            raise ValueError("Task Baseline is empty")
+    baseline_head = _run_git(
+        str(repo_root),
+        ("rev-parse", "--verify", baseline_commit),
+    ).stdout.strip()
+    baseline_type = _run_git(
+        str(repo_root),
+        ("cat-file", "-t", baseline_head),
+    ).stdout.strip()
+    if baseline_type != "commit":
+        raise ValueError("review baseline must resolve to a commit")
     baseline = GitBaseline(head=baseline_head)
     changed_paths = get_changed_paths(str(repo_root), baseline)
     verification_contract = parse_verification_commands(task_markdown)
