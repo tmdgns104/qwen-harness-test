@@ -79,9 +79,21 @@ The persisted baseline represents the Repository HEAD immediately before the lif
 Run exactly:
 
 `python -m unittest tests.test_qh`
+
+Then run:
+
 `python -m unittest tests.test_harness_core`
+
+Then run:
+
 `python -m unittest tests.test_repo_tools`
+
+Then run:
+
 `git diff --check`
+
+Then run:
+
 `git status --short`
 
 ## Stop Condition
