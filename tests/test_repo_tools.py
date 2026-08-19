@@ -95,6 +95,23 @@ class RepositoryReadToolsTests(unittest.TestCase):
             self.assertEqual(target.read_text(encoding="utf-8"), content)
             self.assertEqual(result, "allowed.txt")
 
+    def test_write_repo_text_rejects_path_outside_allowed_changes_without_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            target = repo / "blocked.txt"
+            target.write_text("ORIGINAL\n", encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    "blocked.txt",
+                    "CHANGED\n",
+                    allowed_changes=("allowed.txt",),
+                    forbidden_changes=(),
+                )
+
+            self.assertEqual(target.read_text(encoding="utf-8"), "ORIGINAL\n")
+
 
 if __name__ == "__main__":
     unittest.main()
