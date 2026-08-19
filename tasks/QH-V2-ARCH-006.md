@@ -112,3 +112,29 @@ may change.
 Stop if the design would require weakening Worker/backend independence, deterministic Harness tool authority, HC-004 verification ownership, or existing Human Gates.
 
 Do not begin Single-Task Runner implementation in this Task.
+
+## Decision Result
+
+Human approved ADR-008 - Backend-Neutral Tool Interaction Contract.
+
+The accepted design resolves the Runner boundary as follows:
+
+- QH-V2-WC-001 WorkerRequest and WorkerResponse remain unchanged.
+- Tool-enabled execution uses separate backend-neutral ToolSpec, ToolRequest, ToolResult, and WorkerStep semantics.
+- The Runner owns the tool-call/result continuation loop.
+- The Adapter owns backend translation and backend conversation state only.
+- Ollama-native tool_calls do not become a Runner contract.
+- Initial Worker tools are limited to read_repo_text and write_repo_text.
+- write_repo_text scope is injected by the Runner from the current Task; Qwen cannot supply or expand its own change scope.
+- Initial Worker steps allow zero or one ToolRequest; multiple requests in one step fail closed.
+- Malformed, unknown, unsupported, or unauthorized requests fail closed before execution.
+- Authorized tool execution errors may be returned as ToolResult(ok=False).
+- The tool loop must have a finite deterministic step budget; the exact limit is deferred to the Runner implementation Task.
+- Retry/fallback remains a separate later Task.
+- Git, shell, Verification, Evidence, Final Gate, commit, Task lifecycle, and Architecture operations are not exposed as Worker tools.
+
+## Architecture Gate Result
+
+PASS - the backend-neutral interaction boundary required before Single-Task Runner implementation is now explicitly defined by ADR-008.
+
+This Task does not authorize Runner implementation by itself; Runner implementation still requires its own approved Task and Human Gate.

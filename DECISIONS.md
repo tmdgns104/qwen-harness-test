@@ -302,3 +302,140 @@ Permit a targeted Verification performance phase before Single-Task Runner. Opti
 - The expected normal final path performs one Full Verification instead of manually repeating the same Full Verification through verify, review, and close.
 - Focused development tests remain non-authoritative; final close retains the full Verification contract.
 - Parallel test execution and Verification Evidence reuse remain separate follow-up candidates requiring their own Evidence and approved Tasks.
+
+## ADR-008 - Backend-Neutral Tool Interaction Contract
+
+### Status
+Accepted
+
+### Context
+Milestone 1 requires a Single-Task Runner connecting local Worker execution to the deterministic Harness Core.
+
+The existing backend-independent Worker contract from QH-V2-WC-001 is intentionally minimal:
+
+- WorkerRequest.task_text
+- WorkerResponse.transport_ok
+- WorkerResponse.output_text
+- WorkerResponse.error
+
+The current native Ollama Adapter returns only message.content.
+
+Repository Evidence also shows that Qwen3:8B can produce structured native Ollama tool calls and that a Python-controlled native Ollama tool-call/result continuation loop succeeded against a real Repository file.
+
+However, no backend-neutral contract currently exists for carrying tool requests and tool results across the Worker boundary.
+
+Coupling the Runner directly to Ollama-native tool_calls would violate FR-011 Worker/backend independence. Allowing the LLM or Adapter to authorize Repository operations would violate FR-012 Harness-owned tool boundaries and ADR-004.
+
+### Decision
+Introduce a separate backend-neutral tool-interaction contract for tool-enabled Worker execution while preserving the existing WorkerRequest and WorkerResponse contract unchanged.
+
+The logical backend-neutral records are:
+
+- ToolSpec
+  - name: str
+  - description: str
+  - input_schema: mapping describing backend-neutral tool arguments
+
+- ToolRequest
+  - call_id: str
+  - name: str
+  - arguments: mapping of requested arguments
+
+- ToolResult
+  - call_id: str
+  - ok: bool
+  - output: str
+  - error: str or None
+
+- WorkerStep
+  - transport_ok: bool
+  - output_text: str
+  - tool_requests: ordered collection of ToolRequest
+  - error: str or None
+
+These records are logical architecture contracts. Exact Python class names, modules, and callable signatures belong to the separately approved implementation Task, provided the semantics above are preserved.
+
+The existing WorkerRequest and WorkerResponse dataclasses remain unchanged and continue to support the existing transport-only Worker path.
+
+### Ownership
+The Single-Task Runner owns the multi-turn tool-call/result control loop.
+
+The Worker Adapter owns only:
+
+- backend-specific request translation;
+- backend-specific response translation;
+- backend conversation/session state required to continue a tool-enabled interaction.
+
+The Adapter must translate native backend tool calls into backend-neutral ToolRequest values before they reach the Runner.
+
+The Runner must never depend on Ollama-native tool_calls JSON or other Ollama-specific message structure.
+
+The Runner decides whether a ToolRequest is valid and authorized before any tool execution occurs.
+
+### Initial Milestone 1 Tool Exposure
+The initial tool-enabled Worker surface is limited to Harness-owned Repository tools:
+
+1. read_repo_text
+   - Worker-supplied argument: Repository-relative path.
+   - Deterministic Repository root and path safety remain Harness-owned.
+
+2. write_repo_text
+   - Worker-supplied arguments: Repository-relative path and content.
+   - The Worker does not supply allowed_changes or forbidden_changes.
+   - The Runner obtains the current Task scope and injects it into the deterministic Repository edit tool.
+   - Final authorization semantics remain ChangeScope + is_path_allowed.
+
+No shell, Git, verification, Evidence, final-gate, Architecture, Task lifecycle, or commit operation is exposed as a Worker tool in this phase.
+
+### Runner Step Rule
+For the initial Single-Task Runner:
+
+- one Worker step may contain zero or one ToolRequest;
+- zero ToolRequests means the Worker interaction may terminate and proceed to deterministic Harness evaluation;
+- one ToolRequest may be validated and, if authorized, executed by deterministic Harness code;
+- more than one ToolRequest in a single Worker step is rejected fail-closed without executing any of those requests.
+
+A successful Worker interaction or terminal output does not mean Repository Task PASS.
+
+### Failure Policy
+Malformed, unknown, unsupported, or unauthorized ToolRequest values are not silently repaired.
+
+They cause the current Runner execution to stop fail-closed before tool execution.
+
+Examples include:
+
+- missing or invalid call_id;
+- unknown tool name;
+- invalid argument shape;
+- prohibited operation;
+- write request outside the current Task scope.
+
+An execution failure from an otherwise well-formed and authorized tool request, such as a safe Repository read of a missing file, may be represented as ToolResult with ok false and returned to the Worker for continuation.
+
+This distinction does not authorize retry policy.
+
+### Loop Bound
+A tool-enabled Worker interaction must have a finite deterministic step budget so the Worker cannot loop indefinitely.
+
+The exact step count is deferred to the Single-Task Runner implementation Task and must be justified by focused tests or objective Evidence.
+
+This step budget is an execution bound, not the bounded retry/fallback policy planned for the later Retry/Safe Stop Task.
+
+### Safety Boundaries
+- HC-001 through HC-007 remain authoritative.
+- HC-004 remains the sole owner of approved verification command execution.
+- Tool permission and execution authority remain deterministic Harness responsibilities.
+- Qwen cannot authorize filesystem, shell, Git, verification, Evidence, final-gate, commit, Task lifecycle, or Architecture operations.
+- Qwen self-reported PASS remains non-authoritative.
+- WorkerRequest and WorkerResponse remain unchanged.
+- Ollama-specific tool-call structures remain inside the Adapter.
+- Retry remains a separate later responsibility.
+- Automatic commit, Task completion, next-Task start, and Architecture mutation remain forbidden.
+- Human Gates remain authoritative.
+
+### Consequences
+Single-Task Runner implementation may now introduce a backend-neutral tool-enabled Worker interaction path without coupling orchestration to native Ollama message structure.
+
+The next implementation Task must preserve this contract and may not broaden Worker tool authority without another approved decision.
+
+Bounded retry/safe-stop behavior remains the next separate Milestone 1 stage after the Single-Task Runner.

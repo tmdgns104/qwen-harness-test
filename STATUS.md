@@ -6,6 +6,12 @@ Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
 Task Baseline: 233d80bf042a87e0394135a2314b750e7b1770e4
 
 Handoff:
+- ADR-008 accepted: backend-neutral ToolSpec / ToolRequest / ToolResult / WorkerStep semantics define the tool-enabled Worker boundary.
+- QH-V2-WC-001 WorkerRequest and WorkerResponse remain unchanged; Ollama-native tool_calls stay inside the Adapter.
+- Single-Task Runner owns the deterministic tool continuation loop; initial Worker tools are limited to read_repo_text and write_repo_text.
+- Qwen cannot supply write scope; Runner injects the current Task Allowed/Forbidden scope into the Harness-owned edit tool.
+- Initial Runner step policy: zero or one ToolRequest per Worker step; multiple, malformed, unknown, or unauthorized requests fail closed.
+- Tool interaction requires a finite step budget; exact limit is deferred to the separately approved Runner implementation Task. Retry remains later.
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
 - HC-001 through HC-007 Deterministic Harness Core remains complete and authoritative.
 - ADR-004 records staged Post-HC-007 Worker Integration Architecture.
