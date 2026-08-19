@@ -139,3 +139,47 @@ The Repository therefore preserves both the problem and the Evidence-backed reco
 - A Python utility requires its own approved Task before Repository implementation.
 - Deterministic Harness Core sequencing defined by ADR-001 remains unchanged.
 - This ADR does not authorize Worker Adapter implementation.
+
+## ADR-004 - Post-HC-007 Worker Integration Architecture
+
+### Status
+Accepted
+
+### Context
+HC-001 through HC-007 are complete and verified as the authoritative deterministic Harness Core. ADR-003 deferred Worker Adapter implementation until Architecture explicitly permitted it. Milestone 1 now requires a staged local Worker integration while preserving deterministic Harness-owned safety, execution, Evidence, and final gating.
+
+### Decision
+ADR-003 Worker Adapter deferral is released only for the approved staged Milestone 1 sequence defined below.
+
+- HC-001 through HC-007 remain the authoritative deterministic Harness Core.
+- Worker integration must use an agent/backend-independent boundary.
+- The default local Worker path remains native Ollama API + Qwen3:8B.
+- The initial fast path remains `think:false`.
+- Tool permission and execution authority belong to deterministic Harness code.
+- Qwen must not directly authorize filesystem or shell operations.
+- Milestone 1 does not grant Qwen general shell execution authority.
+- Approved verification command execution remains owned by HC-004.
+- Worker transport, tool execution, orchestration, retry policy, CLI, and E2E verification remain separate responsibilities.
+- Retry must be bounded and implemented above the Worker Adapter rather than inside the transport adapter.
+
+### Milestone 1 Integration Sequence
+1. Worker contract / backend-independent boundary.
+2. Native Ollama Worker Adapter.
+3. Harness-owned Repository read tools.
+4. Harness-owned scoped edit tools.
+5. Single-Task Runner connecting Worker execution to HC-001 through HC-007.
+6. Bounded retry / safe FAIL or BLOCKED handling.
+7. Minimal user CLI.
+8. End-to-End regression with real small Repository Tasks.
+
+Exact implementation details, retry counts, and model parameters are deferred to their own approved Tasks and objective Evidence.
+
+### Outside Milestone 1
+ECC routing, LangGraph orchestration, multi-agent expansion, and automatic Codex escalation remain outside Milestone 1 and are not authorized by this ADR.
+
+### Consequences
+- ADR-001 through ADR-003 remain unchanged and Accepted.
+- Worker integration may proceed only incrementally through separately approved Tasks in the sequence above.
+- Qwen self-reported PASS remains non-authoritative.
+- Deterministic Git/Test/Invariant Evidence and Harness final gating remain authoritative.
+- This ADR does not itself implement or authorize changes outside an approved Worker integration Task.
