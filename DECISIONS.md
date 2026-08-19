@@ -183,3 +183,47 @@ ECC routing, LangGraph orchestration, multi-agent expansion, and automatic Codex
 - Qwen self-reported PASS remains non-authoritative.
 - Deterministic Git/Test/Invariant Evidence and Harness final gating remain authoritative.
 - This ADR does not itself implement or authorize changes outside an approved Worker integration Task.
+
+## ADR-005 - Repetitive Harness Workflow Automation Priority
+
+### Status
+Accepted
+
+### Context
+ADR-003 permits repeated or error-prone manual procedures to be promoted to a small Python utility through a separately approved Task. Repository Evidence now shows repeated manual status inspection, Git checks, scope checks, verification execution, and review preparation are sufficiently recurrent to justify automation.
+
+QH-V2-WC-001 is complete. The Human explicitly requested that this deterministic workflow automation be implemented before the Native Ollama Worker Adapter.
+
+### Decision
+Insert a deterministic Harness workflow automation phase immediately after the completed Worker Contract and before Native Ollama Worker Adapter implementation.
+
+- HC-001 through HC-007 remain the authoritative deterministic Harness engine and must be reused rather than reimplemented.
+- QH-V2-WC-001 remains complete and its Worker contract is unchanged.
+- Automation V1 is limited to read/check-oriented `status`, `preflight`, `verify`, and `review` operations.
+- The workflow utility may orchestrate existing Harness Core functions but must not create a second safety, scope, verification, Evidence, or final-gate engine.
+- Human approval remains required for Architecture decisions, Task approval, semantic review, Task completion approval, and commit decisions.
+- Automation V1 must not auto-commit, auto-complete Tasks, modify Architecture, invoke a Worker backend, execute Qwen tools, or implement retry orchestration.
+- Native Ollama Worker Adapter remains NOT STARTED until this automation phase is completed or explicitly superseded by a later Accepted decision.
+
+### Revised Milestone 1 Sequence
+1. Worker contract / backend-independent boundary - completed by QH-V2-WC-001.
+2. Deterministic Harness repetitive workflow automation - `status`, `preflight`, `verify`, `review`.
+3. Native Ollama Worker Adapter.
+4. Harness-owned Repository read tools.
+5. Harness-owned scoped edit tools.
+6. Single-Task Runner connecting Worker execution to HC-001 through HC-007.
+7. Bounded retry / safe FAIL or BLOCKED handling.
+8. Minimal Worker-facing CLI integration.
+9. End-to-End regression with real small Repository Tasks.
+
+### Automation V1 Boundary
+The implementation Task may introduce a small Repository utility such as `tools/qh.py`.
+Its purpose is to reduce repeated manual CMD workflows while reusing existing Harness Core functions.
+Exact CLI arguments, output contracts, and internal implementation details are deferred to the separately approved implementation Task.
+
+### Consequences
+- ADR-001 through ADR-004 remain unchanged and Accepted.
+- Deterministic safety ownership remains unchanged.
+- Repetitive operational checks can be consolidated before Worker backend integration.
+- Human Gates are preserved.
+- This ADR authorizes the automation phase but does not itself authorize implementation outside a separately approved Task.

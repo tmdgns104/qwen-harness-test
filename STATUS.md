@@ -1,8 +1,8 @@
-Current Task: QH-V2-WC-001 - COMPLETE - VERIFIED - commit 2ee6119
+Current Task: QH-V2-ARCH-003 - ACTIVE - WORKFLOW AUTOMATION PRIORITY
 
-Previous Task: QH-V2-ARCH-002 - COMPLETE - VERIFIED - commit 13b9077
+Previous Task: QH-V2-WC-001 - COMPLETE - VERIFIED - commit 2ee6119
 
-Next Planned Task: Qwen Harness repetitive workflow automation architecture/task adjustment - NOT STARTED
+Next Planned Task: Deterministic Harness workflow automation implementation - NOT STARTED
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
@@ -23,3 +23,6 @@ Handoff:
 - Native Ollama Worker Adapter remains NOT STARTED.
 - Human requested prioritizing repetitive workflow automation before the Native Ollama Worker Adapter.
 - Architecture/task sequencing must be adjusted before automation implementation begins.
+
+- QH-V2-ARCH-003 Task baseline commit: 1dc953e.
+- ADR-005 workflow automation priority decision is now the active Architecture work.
