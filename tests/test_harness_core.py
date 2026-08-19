@@ -852,5 +852,207 @@ class VerificationCommandExecutionTests(unittest.TestCase):
                 hc.run_verification_commands(contract, r"C:\repo")
         run.assert_not_called()
 
+
+class InvariantCheckTests(unittest.TestCase):
+    def _hc(self):
+        import tools.harness_core as harness_core
+
+        return harness_core
+
+    def test_exact_utf8_content_match(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.txt").write_bytes("WORKER-OK".encode("utf-8"))
+            result = hc.check_exact_content(str(root), "target.txt", "WORKER-OK")
+
+        self.assertEqual(
+            result,
+            hc.ExactContentResult(
+                path="target.txt",
+                expected_content="WORKER-OK",
+                exists=True,
+                matches=True,
+            ),
+        )
+
+    def test_exact_content_mismatch(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.txt").write_bytes(b"ACTUAL")
+            result = hc.check_exact_content(str(root), "target.txt", "EXPECTED")
+
+        self.assertTrue(result.exists)
+        self.assertFalse(result.matches)
+
+    def test_exact_content_does_not_normalize_newlines_or_whitespace(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.txt").write_bytes(b"VALUE\n")
+            result = hc.check_exact_content(str(root), "target.txt", "VALUE")
+
+        self.assertTrue(result.exists)
+        self.assertFalse(result.matches)
+
+    def test_missing_exact_content_target_is_mismatch_evidence(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = hc.check_exact_content(str(root), "missing.txt", "EXPECTED")
+
+        self.assertEqual(result.path, "missing.txt")
+        self.assertEqual(result.expected_content, "EXPECTED")
+        self.assertFalse(result.exists)
+        self.assertFalse(result.matches)
+
+
+    def test_sha256_match(self):
+        import hashlib
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        data = b"HASH-CONTENT"
+        expected = hashlib.sha256(data).hexdigest()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.bin").write_bytes(data)
+            result = hc.check_sha256(str(root), "target.bin", expected)
+
+        self.assertEqual(result.actual_sha256, expected)
+        self.assertTrue(result.exists)
+        self.assertTrue(result.matches)
+
+    def test_sha256_mismatch(self):
+        import hashlib
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        data = b"ACTUAL"
+        actual = hashlib.sha256(data).hexdigest()
+        expected = hashlib.sha256(b"EXPECTED").hexdigest()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.bin").write_bytes(data)
+            result = hc.check_sha256(str(root), "target.bin", expected)
+
+        self.assertEqual(result.actual_sha256, actual)
+        self.assertTrue(result.exists)
+        self.assertFalse(result.matches)
+
+    def test_sha256_expected_digest_is_case_insensitive(self):
+        import hashlib
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        data = b"CASE"
+        expected = hashlib.sha256(data).hexdigest().upper()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.bin").write_bytes(data)
+            result = hc.check_sha256(str(root), "target.bin", expected)
+
+        self.assertTrue(result.exists)
+        self.assertTrue(result.matches)
+
+
+    def test_malformed_sha256_fails_before_missing_file_result(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with self.assertRaises(ValueError):
+                hc.check_sha256(str(root), "missing.bin", "not-a-sha256")
+
+    def test_missing_sha256_target_is_mismatch_evidence(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        expected = "0" * 64
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = hc.check_sha256(str(root), "missing.bin", expected)
+
+        self.assertEqual(result.path, "missing.bin")
+        self.assertEqual(result.expected_sha256, expected)
+        self.assertIsNone(result.actual_sha256)
+        self.assertFalse(result.exists)
+        self.assertFalse(result.matches)
+
+    def test_absolute_and_escaping_paths_fail_closed(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cases = (str(root / "target.txt"), "../outside.txt")
+            for candidate in cases:
+                with self.subTest(path=candidate):
+                    with self.assertRaises(ValueError):
+                        hc.check_exact_content(str(root), candidate, "EXPECTED")
+
+
+    def test_non_file_targets_fail_closed(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "directory"
+            target.mkdir()
+            with self.assertRaises(ValueError):
+                hc.check_exact_content(str(root), "directory", "EXPECTED")
+            with self.assertRaises(ValueError):
+                hc.check_sha256(str(root), "directory", "0" * 64)
+
+    def test_invariant_result_objects_are_frozen(self):
+        from dataclasses import FrozenInstanceError
+
+        hc = self._hc()
+        exact = hc.ExactContentResult("target.txt", "EXPECTED", True, True)
+        digest = hc.Sha256Result("target.bin", "0" * 64, "0" * 64, True, True)
+        with self.assertRaises(FrozenInstanceError):
+            exact.matches = False
+        with self.assertRaises(FrozenInstanceError):
+            digest.matches = False
+
+    def test_file_read_oserror_becomes_runtime_error(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from unittest.mock import patch
+
+        hc = self._hc()
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "target.bin"
+            target.write_bytes(b"DATA")
+            with patch("pathlib.Path.read_bytes", side_effect=OSError("read failed")):
+                with self.assertRaises(RuntimeError):
+                    hc.check_exact_content(str(root), "target.bin", "DATA")
+                with self.assertRaises(RuntimeError):
+                    hc.check_sha256(str(root), "target.bin", "0" * 64)
+
+
 if __name__ == "__main__":
     unittest.main()
