@@ -19,6 +19,20 @@ class FakeResponse:
         return self.payload
 
 
+class RawResponse:
+    def __init__(self, payload):
+        self.payload = payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def read(self):
+        return self.payload
+
+
 class OllamaWorkerTests(unittest.TestCase):
     def test_success_sends_native_chat_payload_and_returns_worker_response(self):
         from tools.ollama_worker import call_ollama_worker
@@ -62,6 +76,50 @@ class OllamaWorkerTests(unittest.TestCase):
         self.assertEqual(result.output_text, "")
         self.assertIsNotNone(result.error)
         self.assertIn("connection refused", result.error)
+
+
+    def test_http_failure_returns_transport_failure(self):
+        from urllib.error import HTTPError
+        from tools.ollama_worker import call_ollama_worker
+
+        error = HTTPError("http://127.0.0.1:11434/api/chat", 500, "Internal Server Error", {}, None)
+        with patch("tools.ollama_worker.urlopen", side_effect=error):
+            result = call_ollama_worker(WorkerRequest(task_text="do small task"))
+
+        self.assertFalse(result.transport_ok)
+        self.assertEqual(result.output_text, "")
+        self.assertIsNotNone(result.error)
+        self.assertIn("500", result.error)
+
+    def test_invalid_json_returns_transport_failure(self):
+        from tools.ollama_worker import call_ollama_worker
+
+        with patch("tools.ollama_worker.urlopen", return_value=RawResponse(b"not-json")):
+            result = call_ollama_worker(WorkerRequest(task_text="do small task"))
+
+        self.assertFalse(result.transport_ok)
+        self.assertEqual(result.output_text, "")
+        self.assertIsNotNone(result.error)
+
+    def test_missing_message_content_returns_transport_failure(self):
+        from tools.ollama_worker import call_ollama_worker
+
+        with patch("tools.ollama_worker.urlopen", return_value=FakeResponse({"message": {}})):
+            result = call_ollama_worker(WorkerRequest(task_text="do small task"))
+
+        self.assertFalse(result.transport_ok)
+        self.assertEqual(result.output_text, "")
+        self.assertIsNotNone(result.error)
+
+    def test_non_string_message_content_returns_transport_failure(self):
+        from tools.ollama_worker import call_ollama_worker
+
+        with patch("tools.ollama_worker.urlopen", return_value=FakeResponse({"message": {"content": 123}})):
+            result = call_ollama_worker(WorkerRequest(task_text="do small task"))
+
+        self.assertFalse(result.transport_ok)
+        self.assertEqual(result.output_text, "")
+        self.assertIsNotNone(result.error)
 
 
 if __name__ == "__main__":
