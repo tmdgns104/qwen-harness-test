@@ -139,18 +139,21 @@ This Task must not implement:
 
 ## Verification
 
-Run focused automation tests:
+Run exactly:
 
 `python -m unittest tests.test_qh`
 
-Run Harness Core regression:
+Then run:
 
 `python -m unittest tests.test_harness_core`
 
-Then verify:
+Then run:
 
-- `git diff --check`
-- `git status --short`
+`git diff --check`
+
+Then run:
+
+`git status --short`
 
 ## Stop Condition
 
