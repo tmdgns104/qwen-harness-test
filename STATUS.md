@@ -1,3 +1,3 @@
-Current Task: HC-005 - COMPLETE - VERIFIED
+Current Task: HC-006 - CONTRACT BASELINE
 
-Previous Task: HC-004 - COMPLETE - commit 72e6fd7
+Previous Task: HC-005 - COMPLETE - commit c1c48db
