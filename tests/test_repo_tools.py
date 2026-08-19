@@ -53,6 +53,14 @@ class RepositoryReadToolsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 read_repo_text(repo, "folder")
 
+    def test_read_repo_text_rejects_invalid_utf8(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            (repo / "invalid.txt").write_bytes(b"\xff\xfe\xfa")
+
+            with self.assertRaises(UnicodeDecodeError):
+                read_repo_text(repo, "invalid.txt")
+
 
 if __name__ == "__main__":
     unittest.main()
