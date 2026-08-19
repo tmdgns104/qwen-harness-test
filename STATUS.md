@@ -42,3 +42,10 @@ Handoff:
 - Real local Ollama qwen3:8b smoke: transport_ok=True, non-empty output, error=None.
 - Final qh review: Final Gate PASS; unexpected changed paths none.
 - Task-range changed files stayed within Allowed Changes.
+
+Deferred Automation Follow-up:
+- Task lifecycle automation (`qh.py start` / `qh.py close`) is a priority candidate because a real duplicate STATUS.md replacement error occurred during QH-V2-OWA-001. Revisit when Task lifecycle transitions are repeated again; implement only through a separate approved Task.
+- Task-range scope review is a priority candidate. Extend review to inspect changes from the Task baseline commit through HEAD, not only the current working tree. Revisit before Runner/E2E or when another Task requires manual range review.
+- Worker smoke-test standardization is a deferred candidate. Revisit only after native Worker smoke checks repeat during Read Tools, Edit Tools, or Runner work.
+- Continue to defer automatic commit, automatic Task completion, automatic Architecture modification, automatic next-Task start, and RED/GREEN semantic judgment automation. Human approval remains authoritative.
+- Automation candidates are promoted to implementation Tasks only when workflow order or repeated Evidence justifies them.
