@@ -6,6 +6,9 @@ Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
 Task Baseline: a155bb2b1ee22126c4059c01e9383c854c93059a
 
 Handoff:
+- QH-V2-RUN-001A implementation commit 80cdfff adds frozen backend-neutral ToolSpec, ToolRequest, ToolResult, and WorkerStep records.
+- Existing WorkerRequest and WorkerResponse contracts remain unchanged.
+- QH-V2-RUN-001A Verification Evidence: focused RED confirmed missing records; focused GREEN PASS; WorkerStep PASS; full tests.test_harness_core 114 PASS; git diff --check PASS.
 - ADR-008 accepted: backend-neutral ToolSpec / ToolRequest / ToolResult / WorkerStep semantics define the tool-enabled Worker boundary.
 - QH-V2-WC-001 WorkerRequest and WorkerResponse remain unchanged; Ollama-native tool_calls stay inside the Adapter.
 - Single-Task Runner owns the deterministic tool continuation loop; initial Worker tools are limited to read_repo_text and write_repo_text.
