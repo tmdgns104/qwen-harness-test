@@ -466,3 +466,46 @@ def assemble_evidence(
         exact_content_results=exact_content_results,
         sha256_results=sha256_results,
     )
+
+
+@dataclass(frozen=True)
+class FinalGateResult:
+    passed: bool
+    failures: tuple[str, ...]
+
+
+def evaluate_final_gate(evidence: HarnessEvidence) -> FinalGateResult:
+    recomputed_scope_results = tuple(
+        PathScopeEvidence(path, is_path_allowed(path, evidence.scope))
+        for path in evidence.changed_paths
+    )
+
+    failures = []
+
+    evidence_inconsistent = recomputed_scope_results != evidence.path_scope_results
+    evidence_inconsistent = evidence_inconsistent or any(
+        result.matches and not result.exists
+        for result in evidence.exact_content_results
+    )
+    evidence_inconsistent = evidence_inconsistent or any(
+        result.matches
+        and (
+            not result.exists
+            or result.actual_sha256 is None
+            or result.actual_sha256.lower() != result.expected_sha256.lower()
+        )
+        for result in evidence.sha256_results
+    )
+    if evidence_inconsistent:
+        failures.append("evidence_consistency")
+
+    if any(not result.allowed for result in recomputed_scope_results):
+        failures.append("scope")
+    if any(result.exit_code != 0 for result in evidence.verification_results):
+        failures.append("verification")
+    if any(not result.matches for result in evidence.exact_content_results):
+        failures.append("exact_content")
+    if any(not result.matches for result in evidence.sha256_results):
+        failures.append("sha256")
+
+    return FinalGateResult(passed=not failures, failures=tuple(failures))
