@@ -426,3 +426,43 @@ def check_sha256(repo_root: str, path: str, expected_sha256: str) -> Sha256Resul
     except OSError as exc:
         raise RuntimeError(f"Failed to read or hash invariant target: {exc}") from exc
     return Sha256Result(path, expected_sha256, actual, True, actual.lower() == expected_sha256.lower())
+
+
+@dataclass(frozen=True)
+class PathScopeEvidence:
+    path: str
+    allowed: bool
+
+
+@dataclass(frozen=True)
+class HarnessEvidence:
+    scope: ChangeScope
+    baseline: GitBaseline
+    changed_paths: tuple[str, ...]
+    path_scope_results: tuple[PathScopeEvidence, ...]
+    verification_results: tuple[VerificationCommandResult, ...]
+    exact_content_results: tuple[ExactContentResult, ...]
+    sha256_results: tuple[Sha256Result, ...]
+
+
+def assemble_evidence(
+    scope: ChangeScope,
+    baseline: GitBaseline,
+    changed_paths: tuple[str, ...],
+    verification_results: tuple[VerificationCommandResult, ...] = (),
+    exact_content_results: tuple[ExactContentResult, ...] = (),
+    sha256_results: tuple[Sha256Result, ...] = (),
+) -> HarnessEvidence:
+    path_scope_results = tuple(
+        PathScopeEvidence(path, is_path_allowed(path, scope))
+        for path in changed_paths
+    )
+    return HarnessEvidence(
+        scope=scope,
+        baseline=baseline,
+        changed_paths=changed_paths,
+        path_scope_results=path_scope_results,
+        verification_results=verification_results,
+        exact_content_results=exact_content_results,
+        sha256_results=sha256_results,
+    )
