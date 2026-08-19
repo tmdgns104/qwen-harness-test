@@ -1,8 +1,8 @@
-Current Task: QH-V2-ARCH-002 - COMPLETE - VERIFIED - commit 13b9077
+Current Task: QH-V2-WC-001 - ACTIVE - WORKER CONTRACT
 
-Previous Task: HC-007 - COMPLETE - VERIFIED - commit d6cd50b
+Previous Task: QH-V2-ARCH-002 - COMPLETE - VERIFIED - commit 13b9077
 
-Next Planned Task: Worker contract / backend-independent boundary - NOT STARTED
+Next Planned Task: Native Ollama Worker Adapter - NOT STARTED
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
@@ -18,4 +18,6 @@ Handoff:
 - ECC routing, LangGraph orchestration, multi-agent expansion, and automatic Codex escalation remain outside Milestone 1.
 - QH-V2-ARCH-002 Architecture review completed and committed: 13b9077.
 - Working tree was clean after Architecture commit.
-- Worker Contract is the next planned Task and has not started.
+- QH-V2-WC-001 Worker Contract Task baseline commit: 241bcbc.
+- Worker Contract implementation is now the active Task.
+- Native Ollama Worker Adapter remains NOT STARTED.
