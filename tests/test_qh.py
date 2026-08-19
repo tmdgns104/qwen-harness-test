@@ -428,6 +428,22 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("final gate: fail", output)
 
 
+    def test_review_rejects_invalid_persisted_baseline_without_modifying_repo(self):
+        status_path = self.repo / "STATUS.md"
+        original = status_path.read_text(encoding="utf-8")
+        line = next(x for x in original.splitlines() if x.startswith("Task Baseline:"))
+        invalid = original.replace(line, "Task Baseline: definitely-not-a-commit", 1)
+        status_path.write_text(invalid, encoding="utf-8")
+        before = self._git("status", "--porcelain").stdout
+
+        result = subprocess.run([sys.executable, str(QH), "review"], cwd=self.repo, capture_output=True, text=True, check=False)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("error:", result.stderr.lower())
+        self.assertEqual(status_path.read_text(encoding="utf-8"), invalid)
+        self.assertEqual(self._git("status", "--porcelain").stdout, before)
+
+
     def test_review_rejects_invalid_explicit_baseline_without_modifying_repo(self):
         before = self._git("status", "--porcelain").stdout
 
