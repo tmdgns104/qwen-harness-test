@@ -38,5 +38,15 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("clean", result.stdout.lower())
 
 
+    def test_status_reports_dirty_changed_paths(self):
+        (self.repo / "seed.txt").write_text("changed\n", encoding="utf-8")
+        (self.repo / "new.txt").write_text("new\n", encoding="utf-8")
+        result = subprocess.run([sys.executable, str(QH), "status"], cwd=self.repo, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("dirty", result.stdout.lower())
+        self.assertIn("seed.txt", result.stdout)
+        self.assertIn("new.txt", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()
