@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 from tools.harness_core import WorkerRequest, WorkerResponse
@@ -31,7 +32,11 @@ def call_ollama_worker(
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urlopen(http_request, timeout=timeout_seconds) as response:
-        decoded = json.loads(response.read().decode("utf-8"))
+    try:
+        with urlopen(http_request, timeout=timeout_seconds) as response:
+            decoded = json.loads(response.read().decode("utf-8"))
+    except URLError as exc:
+        return WorkerResponse(transport_ok=False, output_text="", error=str(exc))
+
     content = decoded["message"]["content"]
     return WorkerResponse(transport_ok=True, output_text=content, error=None)
