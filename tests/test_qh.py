@@ -56,5 +56,15 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(self._git("status", "--porcelain").stdout, "")
 
 
+    def test_verify_runs_task_verification_contract_and_reports_result(self):
+        result = subprocess.run([sys.executable, str(QH), "verify"], cwd=self.repo, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("QH-V2-TEST-001", result.stdout)
+        self.assertIn("python -c", result.stdout)
+        self.assertIn("exit", result.stdout.lower())
+        self.assertIn("0", result.stdout)
+        self.assertEqual(self._git("status", "--porcelain").stdout, "")
+
+
 if __name__ == "__main__":
     unittest.main()
