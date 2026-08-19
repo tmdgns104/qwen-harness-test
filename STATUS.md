@@ -1,3 +1,3 @@
-Current Task: HC-004 - COMPLETE - PARENT VERIFICATION PASSED
+Current Task: HC-005 - CONTRACT BASELINE
 
-Previous Task: HC-004B - COMPLETE - commit eb2fd68
+Previous Task: HC-004 - COMPLETE - commit 72e6fd7
