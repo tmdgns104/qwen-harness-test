@@ -48,5 +48,13 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("new.txt", result.stdout)
 
 
+    def test_preflight_accepts_clean_valid_task_without_modifying_repo(self):
+        result = subprocess.run([sys.executable, str(QH), "preflight"], cwd=self.repo, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("QH-V2-TEST-001", result.stdout)
+        self.assertIn("clean", result.stdout.lower())
+        self.assertEqual(self._git("status", "--porcelain").stdout, "")
+
+
 if __name__ == "__main__":
     unittest.main()
