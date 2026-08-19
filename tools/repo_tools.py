@@ -25,6 +25,8 @@ def write_repo_text(
     forbidden_changes: tuple[str, ...],
 ) -> str:
     requested = Path(relative_path)
+    if requested.is_absolute():
+        raise ValueError("absolute paths are not allowed")
     normalized = requested.as_posix()
     if normalized in forbidden_changes:
         raise ValueError("path is forbidden")
