@@ -168,5 +168,22 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(status_path.read_text(encoding="utf-8"), original)
 
 
+    def test_start_rejects_missing_target_task_without_modifying_status(self):
+        status_path = self.repo / "STATUS.md"
+        original = status_path.read_text(encoding="utf-8")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "start", "QH-V2-MISSING-999"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Task file not found", result.stderr)
+        self.assertEqual(status_path.read_text(encoding="utf-8"), original)
+
+
 if __name__ == "__main__":
     unittest.main()
