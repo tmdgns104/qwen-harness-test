@@ -215,6 +215,7 @@ class QhStatusCliTests(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Final Gate: PASS", result.stdout)
         status = status_path.read_text(encoding="utf-8")
         self.assertIn(f"Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit {commit}", status)
         self.assertIn("Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678", status)

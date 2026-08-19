@@ -50,7 +50,7 @@ This Task must not:
 
 ## Completion Boundary
 
-Any close/completion assistance must require already-existing deterministic Evidence and explicit Human invocation. It must not infer PASS from model output.
+Any close/completion assistance must require explicit Human invocation and must compute deterministic Verification and Final Gate Evidence through the existing Harness review path before modifying lifecycle state. If deterministic review fails, close must fail without modifying STATUS.md or the Task file. It must never infer PASS from model output.
 
 ## Allowed Changes
 
@@ -82,6 +82,8 @@ Any close/completion assistance must require already-existing deterministic Evid
 - No automatic next-Task selection exists.
 - No auto-commit exists.
 - No model output can authorize lifecycle completion.
+- `close` must pass the existing deterministic Harness review before lifecycle state is modified.
+- Failed Verification or Final Gate must leave lifecycle files unchanged.
 - Existing qh status/preflight/verify/review behavior remains passing.
 - Focused tests reproduce the QH-V2-OWA-001 duplicate-replacement failure class and prove it is prevented.
 - Harness Core regression remains passing.
