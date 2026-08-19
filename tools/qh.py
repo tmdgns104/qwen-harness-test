@@ -24,6 +24,47 @@ def _load_current_task(repo_root: Path) -> tuple[str, Path, str]:
     return task_id, task_path, task_path.read_text(encoding="utf-8")
 
 
+def _require_single_lifecycle_line(markdown: str, label: str) -> str:
+    prefix = f"{label}:"
+    matches = [line for line in markdown.splitlines() if line.startswith(prefix)]
+    if len(matches) != 1:
+        raise ValueError(f"Expected exactly one {label} line in STATUS.md; found {len(matches)}")
+    return matches[0]
+
+
+def command_start(repo_root: Path, target_task_id: str) -> int:
+    _require_git_top_level(str(repo_root))
+    if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", target_task_id) is None:
+        raise ValueError("Invalid Task ID")
+
+    target_path = repo_root / "tasks" / f"{target_task_id}.md"
+    if not target_path.is_file():
+        raise FileNotFoundError(f"Task file not found: {target_path.relative_to(repo_root)}")
+
+    status_path = repo_root / "STATUS.md"
+    markdown = status_path.read_text(encoding="utf-8")
+    current_line = _require_single_lifecycle_line(markdown, "Current Task")
+    previous_line = _require_single_lifecycle_line(markdown, "Previous Task")
+    _require_single_lifecycle_line(markdown, "Next Planned Task")
+
+    current_match = CURRENT_TASK_RE.match(current_line)
+    if current_match is None:
+        raise ValueError("Current Task line is malformed")
+
+    previous_value = current_line.removeprefix("Current Task: ")
+    lines = markdown.splitlines()
+    current_index = lines.index(current_line)
+    previous_index = lines.index(previous_line)
+    lines[current_index] = f"Current Task: {target_task_id} - ACTIVE"
+    lines[previous_index] = f"Previous Task: {previous_value}"
+    updated = "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
+    status_path.write_text(updated, encoding="utf-8")
+
+    print(f"Started Task: {target_task_id}")
+    print(f"Previous Task: {current_match.group(1)}")
+    return 0
+
+
 def command_status(repo_root: Path) -> int:
     _require_git_top_level(str(repo_root))
     task_id, task_path, task_markdown = _load_current_task(repo_root)
@@ -113,10 +154,17 @@ def command_review(repo_root: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight", "verify", "review"))
+    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start"))
+    parser.add_argument("task_id", nargs="?")
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
     try:
+        if args.command == "start":
+            if args.task_id is None:
+                raise ValueError("start requires a Task ID")
+            return command_start(repo_root, args.task_id)
+        if args.task_id is not None:
+            raise ValueError(f"{args.command} does not accept a Task ID")
         if args.command == "status":
             return command_status(repo_root)
         if args.command == "preflight":
