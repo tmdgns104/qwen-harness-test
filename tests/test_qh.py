@@ -139,5 +139,34 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(status.count(current), 1)
 
 
+    def test_start_rejects_duplicate_current_task_without_modifying_status(self):
+        original = (
+            "Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n\n"
+            "Current Task: QH-V2-DUPLICATE-001 - ACTIVE\n"
+        )
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(original, encoding="utf-8")
+        (self.repo / "tasks" / "QH-V2-TEST-002.md").write_text(
+            "## Status\n\nAPPROVED - READY FOR CONTRACT BASELINE\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "duplicate lifecycle baseline")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "start", "QH-V2-TEST-002"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Expected exactly one Current Task line", result.stderr)
+        self.assertEqual(status_path.read_text(encoding="utf-8"), original)
+
+
 if __name__ == "__main__":
     unittest.main()
