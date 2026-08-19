@@ -272,3 +272,33 @@ Post-Milestone 1 Hardening & UX Improvement follows successful E2E Regression an
 - Single-Task Runner must not begin until the Pre-Runner Safety/UX Review checkpoint is completed or explicitly superseded by a later Accepted decision.
 - Improvement candidates are preserved without forcing premature implementation.
 - UX and troubleshooting work has an explicit post-E2E review point instead of being lost in historical handoff notes.
+
+## ADR-007 - Pre-Runner Verification Performance Optimization
+
+### Status
+Accepted
+
+### Context
+Recent QH-V2-AUTO-005 Evidence shows a full Verification run requires approximately 81 seconds for tests.test_qh and 58 seconds for tests.test_harness_core, while repository-tool tests are negligible. The current manual completion workflow has also invoked verify, review, and close separately even though review executes the full Verification contract and close itself invokes review before lifecycle mutation. This can repeat the same authoritative Verification up to three times for an unchanged Repository state.
+
+### Decision
+Permit a targeted Verification performance phase before Single-Task Runner. Optimize redundant execution before introducing concurrency.
+
+1. The standard final lifecycle path should rely on qh close as the authoritative final operation because close invokes review, the full Task Verification contract, Scope Evidence, and Final Gate before lifecycle mutation.
+2. Standalone qh verify and qh review remain available for diagnostic or explicitly requested intermediate checks, but they are not mandatory predecessors to close when the Human explicitly invokes close.
+3. Development loops should prefer focused tests relevant to the current change; the final close path still executes the complete authoritative Task Verification contract.
+4. Parallel Verification is secondary. It may be considered only for commands proven independent and must not parallelize Git state checks, Evidence assembly, or Final Gate evaluation.
+5. Profiling tests.test_qh subprocess and temporary-Git-repository cost is authorized as a later performance Task if runtime remains material after duplicate execution is removed.
+
+### Safety Boundaries
+- HC-004 remains the authoritative Verification command runner.
+- qh close must continue to fail closed when review, Verification, Scope Evidence, or Final Gate fails.
+- No stale Verification Evidence may be reused by this decision.
+- No automatic PASS, commit, Task completion without an explicit Human close command, next-Task start, or Architecture mutation is authorized.
+- Verification caching or persisted receipts require a separate approved design because stale-Evidence prevention is non-trivial.
+
+### Consequences
+- The first performance improvement is workflow deduplication, not threading.
+- The expected normal final path performs one Full Verification instead of manually repeating the same Full Verification through verify, review, and close.
+- Focused development tests remain non-authoritative; final close retains the full Verification contract.
+- Parallel test execution and Verification Evidence reuse remain separate follow-up candidates requiring their own Evidence and approved Tasks.

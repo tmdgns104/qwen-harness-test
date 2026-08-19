@@ -17,6 +17,8 @@ Handoff:
 - Retry remains bounded and above the Worker Adapter.
 - Milestone 1 remaining sequence now includes: Harness-owned Scoped Edit Tools -> Pre-Runner Safety/UX Review -> Single-Task Runner -> Bounded Retry/Safe Stop -> Minimal CLI -> E2E Regression.
 - Post-Milestone 1 Hardening & UX Improvement review follows successful E2E Regression.
+- Pre-Runner performance decision: remove redundant standalone Full Verification from the normal final workflow; explicit `qh.py close <HEAD>` remains authoritative because it runs review, full Verification, Scope Evidence, and Final Gate before close.
+- Development loops should use focused tests; parallel Verification and stale-safe Evidence reuse remain follow-up candidates.
 - ECC routing, LangGraph orchestration, multi-agent expansion, and automatic Codex escalation remain outside Milestone 1.
 - QH-V2-ARCH-002 Architecture review completed and committed: 13b9077.
 - Working tree was clean after Architecture commit.
