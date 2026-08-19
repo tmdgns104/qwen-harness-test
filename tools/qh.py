@@ -5,7 +5,7 @@ import re
 import sys
 from pathlib import Path
 
-from harness_core import GitBaseline, _require_git_top_level, _run_git, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
+from harness_core import GitBaseline, VerificationContract, _require_git_top_level, _run_git, assemble_evidence, evaluate_final_gate, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
 
 
 CURRENT_TASK_RE = re.compile(r"Current Task:\s+(\S+)", re.MULTILINE)
@@ -77,9 +77,43 @@ def command_verify(repo_root: Path) -> int:
     return 0 if all(result.exit_code == 0 for result in results) else 1
 
 
+def command_review(repo_root: Path) -> int:
+    _require_git_top_level(str(repo_root))
+    task_id, task_path, task_markdown = _load_current_task(repo_root)
+    scope = parse_change_scope(task_markdown)
+    head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
+    baseline = GitBaseline(head=head)
+    changed_paths = get_changed_paths(str(repo_root), baseline)
+    verification_contract = parse_verification_commands(task_markdown)
+    verification_results = run_verification_commands(verification_contract, str(repo_root))
+    evidence = assemble_evidence(scope, baseline, changed_paths, verification_results)
+    diff_result = run_verification_commands(VerificationContract(commands=("git diff --check",)), str(repo_root))[0]
+    print(f"Current Task: {task_id}")
+    print(f"Task File: {task_path.relative_to(repo_root).as_posix()}")
+    print("Changed Paths:")
+    if evidence.path_scope_results:
+        for item in evidence.path_scope_results:
+            state = "allowed" if item.allowed else "forbidden"
+            print(f"- {item.path}: {state}")
+    else:
+        print("- none")
+    print("Verification:")
+    for result in verification_results:
+        print(f"- {result.command}: exit {result.exit_code}")
+    print(f"Diff Check: exit {diff_result.exit_code}")
+    unexpected = any(not item.allowed for item in evidence.path_scope_results)
+    final_gate = evaluate_final_gate(evidence)
+    print(f"Unexpected Changed Paths: {"yes" if unexpected else "no"}")
+    print(f"Final Gate: {"PASS" if final_gate.passed else "FAIL"}")
+    if final_gate.failures:
+        print(f"Final Gate Failures: {", ".join(final_gate.failures)}")
+    passed = final_gate.passed and diff_result.exit_code == 0
+    return 0 if passed else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight", "verify"))
+    parser.add_argument("command", choices=("status", "preflight", "verify", "review"))
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
     try:
@@ -89,6 +123,8 @@ def main() -> int:
             return command_preflight(repo_root)
         if args.command == "verify":
             return command_verify(repo_root)
+        if args.command == "review":
+            return command_review(repo_root)
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

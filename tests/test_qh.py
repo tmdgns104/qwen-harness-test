@@ -91,5 +91,16 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(self._git("status", "--porcelain").stdout, " M seed.txt\n")
 
 
+    def test_review_rejects_forbidden_changed_path(self):
+        (self.repo / "forbidden.txt").write_text("forbidden\n", encoding="utf-8")
+        result = subprocess.run([sys.executable, str(QH), "review"], cwd=self.repo, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 1)
+        output = result.stdout.lower()
+        self.assertIn("forbidden.txt", output)
+        self.assertIn("forbidden", output)
+        self.assertIn("final gate: fail", output)
+        self.assertIn("scope", output)
+
+
 if __name__ == "__main__":
     unittest.main()
