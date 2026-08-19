@@ -16,6 +16,17 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             self.assertEqual(actual, expected)
 
+    def test_read_repo_text_rejects_absolute_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            outside = root / "outside.txt"
+            outside.write_text("OUTSIDE\n", encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                read_repo_text(repo, str(outside))
+
 
 if __name__ == "__main__":
     unittest.main()
