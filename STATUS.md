@@ -24,6 +24,10 @@ Handoff:
 - QH-V2-PERF-002 profiling found repeated Git/test-fixture process creation is the dominant tests.test_qh bottleneck: common setUp alone executes 8 Git commands per test, at least 176 Git subprocesses across 22 tests.
 - A simple status test spent ~61% of runtime in common setUp; the slow close profile used 17 subprocesses, including 16 Git calls.
 - Recommended next optimization: preserve per-test isolation while replacing repeated Repository construction with independent copies of a prebuilt seed test Repository.
+- QH-V2-EDIT-002 resolved the remaining Pre-Runner scope-engine mismatch in implementation commit 5151777.
+- write_repo_text now delegates authorization to Harness Core ChangeScope + is_path_allowed; recursive allow and forbidden-first semantics are shared with final review.
+- Verification: tests.test_repo_tools 15 PASS, tests.test_harness_core 109 PASS.
+
 - QH-V2-PERF-003 implemented isolated seed Repository fixtures in commit 7a8a5f6 with no production-code changes.
 - tests.test_qh improved from 90.110s to 46.899s for 22 tests, approximately 48% faster.
 - Isolation probe PASS; tests.test_qh 22 PASS, tests.test_harness_core 109 PASS, tests.test_repo_tools 13 PASS.

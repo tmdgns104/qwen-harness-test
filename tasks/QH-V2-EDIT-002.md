@@ -89,3 +89,26 @@ Then run:
 ## Stop Condition
 
 Stop on scope-semantic ambiguity, regression, architecture change, or any authorization weakening.
+
+## Implementation Result
+
+- Implementation commit: 5151777
+- write_repo_text public API was preserved.
+- Repository edit authorization now constructs Harness Core ChangeScope and delegates to is_path_allowed.
+- The edit tool no longer maintains a separate exact-membership scope evaluator.
+- Existing repository-root escape, absolute-path, directory, and UTF-8 write behavior remain unchanged.
+
+## Verification Evidence
+
+- Recursive allowed pattern test: PASS.
+- Recursive forbidden override test: PASS.
+- tests.test_repo_tools: 15 PASS.
+- tests.test_harness_core: 109 PASS.
+- git diff --check: PASS.
+- No unexpected changed paths.
+
+## Conclusion
+
+The Runner-blocking scope semantic mismatch identified by QH-V2-PRR-001 is resolved.
+
+Edit-time authorization and final Harness scope evaluation now use the same authoritative scope engine.
