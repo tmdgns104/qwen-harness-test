@@ -66,5 +66,17 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(self._git("status", "--porcelain").stdout, "")
 
 
+    def test_verify_returns_failure_when_verification_command_fails(self):
+        task = self.repo / "tasks" / "QH-V2-TEST-001.md"
+        text = task.read_text(encoding="utf-8")
+        text = text.replace("`python -c \"print(1)\"`", "`python -c \"import sys; sys.exit(7)\"`")
+        task.write_text(text, encoding="utf-8")
+        self._git("add", ".")
+        self._git("commit", "-m", "failing verification contract")
+        result = subprocess.run([sys.executable, str(QH), "verify"], cwd=self.repo, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Exit Code: 7", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

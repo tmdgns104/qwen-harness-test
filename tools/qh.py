@@ -5,7 +5,7 @@ import re
 import sys
 from pathlib import Path
 
-from harness_core import GitBaseline, _require_git_top_level, _run_git, get_changed_paths, parse_change_scope
+from harness_core import GitBaseline, _require_git_top_level, _run_git, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
 
 
 CURRENT_TASK_RE = re.compile(r"Current Task:\s+(\S+)", re.MULTILINE)
@@ -60,9 +60,26 @@ def command_preflight(repo_root: Path) -> int:
     return 0
 
 
+def command_verify(repo_root: Path) -> int:
+    _require_git_top_level(str(repo_root))
+    task_id, task_path, task_markdown = _load_current_task(repo_root)
+    contract = parse_verification_commands(task_markdown)
+    results = run_verification_commands(contract, str(repo_root))
+    print(f"Current Task: {task_id}")
+    print(f"Task File: {task_path.relative_to(repo_root).as_posix()}")
+    for result in results:
+        print(f"Command: {result.command}")
+        print(f"Exit Code: {result.exit_code}")
+        if result.stdout:
+            print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+        if result.stderr:
+            print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\n") else "\n")
+    return 0 if all(result.exit_code == 0 for result in results) else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight"))
+    parser.add_argument("command", choices=("status", "preflight", "verify"))
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
     try:
@@ -70,6 +87,8 @@ def main() -> int:
             return command_status(repo_root)
         if args.command == "preflight":
             return command_preflight(repo_root)
+        if args.command == "verify":
+            return command_verify(repo_root)
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
