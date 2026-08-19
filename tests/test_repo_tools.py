@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.repo_tools import read_repo_text
+from tools.repo_tools import read_repo_text, write_repo_text
 
 
 class RepositoryReadToolsTests(unittest.TestCase):
@@ -60,6 +60,22 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             with self.assertRaises(UnicodeDecodeError):
                 read_repo_text(repo, "invalid.txt")
+
+    def test_write_repo_text_creates_allowed_file_with_exact_content(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            content = "hello\nworld\n"
+
+            result = write_repo_text(
+                repo,
+                "allowed.txt",
+                content,
+                allowed_changes=("allowed.txt",),
+                forbidden_changes=(),
+            )
+
+            self.assertEqual((repo / "allowed.txt").read_text(encoding="utf-8"), content)
+            self.assertEqual(result, "allowed.txt")
 
 
 if __name__ == "__main__":
