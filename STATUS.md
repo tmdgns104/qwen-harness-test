@@ -3,6 +3,7 @@ Current Task: QH-V2-AUTO-005 - ACTIVE
 Previous Task: QH-V2-PRR-001 - COMPLETE - VERIFIED - commit 3386cd0
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
+Task Baseline: 4cf241f944e132b5cfea5636f6a8d0b34d4910c2
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
