@@ -1,6 +1,6 @@
-Current Task: QH-V2-OWA-001 - COMPLETE - VERIFIED - commit 66405cd
+Current Task: QH-V2-AUTO-002 - ACTIVE - DETERMINISTIC TASK LIFECYCLE ASSISTANCE
 
-Previous Task: QH-V2-AUTO-001 - COMPLETE - VERIFIED - commit f8d6280
+Previous Task: QH-V2-OWA-001 - COMPLETE - VERIFIED - commit 79b3693
 
 Next Planned Task: Harness-owned Repository Read Tools - NOT STARTED
 
@@ -42,6 +42,11 @@ Handoff:
 - Real local Ollama qwen3:8b smoke: transport_ok=True, non-empty output, error=None.
 - Final qh review: Final Gate PASS; unexpected changed paths none.
 - Task-range changed files stayed within Allowed Changes.
+
+- QH-V2-AUTO-002 Task baseline commit: 82d15af.
+- Deterministic Task Lifecycle Assistance is now the active Task.
+- Harness-owned Repository Read Tools remains NOT STARTED.
+- This is the final manually prepared Task-start transition before lifecycle assistance is implemented.
 
 Deferred Automation Follow-up:
 - Task lifecycle automation (`qh.py start` / `qh.py close`) is a priority candidate because a real duplicate STATUS.md replacement error occurred during QH-V2-OWA-001. Revisit when Task lifecycle transitions are repeated again; implement only through a separate approved Task.
