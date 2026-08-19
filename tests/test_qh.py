@@ -299,6 +299,38 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(status_path.read_text(encoding="utf-8"), original_status)
         self.assertEqual(task_path.read_text(encoding="utf-8"), original_task)
 
+    def test_start_clears_consumed_next_planned_task_without_selecting_future_task(self):
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            "Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n\n"
+            "Handoff:\n- preserve this history\n",
+            encoding="utf-8",
+        )
+        (self.repo / "tasks" / "QH-V2-TEST-002.md").write_text(
+            "## Status\n\nAPPROVED - READY FOR CONTRACT BASELINE\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "next planned consistency baseline")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "start", "QH-V2-TEST-002"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        status = status_path.read_text(encoding="utf-8")
+        self.assertIn("Current Task: QH-V2-TEST-002 - ACTIVE", status)
+        self.assertIn("Previous Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234", status)
+        self.assertIn("Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED", status)
+        self.assertNotIn("Next Planned Task: QH-V2-TEST-002 - NOT STARTED", status)
+        self.assertIn("- preserve this history", status)
+
 
 if __name__ == "__main__":
     unittest.main()
