@@ -185,5 +185,44 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(status_path.read_text(encoding="utf-8"), original)
 
 
+    def test_close_marks_explicit_current_task_complete_without_committing(self):
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            "Current Task: QH-V2-TEST-001 - ACTIVE\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n\n"
+            "Handoff:\n- preserve this history\n",
+            encoding="utf-8",
+        )
+        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
+        task_path.write_text(
+            "# Test Task\n\n## Status\n\nACTIVE\n\n"
+            "## Allowed Changes\n\n- `seed.txt`\n\n"
+            "## Forbidden Changes\n\n- `forbidden.txt`\n\n"
+            '## Verification\n\nRun exactly:\n\n`python -c "print(1)"`\n',
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "close lifecycle baseline")
+        commit = self._git("rev-parse", "HEAD").stdout.strip()
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "close", commit],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        status = status_path.read_text(encoding="utf-8")
+        self.assertIn(f"Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit {commit}", status)
+        self.assertIn("Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678", status)
+        self.assertIn("Next Planned Task: QH-V2-TEST-002 - NOT STARTED", status)
+        self.assertIn("- preserve this history", status)
+        self.assertIn("## Status\n\nCOMPLETE - VERIFIED", task_path.read_text(encoding="utf-8"))
+        self.assertNotEqual(self._git("status", "--porcelain").stdout, "")
+
+
 if __name__ == "__main__":
     unittest.main()
