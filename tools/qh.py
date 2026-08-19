@@ -172,12 +172,24 @@ def command_verify(repo_root: Path) -> int:
     return 0 if all(result.exit_code == 0 for result in results) else 1
 
 
-def command_review(repo_root: Path) -> int:
+def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
     _require_git_top_level(str(repo_root))
     task_id, task_path, task_markdown = _load_current_task(repo_root)
     scope = parse_change_scope(task_markdown)
-    head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
-    baseline = GitBaseline(head=head)
+    if baseline_commit is None:
+        baseline_head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
+    else:
+        baseline_head = _run_git(
+            str(repo_root),
+            ("rev-parse", "--verify", baseline_commit),
+        ).stdout.strip()
+        baseline_type = _run_git(
+            str(repo_root),
+            ("cat-file", "-t", baseline_head),
+        ).stdout.strip()
+        if baseline_type != "commit":
+            raise ValueError("review baseline must resolve to a commit")
+    baseline = GitBaseline(head=baseline_head)
     changed_paths = get_changed_paths(str(repo_root), baseline)
     verification_contract = parse_verification_commands(task_markdown)
     verification_results = run_verification_commands(verification_contract, str(repo_root))
@@ -221,6 +233,8 @@ def main() -> int:
             if args.task_id is None:
                 raise ValueError("close requires a commit")
             return command_close(repo_root, args.task_id)
+        if args.command == "review":
+            return command_review(repo_root, args.task_id)
         if args.task_id is not None:
             raise ValueError(f"{args.command} does not accept a Task ID")
         if args.command == "status":
@@ -229,8 +243,6 @@ def main() -> int:
             return command_preflight(repo_root)
         if args.command == "verify":
             return command_verify(repo_root)
-        if args.command == "review":
-            return command_review(repo_root)
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
