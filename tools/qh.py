@@ -45,7 +45,7 @@ def command_start(repo_root: Path, target_task_id: str) -> int:
     markdown = status_path.read_text(encoding="utf-8")
     current_line = _require_single_lifecycle_line(markdown, "Current Task")
     previous_line = _require_single_lifecycle_line(markdown, "Previous Task")
-    _require_single_lifecycle_line(markdown, "Next Planned Task")
+    next_planned_line = _require_single_lifecycle_line(markdown, "Next Planned Task")
 
     current_match = CURRENT_TASK_RE.match(current_line)
     if current_match is None:
@@ -55,8 +55,10 @@ def command_start(repo_root: Path, target_task_id: str) -> int:
     lines = markdown.splitlines()
     current_index = lines.index(current_line)
     previous_index = lines.index(previous_line)
+    next_planned_index = lines.index(next_planned_line)
     lines[current_index] = f"Current Task: {target_task_id} - ACTIVE"
     lines[previous_index] = f"Previous Task: {previous_value}"
+    lines[next_planned_index] = "Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED"
     updated = "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
     status_path.write_text(updated, encoding="utf-8")
 

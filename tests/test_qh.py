@@ -133,7 +133,7 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertTrue(status.startswith(
             "Current Task: QH-V2-TEST-002 - ACTIVE\n\n"
             "Previous Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234\n\n"
-            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED"
+            "Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED"
         ))
         self.assertIn(historical, status)
         self.assertEqual(status.count(current), 1)
