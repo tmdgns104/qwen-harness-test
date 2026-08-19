@@ -94,10 +94,13 @@ Do not implement the Runner or Worker tool loop in this Task.
 
 ## Verification
 
-Run:
+Run exactly:
 
-- git diff --check
-- git status --short
+`git diff --check`
+
+Then run:
+
+`git status --short`
 
 Confirm that only:
 
