@@ -10,6 +10,22 @@ from pathlib import Path
 
 
 @dataclass(frozen=True)
+class WorkerRequest:
+    """Backend-independent request passed from the Harness to a Worker."""
+
+    task_text: str
+
+
+@dataclass(frozen=True)
+class WorkerResponse:
+    """Backend-independent Worker transport result; not a Harness PASS/FAIL."""
+
+    transport_ok: bool
+    output_text: str
+    error: str | None = None
+
+
+@dataclass(frozen=True)
 class ChangeScope:
     """Allowed and forbidden repository path patterns parsed from a Task."""
 

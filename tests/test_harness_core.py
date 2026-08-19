@@ -1509,5 +1509,62 @@ class FinalGateTests(unittest.TestCase):
         sha256.assert_not_called()
 
 
+class WorkerContractTests(unittest.TestCase):
+    def _hc(self):
+        import tools.harness_core as harness_core
+        return harness_core
+
+    def test_worker_request_exact_frozen_contract(self):
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        request = hc.WorkerRequest("approved task text")
+
+        self.assertEqual(request.task_text, "approved task text")
+        self.assertEqual(tuple(field.name for field in fields(hc.WorkerRequest)), ("task_text",))
+        self.assertEqual(hc.WorkerRequest.__annotations__, {"task_text": str})
+        with self.assertRaises(FrozenInstanceError):
+            request.task_text = "changed"
+
+    def test_worker_response_exact_frozen_contract(self):
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        response = hc.WorkerResponse(True, "worker output")
+
+        self.assertEqual(response, hc.WorkerResponse(True, "worker output", None))
+        self.assertEqual(tuple(field.name for field in fields(hc.WorkerResponse)), ("transport_ok", "output_text", "error"))
+        self.assertEqual(hc.WorkerResponse.__annotations__, {"transport_ok": bool, "output_text": str, "error": str | None})
+        with self.assertRaises(FrozenInstanceError):
+            response.transport_ok = False
+
+    def test_worker_response_represents_transport_success_and_failure(self):
+        hc = self._hc()
+
+        success = hc.WorkerResponse(True, "backend result")
+        failure = hc.WorkerResponse(False, "", "backend unavailable")
+
+        self.assertTrue(success.transport_ok)
+        self.assertEqual(success.output_text, "backend result")
+        self.assertIsNone(success.error)
+        self.assertFalse(failure.transport_ok)
+        self.assertEqual(failure.output_text, "")
+        self.assertEqual(failure.error, "backend unavailable")
+
+    def test_worker_contract_is_backend_neutral_and_not_final_gate(self):
+        from dataclasses import fields
+
+        hc = self._hc()
+        request_fields = {field.name for field in fields(hc.WorkerRequest)}
+        response_fields = {field.name for field in fields(hc.WorkerResponse)}
+
+        self.assertEqual(request_fields, {"task_text"})
+        self.assertEqual(response_fields, {"transport_ok", "output_text", "error"})
+        forbidden = {"model", "ollama", "http", "tools", "shell", "git", "verification", "passed", "failures", "retry"}
+        self.assertTrue(request_fields.isdisjoint(forbidden))
+        self.assertTrue(response_fields.isdisjoint(forbidden))
+        self.assertNotIsInstance(hc.WorkerResponse(True, "PASS"), hc.FinalGateResult)
+
+
 if __name__ == "__main__":
     unittest.main()
