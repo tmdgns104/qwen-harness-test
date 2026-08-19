@@ -25,7 +25,10 @@ def write_repo_text(
     forbidden_changes: tuple[str, ...],
 ) -> str:
     requested = Path(relative_path)
-    if requested.as_posix() not in allowed_changes:
+    normalized = requested.as_posix()
+    if normalized in forbidden_changes:
+        raise ValueError("path is forbidden")
+    if normalized not in allowed_changes:
         raise ValueError("path is not allowed")
     path = Path(repo_root) / requested
     path.write_text(content, encoding="utf-8")
