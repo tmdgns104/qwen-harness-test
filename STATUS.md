@@ -19,6 +19,8 @@ Handoff:
 - Post-Milestone 1 Hardening & UX Improvement review follows successful E2E Regression.
 - Pre-Runner performance decision: remove redundant standalone Full Verification from the normal final workflow; explicit `qh.py close <HEAD>` remains authoritative because it runs review, full Verification, Scope Evidence, and Final Gate before close.
 - Development loops should use focused tests; parallel Verification and stale-safe Evidence reuse remain follow-up candidates.
+- QH-V2-PERF-001 measured parallel Verification at 137.55s versus a 138.45s sequential baseline (~0.7% improvement); concurrent suites slowed materially, so Verification concurrency is rejected for the current workload.
+- Next performance candidate: profile tests.test_qh Git/subprocess/temporary-repository cost before considering further execution-level optimization.
 - ECC routing, LangGraph orchestration, multi-agent expansion, and automatic Codex escalation remain outside Milestone 1.
 - QH-V2-ARCH-002 Architecture review completed and committed: 13b9077.
 - Working tree was clean after Architecture commit.

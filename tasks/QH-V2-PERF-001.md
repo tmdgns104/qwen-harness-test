@@ -78,3 +78,25 @@ Then run:
 ## Stop Condition
 
 Stop on any architecture ambiguity, unsafe concurrency interaction, regression, scope violation, or inability to preserve deterministic Evidence ordering.
+
+## Experiment Result
+
+- Sequential baseline Full Verification: 138.45 seconds.
+- Sequential component timings:
+  - tests.test_qh: 80.274 seconds.
+  - tests.test_harness_core: 57.087 seconds.
+  - tests.test_repo_tools: 0.036 seconds.
+- Experimental explicit parallel Verification: 137.55 seconds total.
+- Parallel component timings:
+  - tests.test_qh: 136.650 seconds.
+  - tests.test_harness_core: 107.287 seconds.
+  - tests.test_repo_tools: 0.182 seconds.
+- Net wall-clock improvement: approximately 0.90 seconds, about 0.7%.
+- Concurrent execution caused substantial per-suite slowdown, consistent with resource contention among Python, Git subprocesses, temporary repositories, CPU, and storage.
+- Parallel Verification is therefore REJECTED for the current workload.
+- Experimental implementation and tests were fully restored; no concurrency code remains.
+
+## Recommendation
+
+Do not add Verification concurrency before Runner based on current Evidence.
+The next performance investigation should profile tests.test_qh and its Git/subprocess/temporary-repository costs.
