@@ -1,9 +1,9 @@
-Current Task: QH-V2-ARCH-006 - COMPLETE - VERIFIED - commit 0e2b04f
+Current Task: QH-V2-RUN-001A - ACTIVE
 
-Previous Task: QH-V2-EDIT-002 - COMPLETE - VERIFIED - commit f1d2934
+Previous Task: QH-V2-ARCH-006 - COMPLETE - VERIFIED - commit 0e2b04f
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 233d80bf042a87e0394135a2314b750e7b1770e4
+Task Baseline: a155bb2b1ee22126c4059c01e9383c854c93059a
 
 Handoff:
 - ADR-008 accepted: backend-neutral ToolSpec / ToolRequest / ToolResult / WorkerStep semantics define the tool-enabled Worker boundary.
