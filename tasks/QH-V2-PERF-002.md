@@ -62,3 +62,70 @@ Then run:
 ## Stop Condition
 
 Stop after profiling Evidence, recommendation, review, close, and clean working tree.
+
+## Profiling Result
+
+### Full tests.test_qh timing
+
+- 22 tests completed in 90.110 seconds during per-test duration profiling.
+- No single pathological test dominates runtime.
+- Individual tests ranged from approximately 2.4 seconds to 7.4 seconds.
+- All 22 tests belong to QhStatusCliTests.
+
+### Common fixture evidence
+
+QhStatusCliTests.setUp creates a new temporary Git Repository for every test and executes:
+
+1. git init
+2. git config user.email
+3. git config user.name
+4. git add .
+5. git commit baseline
+6. git rev-parse HEAD
+7. git add STATUS.md
+8. git commit persisted baseline
+
+Across 22 tests, this means at least 176 Git subprocess executions from common setup alone.
+
+### Simple status test profile
+
+test_status_reports_current_task_task_file_clean_git_and_scope:
+
+- Total: 4.066 seconds.
+- setUp: 2.479 seconds (~61%).
+- Eight setup Git calls: 2.468 seconds.
+- Total subprocess.run calls: 9.
+- The actual test body, including qh status execution, accounted for the remaining approximately 1.56 seconds.
+
+### Slow close test profile
+
+test_close_rejects_non_head_commit_without_modifying_lifecycle_files:
+
+- Total: 7.271 seconds.
+- Total subprocess.run calls: 17.
+- Total subprocess cumulative time: 7.223 seconds.
+- Total _git calls: 16, cumulative 4.633 seconds.
+- Common setUp: 2.385 seconds.
+- Windows CreateProcess cumulative cost: 1.263 seconds.
+
+### Diagnosis
+
+The dominant tests.test_qh runtime is test infrastructure cost, especially repeated Git process creation and per-test Repository construction.
+
+The Evidence does not indicate that qh production logic itself is the primary cause of the approximately 80-90 second suite runtime.
+
+## Recommendation
+
+Create a separate implementation Task to optimize only tests.test_qh fixture construction.
+
+Preferred first experiment:
+
+- Build one known-good baseline seed Repository for the test class or suite.
+- Give every test its own independent copy of that seed Repository.
+- Preserve complete test isolation.
+- Do not share a mutable working Repository between tests.
+- Preserve all current lifecycle, Git-range, and fail-closed assertions.
+- Measure full tests.test_qh before and after.
+- Keep the optimization only if regressions remain PASS and wall-clock improvement is material.
+
+Do not optimize qh production code based on current profiling Evidence.
