@@ -168,6 +168,23 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             self.assertEqual(outside.read_text(encoding="utf-8"), "ORIGINAL\n")
 
+    def test_write_repo_text_rejects_directory_before_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            target = repo / "folder"
+            target.mkdir()
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    "folder",
+                    "CHANGED\n",
+                    allowed_changes=("folder",),
+                    forbidden_changes=(),
+                )
+
+            self.assertTrue(target.is_dir())
+
 
 if __name__ == "__main__":
     unittest.main()
