@@ -45,6 +45,14 @@ class RepositoryReadToolsTests(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 read_repo_text(repo, "missing.txt")
 
+    def test_read_repo_text_rejects_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            (repo / "folder").mkdir()
+
+            with self.assertRaises(ValueError):
+                read_repo_text(repo, "folder")
+
 
 if __name__ == "__main__":
     unittest.main()
