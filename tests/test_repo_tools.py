@@ -149,6 +149,25 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             self.assertEqual(outside.read_text(encoding="utf-8"), "ORIGINAL\n")
 
+    def test_write_repo_text_rejects_path_traversal_before_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            outside = root / "outside.txt"
+            outside.write_text("ORIGINAL\n", encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    "../outside.txt",
+                    "CHANGED\n",
+                    allowed_changes=("../outside.txt",),
+                    forbidden_changes=(),
+                )
+
+            self.assertEqual(outside.read_text(encoding="utf-8"), "ORIGINAL\n")
+
 
 if __name__ == "__main__":
     unittest.main()
