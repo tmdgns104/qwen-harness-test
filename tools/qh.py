@@ -51,14 +51,22 @@ def command_start(repo_root: Path, target_task_id: str) -> int:
     if current_match is None:
         raise ValueError("Current Task line is malformed")
 
+    baseline_head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
     previous_value = current_line.removeprefix("Current Task: ")
     lines = markdown.splitlines()
     current_index = lines.index(current_line)
     previous_index = lines.index(previous_line)
     next_planned_index = lines.index(next_planned_line)
+    baseline_indexes = [index for index, line in enumerate(lines) if line.startswith("Task Baseline:")]
+    if len(baseline_indexes) > 1:
+        raise ValueError(f"Expected at most one Task Baseline line in STATUS.md; found {len(baseline_indexes)}")
     lines[current_index] = f"Current Task: {target_task_id} - ACTIVE"
     lines[previous_index] = f"Previous Task: {previous_value}"
     lines[next_planned_index] = "Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED"
+    if baseline_indexes:
+        lines[baseline_indexes[0]] = f"Task Baseline: {baseline_head}"
+    else:
+        lines.insert(next_planned_index + 1, f"Task Baseline: {baseline_head}")
     updated = "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
     status_path.write_text(updated, encoding="utf-8")
 
