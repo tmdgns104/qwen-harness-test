@@ -1,8 +1,8 @@
-Current Task: QH-V2-ARCH-002 - ACTIVE - ADR-004 / STATUS UPDATE
+Current Task: QH-V2-ARCH-002 - COMPLETE - VERIFIED - commit 13b9077
 
 Previous Task: HC-007 - COMPLETE - VERIFIED - commit d6cd50b
 
-Next Planned Task: Worker contract / backend-independent boundary, only after QH-V2-ARCH-002 completion and clean verification.
+Next Planned Task: Worker contract / backend-independent boundary - NOT STARTED
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
@@ -16,4 +16,6 @@ Handoff:
 - Retry remains bounded and above the Worker Adapter.
 - Milestone 1 sequence: Worker Contract -> Native Ollama Adapter -> Harness-owned Repository Read Tools -> Harness-owned Scoped Edit Tools -> Single-Task Runner -> Bounded Retry/Safe Stop -> Minimal CLI -> E2E Regression.
 - ECC routing, LangGraph orchestration, multi-agent expansion, and automatic Codex escalation remain outside Milestone 1.
-- No Worker implementation begins until QH-V2-ARCH-002 is independently reviewed, committed, and the working tree is clean.
+- QH-V2-ARCH-002 Architecture review completed and committed: 13b9077.
+- Working tree was clean after Architecture commit.
+- Worker Contract is the next planned Task and has not started.
