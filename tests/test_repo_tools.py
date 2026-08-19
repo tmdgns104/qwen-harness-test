@@ -129,6 +129,26 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             self.assertEqual(target.read_text(encoding="utf-8"), "ORIGINAL\n")
 
+    def test_write_repo_text_rejects_absolute_path_before_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            outside = root / "outside.txt"
+            outside.write_text("ORIGINAL\n", encoding="utf-8")
+            absolute = str(outside)
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    absolute,
+                    "CHANGED\n",
+                    allowed_changes=(Path(absolute).as_posix(),),
+                    forbidden_changes=(),
+                )
+
+            self.assertEqual(outside.read_text(encoding="utf-8"), "ORIGINAL\n")
+
 
 if __name__ == "__main__":
     unittest.main()
