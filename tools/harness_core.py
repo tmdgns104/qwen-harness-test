@@ -5,6 +5,7 @@ import hashlib
 import re
 import subprocess
 import shlex
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -23,6 +24,44 @@ class WorkerResponse:
     transport_ok: bool
     output_text: str
     error: str | None = None
+
+
+@dataclass(frozen=True)
+class ToolSpec:
+    """Backend-neutral description of a Harness-owned tool."""
+
+    name: str
+    description: str
+    input_schema: Mapping[str, object]
+
+
+@dataclass(frozen=True)
+class ToolRequest:
+    """Backend-neutral Worker request for a Harness-owned tool."""
+
+    call_id: str
+    name: str
+    arguments: Mapping[str, object]
+
+
+@dataclass(frozen=True)
+class ToolResult:
+    """Backend-neutral result of deterministic Harness tool execution."""
+
+    call_id: str
+    ok: bool
+    output: str
+    error: str | None
+
+
+@dataclass(frozen=True)
+class WorkerStep:
+    """One backend-neutral Worker interaction step; not a Harness PASS/FAIL."""
+
+    transport_ok: bool
+    output_text: str
+    tool_requests: tuple[ToolRequest, ...]
+    error: str | None
 
 
 @dataclass(frozen=True)

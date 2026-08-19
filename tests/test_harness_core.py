@@ -1566,5 +1566,124 @@ class WorkerContractTests(unittest.TestCase):
         self.assertNotIsInstance(hc.WorkerResponse(True, "PASS"), hc.FinalGateResult)
 
 
+    def test_tool_spec_exact_frozen_contract(self):
+        from collections.abc import Mapping
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        value = hc.ToolSpec("read_repo_text", "Read text", {"type": "object"})
+
+        self.assertEqual(
+            tuple(field.name for field in fields(hc.ToolSpec)),
+            ("name", "description", "input_schema"),
+        )
+        self.assertEqual(
+            hc.ToolSpec.__annotations__,
+            {
+                "name": str,
+                "description": str,
+                "input_schema": Mapping[str, object],
+            },
+        )
+        with self.assertRaises(FrozenInstanceError):
+            value.name = "changed"
+
+    def test_tool_request_exact_frozen_contract(self):
+        from collections.abc import Mapping
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        value = hc.ToolRequest("call-1", "read_repo_text", {"relative_path": "a.txt"})
+
+        self.assertEqual(
+            tuple(field.name for field in fields(hc.ToolRequest)),
+            ("call_id", "name", "arguments"),
+        )
+        self.assertEqual(
+            hc.ToolRequest.__annotations__,
+            {
+                "call_id": str,
+                "name": str,
+                "arguments": Mapping[str, object],
+            },
+        )
+        with self.assertRaises(FrozenInstanceError):
+            value.call_id = "changed"
+
+    def test_tool_result_exact_frozen_contract(self):
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        value = hc.ToolResult("call-1", True, "CONTENT", None)
+
+        self.assertEqual(
+            tuple(field.name for field in fields(hc.ToolResult)),
+            ("call_id", "ok", "output", "error"),
+        )
+        self.assertEqual(
+            hc.ToolResult.__annotations__,
+            {
+                "call_id": str,
+                "ok": bool,
+                "output": str,
+                "error": str | None,
+            },
+        )
+        with self.assertRaises(FrozenInstanceError):
+            value.ok = False
+
+    def test_worker_step_exact_frozen_contract(self):
+        from dataclasses import FrozenInstanceError, fields
+
+        hc = self._hc()
+        request = hc.ToolRequest("call-1", "read_repo_text", {"relative_path": "a.txt"})
+        value = hc.WorkerStep(True, "", (request,), None)
+
+        self.assertEqual(
+            tuple(field.name for field in fields(hc.WorkerStep)),
+            ("transport_ok", "output_text", "tool_requests", "error"),
+        )
+        self.assertEqual(
+            hc.WorkerStep.__annotations__,
+            {
+                "transport_ok": bool,
+                "output_text": str,
+                "tool_requests": tuple[hc.ToolRequest, ...],
+                "error": str | None,
+            },
+        )
+        with self.assertRaises(FrozenInstanceError):
+            value.transport_ok = False
+
+    def test_tool_interaction_records_are_authority_neutral(self):
+        from dataclasses import fields
+
+        hc = self._hc()
+        forbidden = {
+            "ollama",
+            "http",
+            "model",
+            "repo_root",
+            "allowed_changes",
+            "forbidden_changes",
+            "shell",
+            "git",
+            "verification",
+            "evidence",
+            "final_gate",
+            "commit",
+            "retry",
+        }
+
+        for record_type in (
+            hc.ToolSpec,
+            hc.ToolRequest,
+            hc.ToolResult,
+            hc.WorkerStep,
+        ):
+            field_names = {field.name for field in fields(record_type)}
+            self.assertTrue(field_names.isdisjoint(forbidden))
+
+
 if __name__ == "__main__":
     unittest.main()
