@@ -1,8 +1,8 @@
-Current Task: QH-V2-ARCH-003 - ACTIVE - WORKFLOW AUTOMATION PRIORITY
+Current Task: QH-V2-ARCH-003 - COMPLETE - VERIFIED - commit 1233379
 
 Previous Task: QH-V2-WC-001 - COMPLETE - VERIFIED - commit 2ee6119
 
-Next Planned Task: Deterministic Harness workflow automation implementation - NOT STARTED
+Next Planned Task: Deterministic Harness workflow automation implementation Task - NOT STARTED
 
 Handoff:
 - QH-V2-ARCH-002 Task contract baseline commit: 06bacaf
@@ -25,4 +25,5 @@ Handoff:
 - Architecture/task sequencing must be adjusted before automation implementation begins.
 
 - QH-V2-ARCH-003 Task baseline commit: 1dc953e.
-- ADR-005 workflow automation priority decision is now the active Architecture work.
+- ADR-005 workflow automation priority decision completed and committed: 1233379.
+- Deterministic workflow automation implementation Task is next and has not started.
