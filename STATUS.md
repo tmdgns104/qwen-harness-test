@@ -1,4 +1,4 @@
-Current Task: QH-V2-OWA-001 - ACTIVE - NATIVE OLLAMA WORKER ADAPTER
+Current Task: QH-V2-OWA-001 - COMPLETE - VERIFIED - commit 66405cd
 
 Previous Task: QH-V2-AUTO-001 - COMPLETE - VERIFIED - commit f8d6280
 
@@ -36,3 +36,9 @@ Handoff:
 - QH-V2-OWA-001 Task baseline commit: e334135.
 - Native Ollama Worker Adapter is now the active Task.
 - Repository read/edit tools, Runner, and retry remain NOT STARTED.
+- Native Ollama Worker Adapter implementation completed and verified: 66405cd.
+- Focused Adapter tests: 6 PASS.
+- Harness Core regression: 109 PASS.
+- Real local Ollama qwen3:8b smoke: transport_ok=True, non-empty output, error=None.
+- Final qh review: Final Gate PASS; unexpected changed paths none.
+- Task-range changed files stayed within Allowed Changes.
