@@ -38,6 +38,13 @@ class RepositoryReadToolsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 read_repo_text(repo, "../outside.txt")
 
+    def test_read_repo_text_rejects_missing_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+
+            with self.assertRaises(FileNotFoundError):
+                read_repo_text(repo, "missing.txt")
+
 
 if __name__ == "__main__":
     unittest.main()
