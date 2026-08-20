@@ -362,19 +362,35 @@ Run exactly:
 
 `python -m unittest tests.test_qh_worker_run`
 
+Then run:
+
 `python -m unittest tests.test_qh`
+
+Then run:
 
 `python -m unittest tests.test_retry_runner`
 
+Then run:
+
 `python -m unittest tests.test_task_runner`
+
+Then run:
 
 `python -m unittest tests.test_ollama_worker`
 
+Then run:
+
 `python -m unittest tests.test_repo_tools`
+
+Then run:
 
 `python -m unittest tests.test_harness_core`
 
+Then run:
+
 `git diff --check`
+
+Then run:
 
 `git status --short`
 
