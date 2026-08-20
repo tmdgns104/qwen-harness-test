@@ -1,9 +1,9 @@
-Current Task: QH-V2-HARD-002 - COMPLETE - VERIFIED - commit 2ed7d9543d85152dc6c629d48df4e8277bfbf1dd
+Current Task: QH-V2-DOC-001 - ACTIVE
 
-Previous Task: QH-V2-HARD-001 - COMPLETE - VERIFIED - commit e4ba45c
+Previous Task: QH-V2-HARD-002 - COMPLETE - VERIFIED - commit 2ed7d9543d85152dc6c629d48df4e8277bfbf1dd
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 993d305f529267e984c519992f3afc5453b9cf81
+Task Baseline: 95484882d1b3210b2fc525d2321d48fef8e7fc2c
 
 Handoff:
 - QH-V2-RUN-001A implementation commit 80cdfff adds frozen backend-neutral ToolSpec, ToolRequest, ToolResult, and WorkerStep records.
@@ -100,3 +100,10 @@ QH-V2-HARD-002 Implementation Evidence:
 - tests.test_harness_core: 117 PASS.
 - git diff --check: PASS; deterministic Task-range scope check found no unexpected paths.
 - The Task remains ACTIVE pending the human-controlled implementation commit and qh close; no next Task was started.
+
+QH-V2-DOC-001 Pre-Close Evidence:
+- README, Quick Start, How It Works, Development Guide, and publish-safe ignore rules were added without Architecture or production-code changes.
+- All 24 checked internal documentation links resolve; 7 Mermaid blocks passed balanced-fence and static-structure checks.
+- Task Verification passed, including 217 selected regression tests in 311.400 seconds and git diff --check.
+- High-confidence current-tree and reachable-history credential scans found no publishable secret; .pytest_cache is untracked and ignored.
+- Task-range scope contains exactly the seven DOC-001 Allowed Changes and no unexpected path.
