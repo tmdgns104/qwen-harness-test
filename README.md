@@ -10,6 +10,137 @@ Qwen이 “수정했습니다” 또는 “테스트를 통과했습니다”라
 작업이 완료되지 않습니다. 실제 변경 경로와 테스트 종료 코드 등 기계적으로
 확인 가능한 Evidence가 Final Gate를 통과해야 합니다.
 
+## 처음이라면 여기부터
+
+원하는 목적에 맞는 문서부터 읽으세요.
+
+| 나는 무엇을 하고 싶나요? | 먼저 볼 문서 |
+|---|---|
+| 처음 설치하고 작은 예제를 실행하고 싶다 | [처음 사용하는 사용자 → Quick Start](docs/QUICKSTART.md) |
+| Qwen, Ollama, Harness의 관계를 이해하고 싶다 | [구조를 이해하고 싶은 사용자 → How It Works](docs/HOW_IT_WORKS.md) |
+| 이 Repository를 계속 개발하고 싶다 | [Repository를 개발하려는 사용자 → Development Guide](docs/DEVELOPMENT.md) |
+
+## Tested Hardware / 실제로 검증된 실행 환경
+
+아래 사양은 **최소 사양이 아닙니다**. 이 Repository의 실제 Worker E2E가
+성공한 한 가지 검증 환경입니다.
+
+| 항목 | 실제 검증 환경 |
+|---|---|
+| 운영체제 | Windows |
+| GPU | NVIDIA RTX 5070 Laptop GPU |
+| VRAM | VRAM 8 GB |
+| System RAM | System RAM 32 GB |
+| 로컬 모델 런타임 | Ollama |
+| 모델 | `qwen3:8b` |
+| 검증 결과 | 실제 Repository Worker E2E 성공 |
+| 실행 중 관찰 | CPU/GPU 혼합 사용 확인 |
+
+8 GB VRAM은 최소 VRAM 또는 최소 사양이라는 뜻이 아닙니다. 이 프로젝트는
+아직 최소 VRAM 수치를 정할 만큼 여러 하드웨어를 공식 검증하지 않았습니다.
+
+| 환경 구분 | 현재 상태 | 의미 |
+|---|---|---|
+| 위 표의 단일 환경 | 실제 검증됨 | 해당 환경에서 실제 Worker E2E가 성공했습니다. |
+| 다른 GPU 또는 VRAM 구성 | 미검증 | 동작 여부와 속도는 GPU·VRAM과 환경에 따라 다릅니다. |
+| CPU/System RAM 함께 사용 | 가능성 있음 | Ollama의 모델 배치와 환경에 따라 함께 사용할 수 있고 검증 환경에서도 혼합 사용을 관찰했지만, offload 비율이나 동작을 보장하지 않습니다. |
+| CPU-only 환경 | 미검증 | 완전 지원 또는 실용적인 속도를 판단할 Repository Evidence가 없습니다. |
+| Linux/macOS | 전체 E2E 미검증 | Python 코드가 실행될 가능성과 공식 E2E 지원은 다른 주장입니다. |
+| 실행 성능 | 환경 의존 | GPU·VRAM·RAM, 전원·발열 상태와 Ollama/model 상태에 따라 달라질 수 있으며 공식 성능 보장은 없습니다. |
+
+## 처음 사용하는 사람을 위한 5분 시작
+
+아래는 설치 상태를 빠르게 확인하는 짧은 명령 경로입니다. 명령 입력과 확인은
+간단하지만 `ollama pull`의 모델 다운로드는 네트워크와 저장장치에 따라
+5분보다 오래 걸릴 수 있습니다.
+
+```powershell
+git clone https://github.com/tmdgns104/qwen-harness-test.git
+```
+
+Repository와 전체 Git 이력을 내려받으며, 정상이면 `qwen-harness-test` 폴더가 생깁니다.
+
+```powershell
+cd qwen-harness-test
+```
+
+명령 실행 위치를 Repository root로 옮기며, 정상이라면 현재 폴더가 `qwen-harness-test`입니다.
+
+```powershell
+python --version
+```
+
+Python 설치를 확인하며, 정상이면 버전이 출력되고 현재 소스에는 Python 3.12 이상이 필요합니다.
+
+```powershell
+git --version
+```
+
+Git 설치를 확인하며, 정상이면 설치된 Git 버전이 출력됩니다.
+
+```powershell
+ollama --version
+```
+
+Ollama CLI 설치를 확인하며, 정상이면 설치된 Ollama 버전이 출력됩니다.
+
+```powershell
+ollama pull qwen3:8b
+```
+
+기본 Qwen 모델을 로컬에 내려받으며, 정상이면 오류 없이 다운로드가 완료됩니다.
+
+```powershell
+ollama list
+```
+
+로컬 모델 목록을 확인하며, 정상이면 출력에 `qwen3:8b`가 보입니다.
+
+```powershell
+python tools\qh.py status
+```
+
+현재 Task 파일·Git 변경 경로·scope를 보여 주며, 정상 출력이어도 clean 여부는 별도로 확인해야 합니다.
+
+```powershell
+python tools\qh.py preflight
+```
+
+Repository root·현재 Task 파일 존재·Allowed/Forbidden scope 형식을 확인하며,
+정상이라면 오류 없이 해당 정보와 Git State가 출력됩니다.
+
+## 설치 성공 확인
+
+다음 항목을 모두 직접 확인하세요.
+
+- `python --version`, `git --version`, `ollama --version`이 각각 버전을 출력합니다.
+- `ollama list`에 `qwen3:8b`가 있습니다.
+- `python tools\qh.py status`와 `preflight`에 `ERROR`가 없고, 새 clone이라면
+  출력된 Git State가 clean인지 확인합니다.
+- `status`와 `preflight`는 dirty 상태에서도 exit code 0일 수 있으므로 출력도 읽습니다.
+
+여기까지는 Repository와 Task 계약 형식을 확인한 것입니다. `status`와
+`preflight`는 Ollama에 요청하지 않으며 Qwen 추론, 실제 Worker E2E 또는 Task
+완료를 증명하지 않습니다. 실제 첫 Worker 흐름은 [Quick Start의 QH-LOCAL-001 예제](docs/QUICKSTART.md#5-작은-task-계약-만들기)를 따라 하세요.
+
+## 첫 Task를 이해하기
+
+Qwen Harness의 첫 작업은 채팅 한 줄이 아니라 Human이 먼저 읽고 승인하는
+Task 계약에서 시작합니다.
+
+| 용어 | 아주 쉽게 말하면 |
+|---|---|
+| **Task** | Qwen에게 주는 작업 지시서입니다. 목표, 수정 범위, 검증 방법을 한 파일에 적습니다. |
+| **Allowed Changes** | Qwen이 수정해도 되는 파일이나 경로입니다. |
+| **Forbidden Changes** | 절대 수정하면 안 되는 파일이나 경로이며 Allowed보다 우선합니다. |
+| **Verification** | 작업이 정말 성공했는지 확인하기 위해 Harness가 실제로 실행하는 명령입니다. |
+| **Final Gate** | Qwen의 말이 아니라 Git·Verification Evidence를 보고 PASS/FAIL을 결정하는 마지막 검사입니다. |
+| **Git commit** | 선택한 현재 변경 상태를 Git 이력에 남겨 되돌아갈 수 있게 만드는 체크포인트입니다. |
+
+처음에는 Quick Start 문서에 적힌 `QH-LOCAL-001` 학습용 Task 계약을 직접
+만들어 그대로 따라 해보는 것을 권장합니다. Repository에 미리 생성된 예제
+Task 파일이 있는 것은 아닙니다.
+
 ## 왜 만들었나요?
 
 LLM은 코드를 잘 제안할 수 있지만 다음과 같은 실수를 할 수 있습니다.
@@ -144,41 +275,28 @@ Verification 결과를 평가한 뒤에야 Final Gate 결과가 나옵니다.
 첫 번째 항목은 ADR-010에서 다음 capability milestone 전에 필요한 hardening으로
 분류되어 있습니다. 이 README는 해당 기능을 구현하지 않습니다.
 
-## 설치 요구사항
+## 소프트웨어 요구사항과 지원 범위
 
 현재 저장소에는 별도 Python package dependency가 없으며 실행 코드는 Python
 표준 라이브러리를 사용합니다.
 
-- **운영체제**: 현재 검증 환경은 Windows입니다. 다른 OS의 전체 E2E는 문서화된 검증 대상이 아닙니다.
+- **운영체제**: 실제 검증 환경은 Windows입니다. 다른 OS의 전체 E2E는 공식 검증되지 않았습니다.
 - **Python 3.12+**: 현재 CLI 문법 기준이며, 이번 공개 준비 검증 환경은 Python 3.13.5입니다.
 - **Git**
 - **Ollama**
 - **Qwen 모델**: 기본값 `qwen3:8b`
 
-프로젝트가 특정 Git/Ollama 최소 버전을 고정하지는 않습니다.
+프로젝트가 특정 Git/Ollama 최소 버전이나 하드웨어 최소 사양을 고정하지는
+않습니다. 하드웨어 Evidence와 미검증 범위는 위의
+[실제로 검증된 실행 환경](#tested-hardware--실제로-검증된-실행-환경)을 확인하세요.
 
-## Quick Start
-
-PowerShell 예시입니다.
-
-```powershell
-git clone https://github.com/tmdgns104/qwen-harness-test.git
-cd qwen-harness-test
-
-python --version
-git --version
-ollama --version
-ollama pull qwen3:8b
-ollama list
-
-python tools\qh.py status
-python tools\qh.py preflight
-```
+## 다음 단계: 실제 Task 실행
 
 `qh`는 Task를 자동으로 만들어 주지 않습니다. 먼저 `tasks/<TASK-ID>.md`에
 Goal, Allowed Changes, Forbidden Changes, Verification이 있는 승인된 Task 계약을
-작성해야 합니다. 전체 첫 실행 절차는 [Quick Start](docs/QUICKSTART.md)를
-따르세요.
+작성해야 합니다. 계약 commit, start 전환, Worker 실행, 구현 commit, close와
+lifecycle commit까지 이어지는 전체 절차는 [Quick Start](docs/QUICKSTART.md)를
+따르세요. 위의 5분 시작만으로는 Qwen Worker를 실행한 것이 아닙니다.
 
 ## qh CLI
 
@@ -251,9 +369,10 @@ ADR-007의 표준 final path는 `qh close` 안에서 full Verification과 review
 - Milestone 1 실제 Worker E2E: **COMPLETE - VERIFIED**
 - Verification fail-closed hardening(QH-V2-HARD-002): **COMPLETE - VERIFIED**
 - GitHub 문서화/공개 준비: QH-V2-DOC-001로 추적
+- 초보자 온보딩과 실제 검증 Hardware 안내: QH-V2-DOC-002로 추적
 - 다음 필수 hardening 후보: same-active `qh start` lifecycle guard
 - 해당 guard가 완료되기 전 capability expansion은 ADR-010에 따라 보류
-- 다음 구체 Task: 아직 Human이 선택하지 않음
+- 다음 계획 후보: QH-V2-HARD-003 - PLANNED - Human approval required
 - 알려진 기존 RED fixture: 미수행 QH-V2-MD-001 때문에
   `tests/test_markdown_append.py` 3개가 전체 discovery에서 실패하며,
   현재 Harness hardening의 regression은 아닙니다.
@@ -268,6 +387,7 @@ Task/Git Evidence를 함께 확인하세요.
 - [REQUIREMENTS.md](REQUIREMENTS.md) — 기능·검증 요구사항
 - [DECISIONS.md](DECISIONS.md) — Accepted Architecture Decision Records
 - [STATUS.md](STATUS.md) — 현재 Task와 handoff 상태
+- [BACKLOG.md](BACKLOG.md) — Hardening/Operations 후보 순서와 Human Gate
 - [tasks/](tasks/) — Task 계약과 완료 Evidence
 - [Quick Start](docs/QUICKSTART.md) — 처음 실행하는 순서
 - [How It Works](docs/HOW_IT_WORKS.md) — 내부 구조와 신뢰 모델

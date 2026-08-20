@@ -107,3 +107,10 @@ QH-V2-DOC-001 Pre-Close Evidence:
 - Task Verification passed, including 217 selected regression tests in 311.400 seconds and git diff --check.
 - High-confidence current-tree and reachable-history credential scans found no publishable secret; .pytest_cache is untracked and ignored.
 - Task-range scope contains exactly the seven DOC-001 Allowed Changes and no unexpected path.
+
+QH-V2-DOC-002 Pre-Close Evidence:
+- README now presents beginner navigation, one tested hardware environment, the copy/paste setup path, installation checks, and first-Task terms before the retained Architecture detail.
+- Hardware claims distinguish the tested Windows/RTX 5070 Laptop GPU/8 GB VRAM/32 GB RAM environment from unverified or environment-dependent configurations; no minimum hardware or general support claim is made.
+- QUICKSTART now explains the Python knowledge needed and accurately points to its embedded QH-LOCAL-001 learning contract without weakening the existing lifecycle.
+- All seven marked Task Verification commands exited 0, including internal-link, section-order, hardware-language, CLI, unsupported-claim, diff, and status checks.
+- Pre-close Task-range changes are confined to the four DOC-002 Allowed paths; no Architecture, production-code, test, Backlog, or other Task change is included.

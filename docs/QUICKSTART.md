@@ -7,6 +7,17 @@
 > `NORMAL` 또는 Qwen이 출력한 `PASS`는 Task 완료가 아닙니다.
 > 완료 근거는 Git 변경 범위, Verification 결과, Diff Check와 Final Gate입니다.
 
+## Python을 어느 정도 알아야 하나요?
+
+- 기본 사용에는 Python 코드를 직접 작성할 필요가 없습니다.
+- Python 변수와 함수 문법을 본 정도면 출력과 오류를 따라가기 수월하지만,
+  Harness 내부 구현을 이해하지 않아도 기본 흐름을 사용할 수 있습니다.
+- Git commit은 이 문서의 명령을 순서대로 따라 하면 됩니다. 다만 commit 전에
+  `git diff`와 stage된 파일을 직접 확인하세요.
+- 처음에는 이 문서에 적힌 `QH-LOCAL-001` 학습용 Task 계약을 직접 만들어
+  그대로 실행해보는 것을 권장합니다. Repository에 예제 Task 파일이 미리
+  들어 있는 것은 아닙니다.
+
 ## 시작 전에 알아둘 점
 
 - Harness는 Task 파일을 자동으로 만들지 않습니다.
