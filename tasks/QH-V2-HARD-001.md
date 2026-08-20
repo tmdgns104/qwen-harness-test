@@ -304,6 +304,210 @@ It is review / prioritization / decision recording only.
 15. git diff check passes.
 16. no forbidden changed path occurs.
 
+
+## Review Result
+
+### Priority 1 - Candidate A: Verification Contract Fail-Closed Hardening
+
+Classification: REQUIRED-BEFORE-NEXT-MILESTONE
+
+Evidence:
+- QH-V2-CLI-001 intended nine Verification commands.
+- The existing parser accepted only the first command because only the first command followed an explicit marker.
+- qh close therefore reported Final Gate PASS after executing only one intended Verification command.
+- The lifecycle change was reverted before completion.
+- After the Task contract was corrected to use explicit repeated markers, parser count became nine and all nine commands passed.
+
+Risk if ignored:
+- A Task may appear fully verified while only part of its intended Verification contract actually ran.
+- This directly weakens the trust boundary between Worker output and deterministic Repository completion.
+
+User/operator impact:
+- Human-readable Task syntax can silently produce weaker Verification than intended.
+
+Expected implementation scope:
+- Fail-closed Verification contract parsing and focused parser/close regression tests.
+- Exact parser behavior belongs to a separate implementation Task.
+
+Relative priority: 1
+
+Rationale:
+Verification correctness is the highest-priority Harness property and must be hardened before capability expansion.
+
+### Priority 2 - Candidate B: Duplicate qh start / Lifecycle Guard
+
+Classification: REQUIRED-BEFORE-NEXT-MILESTONE
+
+Evidence:
+- During QH-V2-E2E-001 an observed duplicate-start state produced Current Task and Previous Task both pointing to QH-V2-E2E-001 ACTIVE.
+- Restoring STATUS and performing one clean invocation produced the correct lifecycle transition.
+- command_start currently derives Previous Task from the current lifecycle line and does not explicitly reject starting the already-current ACTIVE Task.
+
+Risk if ignored:
+- Repeated operator invocation can corrupt lifecycle Evidence and Previous Task history.
+
+User/operator impact:
+- An accidental duplicate command can create confusing or misleading Repository state.
+
+Expected implementation scope:
+- Deterministic same-active-Task start guard and focused lifecycle regression tests.
+
+Relative priority: 2
+
+Rationale:
+Lifecycle correctness is part of Repository Source-of-Truth integrity and should be fixed before expanding capability.
+
+### Priority 3 - Candidate C: Human-Approved Task Scaffold Generation
+
+Classification: NEXT-HARDENING
+
+Evidence:
+- Long manual Task-generation scripts are repeated.
+- Verification marker syntax caused a real completion-trust incident.
+- Task structure is highly repetitive and mechanically checkable.
+
+Risk if ignored:
+- Continued human formatting errors and unnecessary CMD/script friction.
+
+User/operator impact:
+- High repetitive effort when defining Tasks.
+
+Expected implementation scope:
+- Deterministic scaffold generation only.
+- Human still supplies/approves Goal, Scope, Acceptance Criteria, Verification, and Architecture decisions.
+
+Relative priority: 3
+
+Rationale:
+Useful after the parser itself is made fail-closed; scaffold generation must not become a substitute for parser correctness.
+
+### Priority 4 - Candidate D: qh doctor
+
+Classification: NEXT-HARDENING
+
+Evidence:
+- Repeated manual checks have been needed for Git root, lifecycle state, task existence, Verification parseability, Ollama availability, and model readiness.
+
+Risk if ignored:
+- Troubleshooting remains fragmented and slower than necessary.
+
+User/operator impact:
+- More manual diagnosis and greater chance of checking the wrong layer.
+
+Expected implementation scope:
+- Read-only deterministic environment/state diagnostics.
+
+Relative priority: 4
+
+Rationale:
+High operational value, but lower correctness urgency than Candidates A and B.
+
+### Priority 5 - Candidate F: Windows CMD Workflow Simplification
+
+Classification: NEXT-HARDENING
+
+Evidence:
+- Repeated quoting, multiline command, prompt-copy, and inline-Python failures occurred during Milestone 1.
+- Temporary Python patch scripts proved substantially more reliable.
+
+Risk if ignored:
+- Continued operator mistakes and unnecessary recovery work.
+
+User/operator impact:
+- Significant Windows CMD friction.
+
+Expected implementation scope:
+- Prefer small deterministic utilities or documented Repository-native workflows over fragile long one-liners.
+
+Relative priority: 5
+
+Rationale:
+Repeated Evidence now justifies improvement, but it is not a verification-authority issue.
+
+### Priority 6 - Candidate G: Worker Smoke / E2E Standardization
+
+Classification: NEXT-HARDENING
+
+Evidence:
+- Native Qwen3:8B smoke succeeded.
+- Native Ollama structured tool-call continuation succeeded.
+- Real qh run E2E completed with one Runner attempt and exact Git/Test Evidence.
+
+Risk if ignored:
+- Future Worker/backend changes may require rebuilding ad hoc smoke procedures.
+
+User/operator impact:
+- Regression checks remain more manual than necessary.
+
+Expected implementation scope:
+- Reusable bounded smoke/E2E fixture without granting new Worker authority.
+
+Relative priority: 6
+
+Rationale:
+Evidence is now sufficient to justify standardization after required safety fixes.
+
+### Priority 7 - Candidate E: qh status UX
+
+Classification: SAFE-TO-DEFER
+
+Evidence:
+- Current status output works, but operational state and historical handoff remain verbose.
+
+Risk if ignored:
+- Primarily readability and navigation cost.
+
+User/operator impact:
+- Slower interpretation of current state.
+
+Expected implementation scope:
+- Presentation-only improvements preserving lifecycle semantics.
+
+Relative priority: 7
+
+Rationale:
+Useful but not required for correctness or the next implementation stage.
+
+### Priority 8 - Candidate H: STATUS Handoff / Historical State Cleanup
+
+Classification: SAFE-TO-DEFER
+
+Evidence:
+- STATUS.md contains substantial historical handoff material accumulated during development.
+
+Risk if ignored:
+- Increasing document noise.
+
+User/operator impact:
+- Current state becomes harder to scan.
+
+Expected implementation scope:
+- Preserve history while separating concise operational state from long historical detail.
+
+Relative priority: 8
+
+Rationale:
+No current correctness failure is caused by the accumulated history.
+
+### Review Conclusion
+
+Required before the next capability-expansion milestone:
+
+1. Candidate A - Verification Contract Fail-Closed Hardening.
+2. Candidate B - Duplicate qh start / Lifecycle Guard.
+
+Then continue hardening in this order unless new Evidence changes priority:
+
+3. Candidate C - Human-Approved Task Scaffold Generation.
+4. Candidate D - qh doctor.
+5. Candidate F - Windows CMD Workflow Simplification.
+6. Candidate G - Worker Smoke / E2E Standardization.
+
+Candidates E and H are safe to defer.
+
+No Milestone 1 Architecture change is required by this review.
+Every implementation remains subject to its own approved Task and Human Gate.
+
 ## Verification
 
 Run exactly:

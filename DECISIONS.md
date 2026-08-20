@@ -663,3 +663,93 @@ The next Retry implementation Task may:
 8. remain testable without live Ollama.
 
 Retry implementation must not broaden Worker tool authority or introduce automatic model/backend escalation.
+
+## ADR-010 - Post-Milestone 1 Hardening Priority
+
+### Status
+
+Accepted
+
+### Context
+
+Milestone 1 completed a real End-to-End regression through:
+
+Human -> qh run -> bounded Retry -> Single-Task Runner -> native Ollama ->
+Qwen3:8B -> Harness-owned Repository tools -> Git/Test Evidence -> Final Gate.
+
+ADR-006 requires a Post-Milestone 1 Hardening & UX Improvement review before
+further capability expansion.
+
+The review examined eight accumulated candidates using Repository Evidence.
+
+### Decision
+
+The review establishes the following priority order.
+
+1. Verification Contract Fail-Closed Hardening
+   - Classification: REQUIRED-BEFORE-NEXT-MILESTONE.
+   - A real QH-V2-CLI-001 incident demonstrated that an intended multi-command
+     Verification contract could be parsed as one command while qh close still
+     reported Final Gate PASS.
+   - Verification completeness must fail closed before Worker capability expands.
+
+2. Duplicate qh start / Lifecycle Guard
+   - Classification: REQUIRED-BEFORE-NEXT-MILESTONE.
+   - Repeated start of the current ACTIVE Task can corrupt Previous Task lifecycle
+     history.
+   - Same-active-Task start behavior must become deterministic and protected.
+
+3. Human-Approved Task Scaffold Generation
+   - Classification: NEXT-HARDENING.
+   - Intended to reduce repeated Task-format and Verification-syntax mistakes.
+   - It must not auto-approve Task scope or Architecture.
+
+4. qh doctor
+   - Classification: NEXT-HARDENING.
+   - Read-only deterministic environment and Repository-state diagnostics.
+
+5. Windows CMD Workflow Simplification
+   - Classification: NEXT-HARDENING.
+   - Repeated command quoting and long inline-Python failures justify a safer
+     Repository-native workflow.
+
+6. Worker Smoke / E2E Standardization
+   - Classification: NEXT-HARDENING.
+   - Milestone 1 now provides sufficient real Worker and E2E Evidence to justify
+     reusable regression standardization.
+
+7. qh status UX
+   - Classification: SAFE-TO-DEFER.
+
+8. STATUS Handoff / Historical State Cleanup
+   - Classification: SAFE-TO-DEFER.
+
+### Required Sequence
+
+Before the next capability-expansion milestone:
+
+1. implement Verification Contract Fail-Closed Hardening through a separate Task;
+2. implement Duplicate qh start / Lifecycle Guard through a separate Task.
+
+After those required fixes, continue the remaining hardening candidates according
+to the priority above unless new objective Evidence justifies reprioritization.
+
+### Boundaries
+
+- Milestone 1 Architecture remains Accepted and unchanged.
+- Worker tool authority does not expand.
+- Retry policy does not change.
+- Default native Ollama + Qwen3:8B model policy does not change.
+- Verification authority remains deterministic Harness-owned.
+- No automatic commit, Task completion, next-Task start, or Architecture mutation
+  is authorized.
+- Every implementation requires its own approved Task and Human Gate.
+
+### Consequences
+
+The next selected implementation stage is:
+
+Verification Contract Fail-Closed Hardening.
+
+Capability expansion remains blocked until the two REQUIRED-BEFORE-NEXT-MILESTONE
+items are complete and verified.

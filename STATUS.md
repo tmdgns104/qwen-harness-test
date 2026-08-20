@@ -2,7 +2,7 @@ Current Task: QH-V2-HARD-001 - ACTIVE
 
 Previous Task: QH-V2-E2E-001 - COMPLETE - VERIFIED - commit d9d095d
 
-Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
+Next Planned Task: Verification Contract Fail-Closed Hardening - TASK NOT YET CREATED
 Task Baseline: 17bac01fc0cc2d15f37e0ffef4d55d78bea7198b
 
 Handoff:
@@ -83,3 +83,11 @@ Improvement Checkpoints:
 - CMD simplification, qh doctor, qh status UX, and Task scaffolding are safe to defer until after E2E.
 - Worker smoke-test standardization remains deferred pending repeated Runner/E2E Evidence.
 - Improvement candidates require separate approved Tasks before implementation.
+
+Post-Milestone 1 Hardening Review:
+- Milestone 1 real Worker E2E is COMPLETE - VERIFIED.
+- QH-V2-HARD-001 selects Verification Contract Fail-Closed Hardening as the next implementation stage.
+- Duplicate qh start / Lifecycle Guard is the second REQUIRED-BEFORE-NEXT-MILESTONE fix.
+- Task scaffold generation, qh doctor, Windows CMD simplification, and Worker smoke/E2E standardization are NEXT-HARDENING.
+- qh status UX and STATUS historical cleanup are SAFE-TO-DEFER.
+- No capability expansion should begin until the two required hardening fixes are complete and verified.
