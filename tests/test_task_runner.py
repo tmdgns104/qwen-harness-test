@@ -955,5 +955,354 @@ class TaskRunnerTests(unittest.TestCase):
         self.assertEqual(session.continue_calls, 0)
 
 
+    def test_normal_completion_has_no_failure_kind_and_no_write_attempt(self):
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        session = ScriptedSession(
+            [WorkerStep(True, "done", (), None)]
+        )
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: session,
+        )
+
+        self.assertTrue(result.interaction_ok)
+        self.assertIsNone(result.failure_kind)
+        self.assertFalse(result.write_attempted)
+        self.assertIsInstance(RunnerFailureKind.TRANSIENT_WORKER, RunnerFailureKind)
+
+    def test_session_creation_failure_is_transient_worker(self):
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        def session_factory(request, *, tools):
+            raise RuntimeError("any wording")
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=session_factory,
+        )
+
+        self.assertFalse(result.interaction_ok)
+        self.assertEqual(
+            result.failure_kind,
+            RunnerFailureKind.TRANSIENT_WORKER,
+        )
+        self.assertFalse(result.write_attempted)
+
+    def test_transport_failure_is_transient_worker(self):
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        session = ScriptedSession(
+            [WorkerStep(False, "", (), "arbitrary transport wording")]
+        )
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: session,
+        )
+
+        self.assertEqual(
+            result.failure_kind,
+            RunnerFailureKind.TRANSIENT_WORKER,
+        )
+        self.assertFalse(result.write_attempted)
+
+    def test_continuation_failure_is_transient_worker(self):
+        from tools.harness_core import ToolRequest
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        (root / "note.txt").write_text("HELLO", encoding="utf-8")
+
+        class FailingContinuationSession:
+            def start(self):
+                return WorkerStep(
+                    True,
+                    "",
+                    (
+                        ToolRequest(
+                            "call-read",
+                            "read_repo_text",
+                            {"relative_path": "note.txt"},
+                        ),
+                    ),
+                    None,
+                )
+
+            def continue_with_tool_result(self, result):
+                raise RuntimeError("different continuation wording")
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: FailingContinuationSession(),
+        )
+
+        self.assertEqual(
+            result.failure_kind,
+            RunnerFailureKind.TRANSIENT_WORKER,
+        )
+        self.assertFalse(result.write_attempted)
+
+    def test_unknown_tool_is_safety_failure(self):
+        from tools.harness_core import ToolRequest
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        session = ScriptedSession(
+            [
+                WorkerStep(
+                    True,
+                    "",
+                    (
+                        ToolRequest(
+                            "call-unknown",
+                            "delete_repo_text",
+                            {"relative_path": "target.txt"},
+                        ),
+                    ),
+                    None,
+                )
+            ]
+        )
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: session,
+        )
+
+        self.assertEqual(
+            result.failure_kind,
+            RunnerFailureKind.SAFETY,
+        )
+        self.assertFalse(result.write_attempted)
+
+    def test_step_budget_exhaustion_has_structured_kind(self):
+        from tools.harness_core import ToolRequest
+        from tools.task_runner import (
+            MAX_WORKER_STEPS,
+            RunnerFailureKind,
+            run_single_task,
+        )
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        (root / "note.txt").write_text("HELLO", encoding="utf-8")
+
+        steps = [
+            WorkerStep(
+                True,
+                "",
+                (
+                    ToolRequest(
+                        f"call-{index}",
+                        "read_repo_text",
+                        {"relative_path": "note.txt"},
+                    ),
+                ),
+                None,
+            )
+            for index in range(MAX_WORKER_STEPS)
+        ]
+
+        session = ScriptedSession(steps)
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: session,
+        )
+
+        self.assertEqual(
+            result.failure_kind,
+            RunnerFailureKind.STEP_BUDGET,
+        )
+        self.assertFalse(result.write_attempted)
+
+    def test_successful_write_sets_write_attempted_true(self):
+        from tools.harness_core import ToolRequest
+        from tools.task_runner import run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        session = ScriptedSession(
+            [
+                WorkerStep(
+                    True,
+                    "",
+                    (
+                        ToolRequest(
+                            "call-write",
+                            "write_repo_text",
+                            {
+                                "relative_path": "target.txt",
+                                "content": "NEW",
+                            },
+                        ),
+                    ),
+                    None,
+                ),
+                WorkerStep(True, "done", (), None),
+            ]
+        )
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: session,
+        )
+
+        self.assertTrue(result.interaction_ok)
+        self.assertTrue(result.write_attempted)
+        self.assertIsNone(result.failure_kind)
+
+    def test_write_operational_failure_still_sets_write_attempted_true(self):
+        from unittest.mock import patch
+
+        from tools.harness_core import ToolRequest
+        from tools.task_runner import run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        session = ScriptedSession(
+            [
+                WorkerStep(
+                    True,
+                    "",
+                    (
+                        ToolRequest(
+                            "call-write-fail",
+                            "write_repo_text",
+                            {
+                                "relative_path": "target.txt",
+                                "content": "NEW",
+                            },
+                        ),
+                    ),
+                    None,
+                ),
+                WorkerStep(True, "handled", (), None),
+            ]
+        )
+
+        with patch(
+            "tools.task_runner.write_repo_text",
+            side_effect=OSError("disk-like failure"),
+        ):
+            result = run_single_task(
+                root,
+                "TASK-001",
+                session_factory=lambda request, *, tools: session,
+            )
+
+        self.assertTrue(result.interaction_ok)
+        self.assertTrue(result.write_attempted)
+        self.assertFalse(session.tool_results[0].ok)
+
+    def test_rejected_out_of_scope_write_does_not_set_write_attempted(self):
+        from tools.harness_core import ToolRequest
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        session = ScriptedSession(
+            [
+                WorkerStep(
+                    True,
+                    "",
+                    (
+                        ToolRequest(
+                            "call-forbidden",
+                            "write_repo_text",
+                            {
+                                "relative_path": "protected.txt",
+                                "content": "NO",
+                            },
+                        ),
+                    ),
+                    None,
+                )
+            ]
+        )
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: session,
+        )
+
+        self.assertEqual(
+            result.failure_kind,
+            RunnerFailureKind.SAFETY,
+        )
+        self.assertFalse(result.write_attempted)
+
+
+    def test_write_then_continuation_failure_is_transient_with_write_risk(self):
+        from tools.harness_core import ToolRequest
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, _ = self.make_repo()
+        self.addCleanup(temp.cleanup)
+
+        class WriteThenFailSession:
+            def start(self):
+                return WorkerStep(
+                    True,
+                    "",
+                    (
+                        ToolRequest(
+                            "call-write-risk",
+                            "write_repo_text",
+                            {
+                                "relative_path": "target.txt",
+                                "content": "NEW",
+                            },
+                        ),
+                    ),
+                    None,
+                )
+
+            def continue_with_tool_result(self, result):
+                raise RuntimeError("continuation disconnected after write")
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=lambda request, *, tools: WriteThenFailSession(),
+        )
+
+        self.assertFalse(result.interaction_ok)
+        self.assertEqual(
+            result.failure_kind,
+            RunnerFailureKind.TRANSIENT_WORKER,
+        )
+        self.assertTrue(result.write_attempted)
+        self.assertEqual(
+            (root / "target.txt").read_text(encoding="utf-8"),
+            "NEW",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

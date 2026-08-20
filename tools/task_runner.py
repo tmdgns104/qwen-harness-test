@@ -4,6 +4,7 @@ import os
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Callable
 
@@ -27,6 +28,14 @@ _TASK_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 _CURRENT_TASK_PREFIX = "Current Task:"
 
 
+class RunnerFailureKind(Enum):
+    """Structured deterministic Runner failure classification."""
+
+    TRANSIENT_WORKER = "transient_worker"
+    SAFETY = "safety"
+    STEP_BUDGET = "step_budget"
+
+
 @dataclass(frozen=True)
 class RunnerResult:
     """Deterministic Runner interaction result; not Repository Task PASS."""
@@ -35,6 +44,8 @@ class RunnerResult:
     output_text: str
     steps_consumed: int
     error: str | None
+    failure_kind: RunnerFailureKind | None = None
+    write_attempted: bool = False
 
 
 def _runner_tools() -> tuple[ToolSpec, ...]:
@@ -165,24 +176,30 @@ def _execute_tool_request(
     task_id: str,
     scope: ChangeScope,
     request: ToolRequest,
-) -> ToolResult:
+) -> tuple[ToolResult, bool]:
     relative_path, arguments = _validate_tool_request(request)
 
     if request.name == "read_repo_text":
         try:
             output = read_repo_text(repo_root, relative_path)
         except (OSError, UnicodeError, ValueError) as exc:
-            return ToolResult(
-                call_id=request.call_id,
-                ok=False,
-                output="",
-                error=str(exc),
+            return (
+                ToolResult(
+                    call_id=request.call_id,
+                    ok=False,
+                    output="",
+                    error=str(exc),
+                ),
+                False,
             )
-        return ToolResult(
-            call_id=request.call_id,
-            ok=True,
-            output=output,
-            error=None,
+        return (
+            ToolResult(
+                call_id=request.call_id,
+                ok=True,
+                output=output,
+                error=None,
+            ),
+            False,
         )
 
     requested_target = (repo_root / relative_path).resolve()
@@ -197,6 +214,10 @@ def _execute_tool_request(
         raise ValueError("Worker write path is outside current Task scope")
 
     content = arguments["content"]
+
+    # Side-effect risk begins immediately before the Repository write boundary.
+    write_attempted = True
+
     try:
         output = write_repo_text(
             repo_root,
@@ -206,18 +227,24 @@ def _execute_tool_request(
             forbidden_changes=scope.forbidden,
         )
     except (OSError, UnicodeError, ValueError) as exc:
-        return ToolResult(
-            call_id=request.call_id,
-            ok=False,
-            output="",
-            error=str(exc),
+        return (
+            ToolResult(
+                call_id=request.call_id,
+                ok=False,
+                output="",
+                error=str(exc),
+            ),
+            write_attempted,
         )
 
-    return ToolResult(
-        call_id=request.call_id,
-        ok=True,
-        output=output,
-        error=None,
+    return (
+        ToolResult(
+            call_id=request.call_id,
+            ok=True,
+            output=output,
+            error=None,
+        ),
+        write_attempted,
     )
 
 
@@ -240,6 +267,8 @@ def run_single_task(
             output_text="",
             steps_consumed=0,
             error=str(exc),
+            failure_kind=RunnerFailureKind.SAFETY,
+            write_attempted=False,
         )
 
     request = WorkerRequest(task_text=task_markdown)
@@ -257,9 +286,12 @@ def run_single_task(
             output_text="",
             steps_consumed=0,
             error=f"Worker session failed: {exc}",
+            failure_kind=RunnerFailureKind.TRANSIENT_WORKER,
+            write_attempted=False,
         )
 
     steps_consumed = 1
+    write_attempted = False
 
     while True:
         if not step.transport_ok:
@@ -268,6 +300,8 @@ def run_single_task(
                 output_text="",
                 steps_consumed=steps_consumed,
                 error=step.error or "Worker transport failed",
+                failure_kind=RunnerFailureKind.TRANSIENT_WORKER,
+                write_attempted=write_attempted,
             )
 
         request_count = len(step.tool_requests)
@@ -278,6 +312,8 @@ def run_single_task(
                 output_text=step.output_text,
                 steps_consumed=steps_consumed,
                 error=None,
+                failure_kind=None,
+                write_attempted=write_attempted,
             )
 
         if request_count != 1:
@@ -286,33 +322,38 @@ def run_single_task(
                 output_text=step.output_text,
                 steps_consumed=steps_consumed,
                 error="Worker step must contain zero or one ToolRequest",
+                failure_kind=RunnerFailureKind.SAFETY,
+                write_attempted=write_attempted,
             )
 
-        # The final allowed WorkerStep may terminate, but it may not
-        # execute another tool or trigger a ninth Worker interaction.
         if steps_consumed >= MAX_WORKER_STEPS:
             return RunnerResult(
                 interaction_ok=False,
                 output_text=step.output_text,
                 steps_consumed=steps_consumed,
                 error="Worker step budget exhausted",
+                failure_kind=RunnerFailureKind.STEP_BUDGET,
+                write_attempted=write_attempted,
             )
 
         tool_request = step.tool_requests[0]
 
         try:
-            tool_result = _execute_tool_request(
+            tool_result, tool_write_attempted = _execute_tool_request(
                 root,
                 task_id,
                 scope,
                 tool_request,
             )
+            write_attempted = write_attempted or tool_write_attempted
         except (TypeError, ValueError) as exc:
             return RunnerResult(
                 interaction_ok=False,
                 output_text=step.output_text,
                 steps_consumed=steps_consumed,
                 error=str(exc),
+                failure_kind=RunnerFailureKind.SAFETY,
+                write_attempted=write_attempted,
             )
 
         try:
@@ -323,6 +364,8 @@ def run_single_task(
                 output_text="",
                 steps_consumed=steps_consumed,
                 error=f"Worker continuation failed: {exc}",
+                failure_kind=RunnerFailureKind.TRANSIENT_WORKER,
+                write_attempted=write_attempted,
             )
 
         steps_consumed += 1
