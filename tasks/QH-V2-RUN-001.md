@@ -171,3 +171,87 @@ Stop if child decomposition would require:
 - bypassing an independent child Task Human Gate.
 
 Do not begin QH-V2-RUN-001A implementation in this parent planning step.
+
+## Parent Integration Review Evidence
+
+Parent integration review was performed after all mandatory child Tasks were independently completed and verified.
+
+### Child Completion
+
+- QH-V2-RUN-001A: COMPLETE - VERIFIED
+- QH-V2-RUN-001B: COMPLETE - VERIFIED
+- QH-V2-RUN-001C: COMPLETE - VERIFIED
+
+Implementation Evidence:
+
+- 001A backend-neutral tool interaction records: commit 80cdfff
+- 001B native Ollama tool interaction adapter: completion commit 5472162
+- 001C deterministic Single-Task Runner: completion commit 4cb1ff5
+
+### Integration Boundary Review
+
+The deterministic Runner imports and connects:
+
+- backend-neutral Harness Core contracts and scope authority;
+- OllamaToolSession;
+- Harness-owned read_repo_text and write_repo_text.
+
+Runner inspection found no direct authority for:
+
+- Git;
+- subprocess/shell execution;
+- Verification;
+- Evidence or Final Gate;
+- commit;
+- Ollama-native tool_calls JSON.
+
+Adapter inspection found no direct Repository tool execution, Git, Verification, or Final Gate authority.
+
+Therefore the architecture boundary remains:
+
+Qwen / Ollama Adapter
+-> backend-neutral ToolRequest / ToolResult / WorkerStep
+-> deterministic Single-Task Runner
+-> Harness-owned Repository tools
+
+### Runner Safety Evidence
+
+QH-V2-RUN-001C verified:
+
+- explicit ACTIVE Current Task validation;
+- complete Task contract delivery to Worker;
+- read_repo_text / write_repo_text-only Worker tool surface;
+- zero-or-one ToolRequest execution policy;
+- fail-closed multi-tool, malformed, unknown, unauthorized, absolute-path, and path-escape handling;
+- Runner-owned Allowed/Forbidden write scope injection;
+- lifecycle-control write protection for STATUS.md and the active Task contract;
+- Windows case-alias lifecycle protection;
+- finite eight-WorkerStep budget;
+- no ninth Worker interaction;
+- terminal Worker text is not treated as Repository PASS.
+
+Focused Runner tests: 23 PASS before authoritative close.
+
+### Authoritative Child Verification
+
+QH-V2-RUN-001C authoritative qh close reported:
+
+- tests.test_task_runner: PASS
+- tests.test_ollama_worker: PASS
+- tests.test_repo_tools: PASS
+- tests.test_harness_core: PASS
+- git diff --check: PASS
+- unexpected changed paths: none
+- Final Gate: PASS
+
+No production code changes occurred after that verified Runner completion before this Parent integration review.
+
+### Parent Review Result
+
+PASS - READY FOR AUTHORITATIVE CLOSE
+
+The integrated 001A + 001B + 001C implementation remains consistent with ADR-008.
+
+Qwen self-reported completion is not used as authoritative PASS Evidence.
+
+Retry/Safe Stop remains outside this Parent and is the next Milestone 1 stage after Parent completion.
