@@ -31,7 +31,9 @@ and non-authoritative next-step guidance.
 
 - QH-V2-OPS-004 must be COMPLETE - VERIFIED in the deterministic queue.
 - The dependency is governance ordering rather than a technical dependency on live smoke.
-- Human approval is required before activation.
+- Until committed Requirement/Accepted Decision updates and the Human-approved G1
+  manifest cover this exact unchanged Task and queue blob identity, explicit Human
+  approval is required before activation.
 
 ## Scope
 
@@ -133,4 +135,6 @@ STOP if completion requires:
 
 Queue successor candidate: QH-V2-OPS-006.
 
-Human approval is required. Do not auto-start it.
+Until committed Requirement/Accepted Decision updates and the Human-approved G1
+manifest cover the exact unchanged queue and successor contract blob, Human approval
+is required and the successor must not be auto-started.

@@ -31,7 +31,9 @@ the Repository, environment, Ollama, Git remote, or credentials.
 - QH-V2-OPS-001 must be COMPLETE - VERIFIED in the deterministic queue.
 - The scaffold is not a technical prerequisite for diagnostics, but the queue keeps
   one Human-approved operations change active at a time.
-- Human approval is required before activation.
+- Until committed Requirement/Accepted Decision updates and the Human-approved G1
+  manifest cover this exact unchanged Task and queue blob identity, explicit Human
+  approval is required before activation.
 
 ## Scope
 
@@ -141,4 +143,6 @@ STOP if completion requires:
 
 Queue successor candidate: QH-V2-OPS-003.
 
-Human approval is required. Do not auto-start it.
+Until committed Requirement/Accepted Decision updates and the Human-approved G1
+manifest cover the exact unchanged queue and successor contract blob, Human approval
+is required and the successor must not be auto-started.

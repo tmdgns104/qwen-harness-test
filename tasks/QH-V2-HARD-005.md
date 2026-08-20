@@ -126,6 +126,6 @@ STOP if completion requires:
 
 ## Next Task
 
-Queue successor candidate: QH-V2-HARD-006.
+Queue successor candidate: QH-V2-ARCH-008 (Architecture decision preparation only).
 
 Human approval is required. Do not auto-start it.

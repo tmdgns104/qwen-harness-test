@@ -33,7 +33,9 @@ at a Human Architecture Gate without creating implementation Tasks.
 ## Dependencies
 
 - QH-V2-OPS-006 and every earlier deterministic queue item must be COMPLETE - VERIFIED.
-- This Task is analysis only and still requires explicit Human approval before activation.
+- This Task is analysis only. Until committed Requirement/Accepted Decision updates
+  and the Human-approved G1 manifest cover this exact unchanged Task and queue blob
+  identity, explicit Human approval is required before activation.
 - Its output does not approve Architecture or authorize any implementation.
 
 ## Scope

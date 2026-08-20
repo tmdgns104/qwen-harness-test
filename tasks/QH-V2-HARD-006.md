@@ -35,9 +35,14 @@ the existing root and lifecycle protections.
 ## Dependencies
 
 - QH-V2-HARD-005 must be COMPLETE - VERIFIED.
+- QH-V2-ARCH-008 must be COMPLETE - VERIFIED as a proposal, and the separate Human
+  One-Time Autonomous Queue Gate outcome must be recorded.
+- A rejected or deferred Gate leaves only the ordinary Human-controlled path.
+- Autonomous activation additionally requires committed Requirement/Accepted Decision
+  updates and a Human-approved G1 manifest covering this exact unchanged Task and
+  queue blob identity.
 - The queue serializes trust-boundary Hardening even though this path issue is
   technically separable from post-Verification Evidence refresh.
-- Human approval is required before activation.
 
 ## Scope
 
@@ -146,4 +151,6 @@ STOP if completion requires:
 
 Queue successor candidate: QH-V2-HARD-007.
 
-Human approval is required. Do not auto-start it.
+Until committed Requirement/Accepted Decision updates and the Human-approved G1
+manifest cover the exact unchanged queue and successor contract blob, Human approval
+is required and the successor must not be auto-started.

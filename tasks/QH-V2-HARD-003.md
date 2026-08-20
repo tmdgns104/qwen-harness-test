@@ -33,7 +33,8 @@ Current Task.
 
 - QH-V2-HARD-002 is COMPLETE - VERIFIED.
 - QH-V2-DOC-001 is COMPLETE - VERIFIED and provides the published workflow baseline.
-- This is the first Backlog candidate and requires an explicit Human Task Gate
+- QH-V2-DOC-002 is COMPLETE - VERIFIED and is the completed first queue stage.
+- This is the first unfinished Backlog candidate and requires an explicit Human Task Gate
   before approval or `qh start`.
 
 ## Scope
