@@ -91,3 +91,12 @@ Post-Milestone 1 Hardening Review:
 - Task scaffold generation, qh doctor, Windows CMD simplification, and Worker smoke/E2E standardization are NEXT-HARDENING.
 - qh status UX and STATUS historical cleanup are SAFE-TO-DEFER.
 - No capability expansion should begin until the two required hardening fixes are complete and verified.
+
+QH-V2-HARD-002 Implementation Evidence:
+- Verification parsing now fails closed on unmarked standalone inline-code tokens and backtick-fenced blocks.
+- The qh close regression proves malformed Verification executes no accepted prefix and preserves lifecycle files.
+- Verification parser contract tests: 16 PASS.
+- tests.test_qh: 23 PASS.
+- tests.test_harness_core: 117 PASS.
+- git diff --check: PASS; deterministic Task-range scope check found no unexpected paths.
+- The Task remains ACTIVE pending the human-controlled implementation commit and qh close; no next Task was started.

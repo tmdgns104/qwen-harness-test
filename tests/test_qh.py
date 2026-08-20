@@ -352,6 +352,57 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(task_path.read_text(encoding="utf-8"), original_task)
 
 
+    def test_close_rejects_unmarked_verification_command_without_modifying_lifecycle_files(self):
+        status_path = self.repo / "STATUS.md"
+        status_path.write_text(
+            "Current Task: QH-V2-TEST-001 - ACTIVE\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n",
+            encoding="utf-8",
+        )
+        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
+        verification_side_effect = self.repo / "verification-ran.txt"
+        task_path.write_text(
+            "# Test Task\n\n## Status\n\nACTIVE\n\n"
+            "## Allowed Changes\n\n- `seed.txt`\n- `STATUS.md`\n\n"
+            "## Forbidden Changes\n\n- `forbidden.txt`\n\n"
+            "## Verification\n\nRun exactly:\n\n"
+            "`python -c \"from pathlib import Path; "
+            "Path('verification-ran.txt').write_text('ran', encoding='utf-8')\"`\n\n"
+            '`python -c "print(2)"`\n',
+            encoding="utf-8",
+        )
+
+        self._git("add", ".")
+        self._git("commit", "-m", "malformed verification close baseline")
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+
+        status_path.write_text(
+            status_path.read_text(encoding="utf-8").rstrip("\n")
+            + f"\nTask Baseline: {baseline}\n",
+            encoding="utf-8",
+        )
+        self._git("add", "STATUS.md")
+        self._git("commit", "-m", "persist malformed verification baseline")
+        commit = self._git("rev-parse", "HEAD").stdout.strip()
+
+        original_status = status_path.read_text(encoding="utf-8")
+        original_task = task_path.read_text(encoding="utf-8")
+
+        result = subprocess.run(
+            [sys.executable, str(QH), "close", commit],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Unmarked verification command", result.stderr)
+        self.assertFalse(verification_side_effect.exists())
+        self.assertEqual(status_path.read_text(encoding="utf-8"), original_status)
+        self.assertEqual(task_path.read_text(encoding="utf-8"), original_task)
+
     def test_close_rejects_non_head_commit_without_modifying_lifecycle_files(self):
         status_path = self.repo / "STATUS.md"
         status_path.write_text(

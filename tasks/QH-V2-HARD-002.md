@@ -248,3 +248,35 @@ STOP if implementation requires:
 - Architecture modification.
 
 The next required Hardening item after this Task remains Duplicate `qh start` / Lifecycle Guard.
+
+## Implementation Result
+
+- `parse_verification_commands()` now rejects standalone inline-code tokens and
+  backtick-fenced blocks that appear without a supported Verification marker.
+- Supported markers, command ordering, single-command fenced blocks, and ordinary
+  prose (including inline code inside a prose sentence) remain compatible.
+- The `qh close` regression proves that malformed Verification is reported before
+  an accepted prefix command can create a side effect.
+- `STATUS.md` and the active Task markdown remain unchanged when that malformed
+  contract is rejected.
+- `tools/qh.py` and all other Forbidden Changes remain untouched.
+- Three existing Git process-failure tests now inject `OSError` directly instead
+  of relying on Windows `PATH` lookup behavior, preserving their fail-closed intent
+  across environments.
+
+## Verification Evidence
+
+- Verification parser contract tests: 16 PASS.
+- Malformed `qh close` focused regression: PASS.
+- Existing Windows Git failure regressions: 3 PASS.
+- `tests.test_qh`: 23 PASS.
+- `tests.test_harness_core`: 117 PASS.
+- `git diff --check`: PASS.
+- Deterministic Task-range scope check: no unexpected changed paths.
+- No live Ollama dependency was used.
+
+## Conclusion
+
+The implementation and required regressions are ready for the human-controlled
+commit and `qh close` lifecycle steps. This Task remains ACTIVE until those steps
+are performed; no next Task was started.

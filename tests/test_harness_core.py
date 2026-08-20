@@ -208,11 +208,14 @@ class GitExecutionAndRootTests(unittest.TestCase):
                 hc._require_git_top_level(other)
 
     def test_unavailable_git_process_creation_raises_runtime_error(self) -> None:
-        import os
         from unittest.mock import patch
 
         hc = self._hc()
-        with patch.dict(os.environ, {"PATH": ""}):
+        with patch.object(
+            hc.subprocess,
+            "run",
+            side_effect=OSError("git executable is unavailable"),
+        ):
             with self.assertRaises(RuntimeError):
                 hc._run_git(str(self.repo), ("rev-parse", "--show-toplevel"))
 
@@ -374,12 +377,15 @@ class GitBaselineCaptureTests(unittest.TestCase):
         self.assertEqual(baseline.head, self._git("rev-parse", "HEAD"))
 
     def test_required_git_failure_fails_closed(self) -> None:
-        import os
         from unittest.mock import patch
 
         hc = self._hc()
 
-        with patch.dict(os.environ, {"PATH": ""}):
+        with patch.object(
+            hc.subprocess,
+            "run",
+            side_effect=OSError("git executable is unavailable"),
+        ):
             with self.assertRaises(RuntimeError):
                 hc.capture_git_baseline(str(self.repo))
 
@@ -535,11 +541,14 @@ class GitEvidenceTests(unittest.TestCase):
             hc.get_changed_paths(str(self.repo), baseline)
 
     def test_git_command_failure_fails_closed(self) -> None:
-        import os
         from unittest.mock import patch
 
         hc = self._hc()
-        with patch.dict(os.environ, {"PATH": ""}):
+        with patch.object(
+            hc.subprocess,
+            "run",
+            side_effect=OSError("git executable is unavailable"),
+        ):
             with self.assertRaises(RuntimeError):
                 hc.capture_git_baseline(str(self.repo))
 
@@ -587,6 +596,34 @@ Then run:
         result = hc.parse_verification_commands(markdown)
         self.assertEqual(result.commands, ("python check_docs.py", "git diff --check"))
 
+    def test_unmarked_second_inline_code_command_fails_closed(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+`python first.py`
+
+`python second.py`
+"""
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
+    def test_unmarked_fenced_command_block_fails_closed(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+`python first.py`
+
+```text
+python second.py
+```
+"""
+        with self.assertRaises(ValueError):
+            hc.parse_verification_commands(markdown)
+
     def test_prose_after_valid_command_is_not_executed(self) -> None:
         hc = self._hc()
         markdown = """## Verification
@@ -599,6 +636,19 @@ Then verify actual changed paths against scope.
 """
         result = hc.parse_verification_commands(markdown)
         self.assertEqual(result.commands, ("python -m unittest tests.test_harness_core",))
+
+    def test_inline_code_inside_descriptive_prose_remains_allowed(self) -> None:
+        hc = self._hc()
+        markdown = """## Verification
+
+Run exactly:
+
+`python check.py`
+
+Then verify that `target.txt` contains the expected text.
+"""
+        result = hc.parse_verification_commands(markdown)
+        self.assertEqual(result.commands, ("python check.py",))
 
     def test_verify_with_descriptive_bullets_fails_closed(self) -> None:
         hc = self._hc()

@@ -348,8 +348,13 @@ def parse_verification_commands(markdown: str) -> VerificationContract:
     commands = []
     index = 0
     while index < len(section):
-        marker = section[index]
-        if marker not in markers:
+        line = section[index]
+        if line not in markers:
+            token = line.strip()
+            if token.startswith("```") or (
+                token.startswith("`") and token.endswith("`")
+            ):
+                raise ValueError("Unmarked verification command")
             index += 1
             continue
 
