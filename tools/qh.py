@@ -229,9 +229,52 @@ def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
     return 0 if passed else 1
 
 
+def command_run(
+    repo_root: Path,
+    task_id: str,
+    *,
+    retry_callable=None,
+) -> int:
+    """Run the current Task through bounded Retry orchestration.
+
+    This reports Worker interaction state only.
+    It does not perform Verification, Final Gate, Task completion, or commit.
+    """
+    from tools.retry_runner import RetryOutcomeKind, run_with_retry
+
+    if retry_callable is None:
+        retry_callable = run_with_retry
+
+    outcome = retry_callable(repo_root, task_id)
+    runner_result = outcome.runner_result
+
+    failure_kind = (
+        runner_result.failure_kind.name
+        if runner_result.failure_kind is not None
+        else "NONE"
+    )
+
+    print(f"Task: {task_id}")
+    print(f"Outcome: {outcome.outcome_kind.name}")
+    print(f"Attempts: {outcome.attempts_consumed}")
+    print(f"Failure Kind: {failure_kind}")
+    print(
+        "Write Side Effect Risk: "
+        + ("YES" if outcome.write_side_effect_risk else "NO")
+    )
+
+    if runner_result.output_text:
+        print(f"Worker Output: {runner_result.output_text}")
+
+    if outcome.error:
+        print(f"Error: {outcome.error}")
+
+    return 0 if outcome.outcome_kind is RetryOutcomeKind.NORMAL else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close"))
+    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close", "run"))
     parser.add_argument("task_id", nargs="?")
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
@@ -240,6 +283,10 @@ def main() -> int:
             if args.task_id is None:
                 raise ValueError("start requires a Task ID")
             return command_start(repo_root, args.task_id)
+        if args.command == "run":
+            if args.task_id is None:
+                raise ValueError("run requires a Task ID")
+            return command_run(repo_root, args.task_id)
         if args.command == "close":
             if args.task_id is None:
                 raise ValueError("close requires a commit")
