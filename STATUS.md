@@ -1,9 +1,9 @@
-Current Task: QH-V2-HARD-001 - COMPLETE - VERIFIED - commit e4ba45c
+Current Task: QH-V2-HARD-002 - ACTIVE
 
-Previous Task: QH-V2-E2E-001 - COMPLETE - VERIFIED - commit d9d095d
+Previous Task: QH-V2-HARD-001 - COMPLETE - VERIFIED - commit e4ba45c
 
-Next Planned Task: Verification Contract Fail-Closed Hardening - TASK NOT YET CREATED
-Task Baseline: 17bac01fc0cc2d15f37e0ffef4d55d78bea7198b
+Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
+Task Baseline: 993d305f529267e984c519992f3afc5453b9cf81
 
 Handoff:
 - QH-V2-RUN-001A implementation commit 80cdfff adds frozen backend-neutral ToolSpec, ToolRequest, ToolResult, and WorkerStep records.
