@@ -439,3 +439,227 @@ Single-Task Runner implementation may now introduce a backend-neutral tool-enabl
 The next implementation Task must preserve this contract and may not broaden Worker tool authority without another approved decision.
 
 Bounded retry/safe-stop behavior remains the next separate Milestone 1 stage after the Single-Task Runner.
+
+## ADR-009 - Bounded Retry and Safe Stop Policy
+
+### Status
+Accepted
+
+### Context
+QH-V2-RUN-001 completed the deterministic Single-Task Runner.
+
+Milestone 1 next requires bounded retry / safe FAIL or BLOCKED handling.
+
+The current Runner already provides:
+
+- explicit ACTIVE Task validation;
+- deterministic ToolRequest validation;
+- Harness-owned Repository read/write execution;
+- Task scope enforcement;
+- lifecycle-control file protection;
+- an eight-WorkerStep execution bound;
+- fail-closed behavior for malformed, unknown, unauthorized, or multi-tool requests.
+
+However, retry policy remains intentionally separate from the Runner step loop.
+
+A retry layer must not decide safety by parsing human-readable error strings.
+
+Automatic whole-Runner retry also becomes unsafe after a Repository write attempt because a previous attempt may already have produced side effects.
+
+### Decision
+
+#### Retry Layer
+Retry is implemented above the Single-Task Runner.
+
+Retry is not implemented inside:
+
+- Ollama transport;
+- OllamaToolSession;
+- Repository tools;
+- Harness Core Verification;
+- the Worker-step loop.
+
+The existing eight-WorkerStep budget remains an execution bound for one Runner attempt.
+
+It is not the retry budget.
+
+#### Attempt Limit
+Retry V1 allows at most:
+
+2 total Runner attempts
+
+consisting of:
+
+- one initial attempt;
+- at most one automatic retry.
+
+No third automatic attempt is permitted.
+
+The attempt count may be revisited later only with objective Evidence.
+
+#### Structured Failure Classification
+Retry decisions must use deterministic structured failure metadata.
+
+Retry policy must not depend on matching or parsing human-readable error text.
+
+The implementation must distinguish at least:
+
+- normal Runner interaction completion;
+- transient Worker/session failure;
+- deterministic validation or safety failure;
+- Worker-step budget exhaustion;
+- Repository write side-effect risk.
+
+Exact Python field names and types belong to the separately approved implementation Task.
+
+#### Retryable Failure
+Automatic retry is permitted only when all of the following are true:
+
+1. the Runner did not terminate normally;
+2. the failure is deterministically classified as transient Worker/session failure;
+3. no Repository write operation was attempted during that Runner attempt;
+4. the total attempt limit has not been reached.
+
+Initial retryable transient candidates are limited to:
+
+- Worker session creation/call failure;
+- Worker transport failure;
+- Worker continuation transport/session failure.
+
+Qwen does not classify its own failure as retryable.
+
+#### Deterministic FAIL
+The following conditions stop as deterministic FAIL and are not automatically retried:
+
+- invalid or mismatched Task selection;
+- non-ACTIVE Current Task;
+- malformed ToolRequest;
+- invalid call_id;
+- unsupported or unknown tool;
+- invalid argument shape;
+- multiple ToolRequests in one WorkerStep;
+- absolute path;
+- path escape;
+- write outside Task scope;
+- lifecycle-control write attempt;
+- Worker-step budget exhaustion;
+- other deterministic authorization or safety-policy violations.
+
+#### Operational BLOCKED
+BLOCKED is used when execution cannot safely continue because of an operational or uncertain condition rather than a deterministic authorization violation.
+
+Initial BLOCKED cases include:
+
+- retryable transient Worker/session failure after the total attempt limit is exhausted;
+- transient Worker/session failure after a Repository write attempt, where retry is prohibited because side effects may already exist;
+- another explicitly classified transient condition for which policy does not permit another attempt.
+
+BLOCKED does not mean the Repository Task itself is incorrect.
+
+#### Repository Tool Errors
+A well-formed and authorized Repository tool operation that becomes:
+
+ToolResult(ok=False)
+
+and continues within the same Worker session is not automatically a top-level retry event.
+
+For example, a safe read of a missing file may be returned to the Worker as ToolResult(ok=False) so the existing Runner interaction can continue within its eight-step bound.
+
+This is tool-result continuation, not Retry.
+
+#### Repository Write Side-Effect Boundary
+If a Repository write operation is attempted during a Runner attempt, automatic whole-Runner retry is disabled for that attempt.
+
+This remains true even if:
+
+- write_repo_text reports failure;
+- the following Worker continuation fails;
+- transport fails after the write;
+- the system cannot prove whether a partial side effect occurred.
+
+A write attempt means deterministic Runner code reached the Repository write execution boundary after structural and authorization checks.
+
+A rejected write that never reaches Repository write execution does not count as a write attempt, but the deterministic rejection itself remains non-retryable.
+
+#### Read-Only Attempts
+Successful Repository reads do not create mutation side effects.
+
+Therefore a transient Worker/session failure after only read operations may remain retryable, subject to the total attempt limit.
+
+#### Normal Interaction Completion
+A terminal zero-tool WorkerStep within Runner rules is normal Runner interaction completion.
+
+It is neither FAIL nor BLOCKED.
+
+It is also not authoritative Repository Task PASS.
+
+Repository PASS still requires existing Verification, Evidence, and Final Gate authority.
+
+#### Safe Stop Outcome
+When Retry is not permitted or the attempt limit is exhausted, the orchestration layer returns a deterministic safe-stop outcome.
+
+The outcome must preserve:
+
+- normal / FAIL / BLOCKED classification;
+- structured failure classification when applicable;
+- total attempts consumed;
+- readable error information;
+- whether Repository write side-effect risk occurred.
+
+Safe stop does not automatically:
+
+- complete a Task;
+- run Verification;
+- create authoritative Evidence;
+- pass Final Gate;
+- commit;
+- modify Architecture;
+- start another Task.
+
+#### Retry V1 Model Policy
+Retry V1 does not automatically:
+
+- switch model;
+- change model parameters;
+- enable think:true;
+- escalate to Codex;
+- invoke another agent.
+
+The approved default Worker path remains native Ollama + Qwen3:8B.
+
+A higher-reasoning slow path remains a possible later optimization requiring separate Evidence and approval.
+
+### Accuracy and Performance
+Correctness and side-effect safety take priority over retry success rate.
+
+The normal successful path performs only one Runner attempt.
+
+Retry cost is incurred only after an explicitly classified retryable transient failure.
+
+Verification suites are not repeated inside the Retry loop.
+
+Final Repository completion remains governed by existing qh close, Verification, Evidence, and Final Gate authority.
+
+### Safety Boundaries
+- Retry remains deterministic Harness policy.
+- Qwen cannot request or expand the retry budget.
+- Qwen cannot classify its own failure as retryable.
+- Qwen cannot authorize retry after Repository write side-effect risk.
+- Qwen cannot override FAIL or BLOCKED.
+- Qwen cannot mark a Task complete.
+- ADR-008 Worker/tool authority boundaries remain unchanged.
+- Human Gates remain authoritative.
+
+### Consequences
+The next Retry implementation Task may:
+
+1. add structured Runner failure and write-side-effect metadata with minimal contract change;
+2. preserve existing successful Single-Task Runner behavior;
+3. add a retry orchestration layer above run_single_task;
+4. permit at most one automatic retry;
+5. retry only transient Worker/session failures with no Repository write attempt;
+6. stop immediately for deterministic FAIL;
+7. return BLOCKED when transient execution cannot safely continue;
+8. remain testable without live Ollama.
+
+Retry implementation must not broaden Worker tool authority or introduce automatic model/backend escalation.
