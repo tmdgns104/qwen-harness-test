@@ -2,7 +2,7 @@
 
 ## Status
 
-PLANNED
+APPROVED - READY FOR CONTRACT BASELINE
 
 ## Problem
 
