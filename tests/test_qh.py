@@ -621,5 +621,214 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("final gate: fail", output)
 
 
+class QhLifecycleStartGuardTests(unittest.TestCase):
+    CURRENT_TASK_ID = "QH-V2-CURRENT-001"
+    TARGET_TASK_ID = "QH-V2-TARGET-002"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.seed_tmp = tempfile.TemporaryDirectory()
+        cls.seed_repo = Path(cls.seed_tmp.name)
+
+        def git(*args):
+            return subprocess.run(
+                ["git", *args],
+                cwd=cls.seed_repo,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+        git("init")
+        git("config", "user.email", "test@example.com")
+        git("config", "user.name", "Test User")
+
+        (cls.seed_repo / "tasks").mkdir()
+        (cls.seed_repo / "STATUS.md").write_text(
+            f"Current Task: {cls.CURRENT_TASK_ID} - ACTIVE\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            f"Next Planned Task: {cls.TARGET_TASK_ID} - PLANNED\n"
+            "Task Baseline: previous-baseline\n\n"
+            "Handoff:\n- preserve lifecycle history\n",
+            encoding="utf-8",
+        )
+        (cls.seed_repo / "tasks" / f"{cls.CURRENT_TASK_ID}.md").write_text(
+            "# Current Task\n\n## Status\n\nACTIVE\n\n"
+            "## Evidence\n\n- preserve current Task bytes\n",
+            encoding="utf-8",
+        )
+        (cls.seed_repo / "tasks" / f"{cls.TARGET_TASK_ID}.md").write_text(
+            "# Target Task\n\n## Status\n\n"
+            "APPROVED - READY FOR CONTRACT BASELINE\n\n"
+            "## Evidence\n\n- preserve target Task bytes\n",
+            encoding="utf-8",
+        )
+
+        git("add", ".")
+        git("commit", "-m", "lifecycle start guard seed")
+        cls.seed_head = git("rev-parse", "HEAD").stdout.strip()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.seed_tmp.cleanup()
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        shutil.copytree(self.seed_repo, self.repo, dirs_exist_ok=True)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    @property
+    def status_path(self):
+        return self.repo / "STATUS.md"
+
+    @property
+    def current_task_path(self):
+        return self.repo / "tasks" / f"{self.CURRENT_TASK_ID}.md"
+
+    def _target_task_path(self, task_id=None):
+        return self.repo / "tasks" / f"{task_id or self.TARGET_TASK_ID}.md"
+
+    def _write_status(self, current_value):
+        self.status_path.write_text(
+            f"Current Task: {current_value}\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            f"Next Planned Task: {self.TARGET_TASK_ID} - PLANNED\n"
+            "Task Baseline: previous-baseline\n\n"
+            "Handoff:\n- preserve lifecycle history\n",
+            encoding="utf-8",
+        )
+
+    def _run_start(self, target_task_id):
+        return subprocess.run(
+            [sys.executable, str(QH), "start", target_task_id],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    def _lifecycle_file_bytes(self, target_task_id):
+        paths = {
+            self.status_path,
+            self.current_task_path,
+            self._target_task_path(target_task_id),
+        }
+        return {
+            path.relative_to(self.repo).as_posix(): (
+                path.read_bytes() if path.exists() else None
+            )
+            for path in paths
+        }
+
+    def _lifecycle_lines(self):
+        labels = (
+            "Current Task:",
+            "Previous Task:",
+            "Next Planned Task:",
+            "Task Baseline:",
+        )
+        return tuple(
+            line
+            for line in self.status_path.read_text(encoding="utf-8").splitlines()
+            if line.startswith(labels)
+        )
+
+    def _assert_start_rejected_without_mutation(self, target_task_id):
+        before_bytes = self._lifecycle_file_bytes(target_task_id)
+        before_lifecycle = self._lifecycle_lines()
+
+        result = self._run_start(target_task_id)
+
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self._lifecycle_file_bytes(target_task_id), before_bytes)
+        self.assertEqual(self._lifecycle_lines(), before_lifecycle)
+        return result
+
+    def test_rejects_starting_same_active_task_without_mutation(self):
+        self._assert_start_rejected_without_mutation(self.CURRENT_TASK_ID)
+
+    def test_rejects_starting_different_task_while_current_is_active_without_mutation(self):
+        self._assert_start_rejected_without_mutation(self.TARGET_TASK_ID)
+
+    def test_rejects_non_complete_or_malformed_current_lifecycle_without_mutation(self):
+        invalid_current_values = (
+            f"{self.CURRENT_TASK_ID} - PLANNED",
+            f"{self.CURRENT_TASK_ID} - COMPLETE",
+            f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED",
+            f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234 extra",
+        )
+
+        for current_value in invalid_current_values:
+            with self.subTest(current_value=current_value):
+                self._write_status(current_value)
+                self._assert_start_rejected_without_mutation(self.TARGET_TASK_ID)
+
+    def test_rejects_unapproved_or_malformed_target_status_without_mutation(self):
+        invalid_target_markdown = {
+            "draft": "# Target Task\n\n## Status\n\nDRAFT\n",
+            "planned": "# Target Task\n\n## Status\n\nPLANNED\n",
+            "complete": "# Target Task\n\n## Status\n\nCOMPLETE\n",
+            "complete_verified": "# Target Task\n\n## Status\n\nCOMPLETE - VERIFIED\n",
+            "missing_heading": "# Target Task\n\n## Goal\n\nNo status heading.\n",
+            "missing_value": "# Target Task\n\n## Status\n\n## Goal\n\nNo status value.\n",
+            "duplicate_heading": (
+                "# Target Task\n\n## Status\n\n"
+                "APPROVED - READY FOR CONTRACT BASELINE\n\n"
+                "## Status\n\nAPPROVED - READY FOR CONTRACT BASELINE\n"
+            ),
+            "malformed_value": (
+                "# Target Task\n\n## Status\n\n"
+                "APPROVED - READY FOR CONTRACT BASELINE - EXTRA\n"
+            ),
+        }
+
+        for case, task_markdown in invalid_target_markdown.items():
+            with self.subTest(case=case):
+                self._write_status(
+                    f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234"
+                )
+                self._target_task_path().write_text(task_markdown, encoding="utf-8")
+                self._assert_start_rejected_without_mutation(self.TARGET_TASK_ID)
+
+    def test_exact_complete_current_and_approved_target_start_normally(self):
+        completed_current = (
+            f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234"
+        )
+        self._write_status(completed_current)
+        current_task_before = self.current_task_path.read_bytes()
+        target_task_before = self._target_task_path().read_bytes()
+
+        result = self._run_start(self.TARGET_TASK_ID)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        status = self.status_path.read_text(encoding="utf-8")
+        self.assertIn(f"Current Task: {self.TARGET_TASK_ID} - ACTIVE", status)
+        self.assertIn(f"Previous Task: {completed_current}", status)
+        self.assertIn("Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED", status)
+        self.assertIn(f"Task Baseline: {self.seed_head}", status)
+        self.assertEqual(self.current_task_path.read_bytes(), current_task_before)
+        self.assertEqual(self._target_task_path().read_bytes(), target_task_before)
+
+    def test_duplicate_current_lifecycle_field_still_fails_without_mutation(self):
+        self._write_status(
+            f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234"
+        )
+        duplicate = self.status_path.read_text(encoding="utf-8") + (
+            "Current Task: QH-V2-DUPLICATE-999 - ACTIVE\n"
+        )
+        self.status_path.write_text(duplicate, encoding="utf-8")
+
+        self._assert_start_rejected_without_mutation(self.TARGET_TASK_ID)
+
+    def test_missing_target_still_fails_without_mutation(self):
+        self._write_status(
+            f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234"
+        )
+        self._assert_start_rejected_without_mutation("QH-V2-MISSING-999")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -114,3 +114,11 @@ QH-V2-DOC-002 Pre-Close Evidence:
 - QUICKSTART now explains the Python knowledge needed and accurately points to its embedded QH-LOCAL-001 learning contract without weakening the existing lifecycle.
 - All seven marked Task Verification commands exited 0, including internal-link, section-order, hardware-language, CLI, unsupported-claim, diff, and status checks.
 - Pre-close Task-range changes are confined to the four DOC-002 Allowed paths; no Architecture, production-code, test, Backlog, or other Task change is included.
+
+QH-V2-HARD-003 Pre-Close Evidence:
+- `qh start` now fails closed unless Current is exactly COMPLETE - VERIFIED and the target Task has the exact Human-approved contract status.
+- Focused RED ran 7 tests with 14 expected failing subcases, reproducing ACTIVE lifecycle mutation and unapproved target-start risks.
+- Focused GREEN: 7 PASS; tests.test_qh: 30 PASS.
+- Rejected starts preserve STATUS, current Task, target Task, and all four lifecycle values byte-for-byte.
+- git diff --check: PASS; deterministic Task-range scope check found no unexpected paths.
+- The Task remains ACTIVE pending the human-controlled implementation commit and qh close; no successor Task was selected or started.

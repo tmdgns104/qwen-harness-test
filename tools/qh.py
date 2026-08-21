@@ -8,7 +8,13 @@ from pathlib import Path
 from harness_core import GitBaseline, VerificationContract, _require_git_top_level, _run_git, assemble_evidence, evaluate_final_gate, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
 
 
+TASK_ID_PATTERN = r"[A-Za-z0-9][A-Za-z0-9._-]*"
 CURRENT_TASK_RE = re.compile(r"Current Task:\s+(\S+)", re.MULTILINE)
+COMPLETED_CURRENT_TASK_RE = re.compile(
+    rf"Current Task: (?P<task_id>{TASK_ID_PATTERN})"
+    r" - COMPLETE - VERIFIED - commit \S+"
+)
+APPROVED_TASK_STATUS = "APPROVED - READY FOR CONTRACT BASELINE"
 
 
 def _load_current_task(repo_root: Path) -> tuple[str, Path, str]:
@@ -32,9 +38,54 @@ def _require_single_lifecycle_line(markdown: str, label: str) -> str:
     return matches[0]
 
 
+def _require_completed_current_task(current_line: str) -> re.Match[str]:
+    match = COMPLETED_CURRENT_TASK_RE.fullmatch(current_line)
+    if match is None:
+        raise ValueError(
+            "Current Task must be exactly COMPLETE - VERIFIED before start"
+        )
+    return match
+
+
+def _require_approved_target_status(markdown: str) -> None:
+    lines = markdown.splitlines()
+    status_headings = [
+        index for index, line in enumerate(lines) if line == "## Status"
+    ]
+    if len(status_headings) != 1:
+        raise ValueError(
+            "Expected exactly one target Task Status heading; "
+            f"found {len(status_headings)}"
+        )
+
+    status_heading = status_headings[0]
+    next_heading = next(
+        (
+            index
+            for index in range(status_heading + 1, len(lines))
+            if lines[index].startswith("## ")
+        ),
+        len(lines),
+    )
+    status_values = [
+        line
+        for line in lines[status_heading + 1 : next_heading]
+        if line.strip()
+    ]
+    if len(status_values) != 1:
+        raise ValueError(
+            "Expected exactly one target Task Status value; "
+            f"found {len(status_values)}"
+        )
+    if status_values[0] != APPROVED_TASK_STATUS:
+        raise ValueError(
+            f"Target Task Status must be exactly {APPROVED_TASK_STATUS}"
+        )
+
+
 def command_start(repo_root: Path, target_task_id: str) -> int:
     _require_git_top_level(str(repo_root))
-    if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", target_task_id) is None:
+    if re.fullmatch(TASK_ID_PATTERN, target_task_id) is None:
         raise ValueError("Invalid Task ID")
 
     target_path = repo_root / "tasks" / f"{target_task_id}.md"
@@ -47,9 +98,9 @@ def command_start(repo_root: Path, target_task_id: str) -> int:
     previous_line = _require_single_lifecycle_line(markdown, "Previous Task")
     next_planned_line = _require_single_lifecycle_line(markdown, "Next Planned Task")
 
-    current_match = CURRENT_TASK_RE.match(current_line)
-    if current_match is None:
-        raise ValueError("Current Task line is malformed")
+    current_match = _require_completed_current_task(current_line)
+    target_markdown = target_path.read_text(encoding="utf-8")
+    _require_approved_target_status(target_markdown)
 
     baseline_head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
     previous_value = current_line.removeprefix("Current Task: ")
@@ -71,7 +122,7 @@ def command_start(repo_root: Path, target_task_id: str) -> int:
     status_path.write_text(updated, encoding="utf-8")
 
     print(f"Started Task: {target_task_id}")
-    print(f"Previous Task: {current_match.group(1)}")
+    print(f"Previous Task: {current_match.group('task_id')}")
     return 0
 
 

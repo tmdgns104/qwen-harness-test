@@ -127,6 +127,43 @@ STOP if completion requires:
 - modifying Harness Core, Worker, Runner, Retry, Adapter, or Repository tools;
 - weakening existing lifecycle tests or zero-mutation guarantees.
 
+## Implementation Result
+
+- `command_start()` now requires the Current Task lifecycle line to match the
+  exact completed form before it can start another Task.
+- The target Task must contain exactly one `## Status` section value, and that
+  value must be exactly `APPROVED - READY FOR CONTRACT BASELINE`.
+- Current lifecycle and target approval validation both complete before the
+  existing single `STATUS.md` write.
+- Rejected starts leave `STATUS.md`, the current Task, and the target Task
+  byte-for-byte unchanged.
+- The approved normal transition still moves Current to Previous, marks the
+  explicit target ACTIVE in `STATUS.md`, records the pre-start HEAD, and clears
+  the consumed Next pointer without modifying either Task document.
+- No Worker, Runner, Retry, Adapter, Repository tool, Verification, or
+  Architecture behavior changed.
+
+## Verification Evidence
+
+- Focused RED: 7 tests ran with 14 expected failing subcases. The failures proved
+  that same-ACTIVE, different-ACTIVE, invalid Current lifecycle, and DRAFT,
+  PLANNED, COMPLETE, missing, duplicate, and malformed target status inputs could
+  reach the old start transition.
+- Focused GREEN: `QhLifecycleStartGuardTests` 7 PASS.
+- Rejected-start regressions compare exact bytes for `STATUS.md`, the current
+  Task, and the target Task before and after each command.
+- `tests.test_qh`: 30 PASS.
+- `git diff --check`: PASS.
+- Baseline-to-implementation scope check: only HARD-003 Allowed Changes; no
+  unexpected path.
+- No live Ollama dependency was used.
+
+## Conclusion
+
+The implementation and required regressions are ready for the human-controlled
+implementation commit and exact-HEAD `qh close` lifecycle steps. This Task remains
+ACTIVE until those steps complete, and no successor Task was selected or started.
+
 ## Next Task
 
 Queue successor candidate: QH-V2-HARD-004.
