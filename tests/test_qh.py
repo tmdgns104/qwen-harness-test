@@ -798,6 +798,27 @@ class QhLifecycleStartGuardTests(unittest.TestCase):
             f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234"
         )
         self._write_status(completed_current)
+        subprocess.run(
+            ["git", "add", "STATUS.md"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "commit", "-m", "clean completed lifecycle fixture"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        expected_baseline = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
         current_task_before = self.current_task_path.read_bytes()
         target_task_before = self._target_task_path().read_bytes()
 
@@ -808,7 +829,7 @@ class QhLifecycleStartGuardTests(unittest.TestCase):
         self.assertIn(f"Current Task: {self.TARGET_TASK_ID} - ACTIVE", status)
         self.assertIn(f"Previous Task: {completed_current}", status)
         self.assertIn("Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED", status)
-        self.assertIn(f"Task Baseline: {self.seed_head}", status)
+        self.assertIn(f"Task Baseline: {expected_baseline}", status)
         self.assertEqual(self.current_task_path.read_bytes(), current_task_before)
         self.assertEqual(self._target_task_path().read_bytes(), target_task_before)
 
@@ -828,6 +849,237 @@ class QhLifecycleStartGuardTests(unittest.TestCase):
             f"{self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234"
         )
         self._assert_start_rejected_without_mutation("QH-V2-MISSING-999")
+
+
+class QhCleanWorktreeLifecycleTests(unittest.TestCase):
+    CURRENT_TASK_ID = "QH-V2-CURRENT-001"
+    TARGET_TASK_ID = "QH-V2-TARGET-002"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        (self.repo / "tasks").mkdir()
+
+        self._git("init")
+        self._git("config", "user.email", "test@example.com")
+        self._git("config", "user.name", "Test User")
+
+        (self.repo / ".gitignore").write_text("ignored.tmp\n", encoding="utf-8")
+        (self.repo / "seed.txt").write_text("seed\n", encoding="utf-8")
+        self.current_task_path.write_text(
+            "# Current Task\n\n## Status\n\nCOMPLETE - VERIFIED\n",
+            encoding="utf-8",
+        )
+        self.target_task_path.write_text(
+            "# Target Task\n\n## Status\n\n"
+            "APPROVED - READY FOR CONTRACT BASELINE\n",
+            encoding="utf-8",
+        )
+        self.status_path.write_text(
+            f"Current Task: {self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            f"Next Planned Task: {self.TARGET_TASK_ID} - PLANNED\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "clean lifecycle seed")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    @property
+    def status_path(self):
+        return self.repo / "STATUS.md"
+
+    @property
+    def current_task_path(self):
+        return self.repo / "tasks" / f"{self.CURRENT_TASK_ID}.md"
+
+    @property
+    def target_task_path(self):
+        return self.repo / "tasks" / f"{self.TARGET_TASK_ID}.md"
+
+    def _git(self, *args):
+        return subprocess.run(
+            ["git", *args],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+    def _run_qh(self, *args):
+        return subprocess.run(
+            [sys.executable, str(QH), *args],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    def _start_bytes(self):
+        return (
+            self.status_path.read_bytes(),
+            self.current_task_path.read_bytes(),
+            self.target_task_path.read_bytes(),
+        )
+
+    def _close_bytes(self):
+        return (
+            self.status_path.read_bytes(),
+            self.current_task_path.read_bytes(),
+        )
+
+    def _assert_start_rejected_without_mutation(self):
+        before = self._start_bytes()
+        result = self._run_qh("start", self.TARGET_TASK_ID)
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self._start_bytes(), before)
+
+    def _prepare_active_close(self, verification_command='python -c "print(1)"'):
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        self.status_path.write_text(
+            f"Current Task: {self.CURRENT_TASK_ID} - ACTIVE\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            f"Next Planned Task: {self.TARGET_TASK_ID} - PLANNED\n"
+            f"Task Baseline: {baseline}\n",
+            encoding="utf-8",
+        )
+        self.current_task_path.write_text(
+            "# Current Task\n\n"
+            "## Status\n\nACTIVE\n\n"
+            "## Allowed Changes\n\n"
+            "- `STATUS.md`\n"
+            f"- `tasks/{self.CURRENT_TASK_ID}.md`\n"
+            "- `seed.txt`\n"
+            "- `generated.txt`\n"
+            "- `verification_ran.txt`\n"
+            "- `head.txt`\n\n"
+            "## Forbidden Changes\n\n"
+            "- `forbidden.txt`\n\n"
+            "## Verification\n\n"
+            "Run exactly:\n\n"
+            f"`{verification_command}`\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "active close fixture")
+        return self._git("rev-parse", "HEAD").stdout.strip(), baseline
+
+    def test_start_rejects_unstaged_dirty_state_without_lifecycle_mutation(self):
+        (self.repo / "seed.txt").write_text("unstaged\n", encoding="utf-8")
+        self._assert_start_rejected_without_mutation()
+
+    def test_start_rejects_staged_dirty_state_without_lifecycle_mutation(self):
+        (self.repo / "seed.txt").write_text("staged\n", encoding="utf-8")
+        self._git("add", "seed.txt")
+        self._assert_start_rejected_without_mutation()
+
+    def test_start_rejects_deleted_tracked_state_without_lifecycle_mutation(self):
+        (self.repo / "seed.txt").unlink()
+        self._assert_start_rejected_without_mutation()
+
+    def test_start_rejects_nonignored_untracked_state_without_lifecycle_mutation(self):
+        (self.repo / "untracked.txt").write_text("untracked\n", encoding="utf-8")
+        self._assert_start_rejected_without_mutation()
+
+    def test_start_preserves_ignored_artifact_semantics(self):
+        (self.repo / "ignored.tmp").write_text("ignored\n", encoding="utf-8")
+        self.assertEqual(self._git("status", "--porcelain").stdout, "")
+        result = self._run_qh("start", self.TARGET_TASK_ID)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_close_rejects_non_head_commit_before_verification(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('verification_ran.txt').write_text('ran', encoding='utf-8')\""
+        )
+        head, baseline = self._prepare_active_close(command)
+        self.assertNotEqual(head, baseline)
+        before = self._close_bytes()
+
+        result = self._run_qh("close", baseline)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.repo / "verification_ran.txt").exists())
+        self.assertEqual(self._close_bytes(), before)
+
+    def test_close_rejects_dirty_entry_before_verification(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('verification_ran.txt').write_text('ran', encoding='utf-8')\""
+        )
+        head, _ = self._prepare_active_close(command)
+        (self.repo / "seed.txt").write_text("dirty\n", encoding="utf-8")
+        before = self._close_bytes()
+
+        result = self._run_qh("close", head)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.repo / "verification_ran.txt").exists())
+        self.assertEqual(self._close_bytes(), before)
+
+    def test_close_rejects_verification_created_dirt_without_lifecycle_write(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('generated.txt').write_text('dirty', encoding='utf-8')\""
+        )
+        head, _ = self._prepare_active_close(command)
+        before = self._close_bytes()
+
+        result = self._run_qh("close", head)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue((self.repo / "generated.txt").exists())
+        self.assertEqual(self._close_bytes(), before)
+
+    def test_close_rejects_verification_head_change_without_lifecycle_write(self):
+        command = (
+            'python -c "import subprocess; from pathlib import Path; '
+            "Path('head.txt').write_text('changed', encoding='utf-8'); "
+            "subprocess.run(['git','add','head.txt'], check=True); "
+            "subprocess.run(['git','commit','-m','move-head'], check=True)\""
+        )
+        head, _ = self._prepare_active_close(command)
+        before = self._close_bytes()
+
+        result = self._run_qh("close", head)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotEqual(self._git("rev-parse", "HEAD").stdout.strip(), head)
+        self.assertEqual(self._close_bytes(), before)
+
+    def test_clean_normal_start_remains_compatible(self):
+        result = self._run_qh("start", self.TARGET_TASK_ID)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            f"Current Task: {self.TARGET_TASK_ID} - ACTIVE",
+            self.status_path.read_text(encoding="utf-8"),
+        )
+
+    def test_clean_normal_close_remains_compatible(self):
+        head, _ = self._prepare_active_close()
+        result = self._run_qh("close", head)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            f"Current Task: {self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit {head}",
+            self.status_path.read_text(encoding="utf-8"),
+        )
+        self.assertIn(
+            "## Status\n\nCOMPLETE - VERIFIED",
+            self.current_task_path.read_text(encoding="utf-8"),
+        )
+
+    def test_review_remains_usable_for_dirty_intermediate_diagnostics(self):
+        self._prepare_active_close()
+        (self.repo / "seed.txt").write_text("dirty but allowed\n", encoding="utf-8")
+        before = self._close_bytes()
+
+        result = self._run_qh("review")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Final Gate: PASS", result.stdout)
+        self.assertEqual(self._close_bytes(), before)
 
 
 if __name__ == "__main__":

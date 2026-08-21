@@ -5,7 +5,7 @@ import re
 import sys
 from pathlib import Path
 
-from harness_core import GitBaseline, VerificationContract, _require_git_top_level, _run_git, assemble_evidence, evaluate_final_gate, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
+from harness_core import GitBaseline, VerificationContract, _require_git_top_level, _run_git, assemble_evidence, capture_git_baseline, evaluate_final_gate, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
 
 
 TASK_ID_PATTERN = r"[A-Za-z0-9][A-Za-z0-9._-]*"
@@ -102,7 +102,7 @@ def command_start(repo_root: Path, target_task_id: str) -> int:
     target_markdown = target_path.read_text(encoding="utf-8")
     _require_approved_target_status(target_markdown)
 
-    baseline_head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
+    baseline_head = capture_git_baseline(str(repo_root)).head
     previous_value = current_line.removeprefix("Current Task: ")
     lines = markdown.splitlines()
     current_index = lines.index(current_line)
@@ -143,17 +143,29 @@ def _completed_task_markdown(markdown: str) -> str:
 def command_close(repo_root: Path, commit: str) -> int:
     _require_git_top_level(str(repo_root))
 
-    if command_review(repo_root) != 0:
-        return 1
-
-    commit_type = _run_git(str(repo_root), ("cat-file", "-t", commit)).stdout.strip()
+    resolved_commit = _run_git(str(repo_root), ("rev-parse", commit)).stdout.strip()
+    commit_type = _run_git(
+        str(repo_root),
+        ("cat-file", "-t", resolved_commit),
+    ).stdout.strip()
     if commit_type != "commit":
         raise ValueError(f"Not a Git commit: {commit}")
 
-    head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
-    resolved_commit = _run_git(str(repo_root), ("rev-parse", commit)).stdout.strip()
-    if resolved_commit != head:
-        raise ValueError(f"Completion commit must match current HEAD: {head}")
+    entry_baseline = capture_git_baseline(str(repo_root))
+    if resolved_commit != entry_baseline.head:
+        raise ValueError(
+            f"Completion commit must match current HEAD: {entry_baseline.head}"
+        )
+
+    if command_review(repo_root) != 0:
+        return 1
+
+    post_verification_baseline = capture_git_baseline(str(repo_root))
+    if post_verification_baseline.head != resolved_commit:
+        raise ValueError(
+            "Repository HEAD changed during Verification: "
+            f"{post_verification_baseline.head}"
+        )
 
     task_id, task_path, task_markdown = _load_current_task(repo_root)
     status_path = repo_root / "STATUS.md"
