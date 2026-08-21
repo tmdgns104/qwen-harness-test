@@ -90,7 +90,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("forbidden.txt", result.stdout)
         self.assertIn("clean", result.stdout.lower())
 
-
     def test_status_reports_dirty_changed_paths(self):
         (self.repo / "seed.txt").write_text("changed\n", encoding="utf-8")
         (self.repo / "new.txt").write_text("new\n", encoding="utf-8")
@@ -100,14 +99,12 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("seed.txt", result.stdout)
         self.assertIn("new.txt", result.stdout)
 
-
     def test_preflight_accepts_clean_valid_task_without_modifying_repo(self):
         result = subprocess.run([sys.executable, str(QH), "preflight"], cwd=self.repo, capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("QH-V2-TEST-001", result.stdout)
         self.assertIn("clean", result.stdout.lower())
         self.assertEqual(self._git("status", "--porcelain").stdout, "")
-
 
     def test_verify_runs_task_verification_contract_and_reports_result(self):
         result = subprocess.run([sys.executable, str(QH), "verify"], cwd=self.repo, capture_output=True, text=True, check=False)
@@ -117,7 +114,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("exit", result.stdout.lower())
         self.assertIn("0", result.stdout)
         self.assertEqual(self._git("status", "--porcelain").stdout, "")
-
 
     def test_verify_returns_failure_when_verification_command_fails(self):
         task = self.repo / "tasks" / "QH-V2-TEST-001.md"
@@ -129,7 +125,6 @@ class QhStatusCliTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(QH), "verify"], cwd=self.repo, capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 1)
         self.assertIn("Exit Code: 7", result.stdout)
-
 
     def test_review_reports_allowed_change_verification_and_diff_check(self):
         (self.repo / "seed.txt").write_text("changed\n", encoding="utf-8")
@@ -143,7 +138,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("diff", output)
         self.assertEqual(self._git("status", "--porcelain").stdout, " M seed.txt\n")
 
-
     def test_review_rejects_forbidden_changed_path(self):
         (self.repo / "forbidden.txt").write_text("forbidden\n", encoding="utf-8")
         result = subprocess.run([sys.executable, str(QH), "review"], cwd=self.repo, capture_output=True, text=True, check=False)
@@ -153,7 +147,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("forbidden", output)
         self.assertIn("final gate: fail", output)
         self.assertIn("scope", output)
-
 
     def test_start_updates_only_top_level_lifecycle_fields_and_preserves_handoff_history(self):
         current = "Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234"
@@ -191,7 +184,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn(historical, status)
         self.assertEqual(status.count(current), 1)
 
-
     def test_start_records_pre_start_head_as_task_baseline(self):
         status_path = self.repo / "STATUS.md"
         status_path.write_text(
@@ -221,7 +213,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn(f"Task Baseline: {expected_baseline}", status)
         self.assertEqual(status.count("Task Baseline:"), 1)
 
-
     def test_start_rejects_duplicate_current_task_without_modifying_status(self):
         original = (
             "Current Task: QH-V2-TEST-001 - COMPLETE - VERIFIED - commit abc1234\n\n"
@@ -250,7 +241,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("Expected exactly one Current Task line", result.stderr)
         self.assertEqual(status_path.read_text(encoding="utf-8"), original)
 
-
     def test_start_rejects_missing_target_task_without_modifying_status(self):
         status_path = self.repo / "STATUS.md"
         original = status_path.read_text(encoding="utf-8")
@@ -266,7 +256,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("Task file not found", result.stderr)
         self.assertEqual(status_path.read_text(encoding="utf-8"), original)
-
 
     def test_close_marks_explicit_current_task_complete_without_committing(self):
         status_path = self.repo / "STATUS.md"
@@ -311,7 +300,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("## Status\n\nCOMPLETE - VERIFIED", task_path.read_text(encoding="utf-8"))
         self.assertNotEqual(self._git("status", "--porcelain").stdout, "")
 
-
     def test_close_review_failure_does_not_modify_lifecycle_files(self):
         status_path = self.repo / "STATUS.md"
         status_path.write_text(
@@ -350,7 +338,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("Final Gate: FAIL", result.stdout)
         self.assertEqual(status_path.read_text(encoding="utf-8"), original_status)
         self.assertEqual(task_path.read_text(encoding="utf-8"), original_task)
-
 
     def test_close_rejects_unmarked_verification_command_without_modifying_lifecycle_files(self):
         status_path = self.repo / "STATUS.md"
@@ -523,7 +510,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("unexpected changed paths: yes", output)
         self.assertIn("final gate: fail", output)
 
-
     def test_close_rejects_committed_forbidden_change_since_persisted_baseline(self):
         status_path = self.repo / "STATUS.md"
         task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
@@ -542,7 +528,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertEqual(status_path.read_text(encoding="utf-8"), before_status)
         self.assertEqual(task_path.read_text(encoding="utf-8"), before_task)
 
-
     def test_review_rejects_invalid_persisted_baseline_without_modifying_repo(self):
         status_path = self.repo / "STATUS.md"
         original = status_path.read_text(encoding="utf-8")
@@ -557,7 +542,6 @@ class QhStatusCliTests(unittest.TestCase):
         self.assertIn("error:", result.stderr.lower())
         self.assertEqual(status_path.read_text(encoding="utf-8"), invalid)
         self.assertEqual(self._git("status", "--porcelain").stdout, before)
-
 
     def test_review_rejects_invalid_explicit_baseline_without_modifying_repo(self):
         before = self._git("status", "--porcelain").stdout
@@ -1080,6 +1064,174 @@ class QhCleanWorktreeLifecycleTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Final Gate: PASS", result.stdout)
         self.assertEqual(self._close_bytes(), before)
+
+
+class QhPostVerificationEvidenceRefreshTests(unittest.TestCase):
+    TASK_ID = "QH-V2-EVIDENCE-001"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        (self.repo / "tasks").mkdir()
+        self._git("init")
+        self._git("config", "user.email", "test@example.com")
+        self._git("config", "user.name", "Test User")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    @property
+    def status_path(self):
+        return self.repo / "STATUS.md"
+
+    @property
+    def task_path(self):
+        return self.repo / "tasks" / f"{self.TASK_ID}.md"
+
+    def _git(self, *args):
+        return subprocess.run(
+            ["git", *args],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+    def _run_qh(self, *args):
+        return subprocess.run(
+            [sys.executable, str(QH), *args],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    def _prepare(self, verification_command):
+        (self.repo / "seed.txt").write_text("seed\n", encoding="utf-8")
+        (self.repo / "forbidden_existing.txt").write_text(
+            "original\n",
+            encoding="utf-8",
+        )
+        self.status_path.write_text(
+            f"Current Task: {self.TASK_ID} - ACTIVE\n\n"
+            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+            "Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED\n",
+            encoding="utf-8",
+        )
+        self.task_path.write_text(
+            "# Evidence Refresh Fixture\n\n"
+            "## Status\n\nACTIVE\n\n"
+            "## Allowed Changes\n\n"
+            "- `STATUS.md`\n"
+            f"- `tasks/{self.TASK_ID}.md`\n"
+            "- `seed.txt`\n"
+            "- `allowed_generated.txt`\n"
+            "- `counter.txt`\n\n"
+            "## Forbidden Changes\n\n"
+            "- `forbidden_generated.txt`\n"
+            "- `forbidden_existing.txt`\n\n"
+            "## Verification\n\n"
+            "Run exactly:\n\n"
+            f"`{verification_command}`\n",
+            encoding="utf-8",
+        )
+        self._git("add", ".")
+        self._git("commit", "-m", "evidence refresh baseline")
+        baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        self.status_path.write_text(
+            self.status_path.read_text(encoding="utf-8").rstrip("\n")
+            + f"\nTask Baseline: {baseline}\n",
+            encoding="utf-8",
+        )
+        self._git("add", "STATUS.md")
+        self._git("commit", "-m", "persist evidence refresh baseline")
+        return self._git("rev-parse", "HEAD").stdout.strip()
+
+    def _lifecycle_bytes(self):
+        return self.status_path.read_bytes(), self.task_path.read_bytes()
+
+    def test_review_detects_forbidden_untracked_created_by_verification(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('forbidden_generated.txt').write_text('bad', encoding='utf-8')\""
+        )
+        self._prepare(command)
+
+        result = self._run_qh("review")
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("forbidden_generated.txt: forbidden", result.stdout)
+        self.assertIn("Unexpected Changed Paths: yes", result.stdout)
+        self.assertIn("Final Gate: FAIL", result.stdout)
+
+    def test_review_reports_allowed_path_created_by_verification(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('allowed_generated.txt').write_text('ok', encoding='utf-8')\""
+        )
+        self._prepare(command)
+
+        result = self._run_qh("review")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("allowed_generated.txt: allowed", result.stdout)
+        self.assertIn("Unexpected Changed Paths: no", result.stdout)
+        self.assertIn("Final Gate: PASS", result.stdout)
+
+    def test_review_detects_forbidden_modification_by_verification(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('forbidden_existing.txt').write_text('changed', encoding='utf-8')\""
+        )
+        self._prepare(command)
+
+        result = self._run_qh("review")
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("forbidden_existing.txt: forbidden", result.stdout)
+        self.assertIn("Final Gate: FAIL", result.stdout)
+
+    def test_review_detects_forbidden_deletion_by_verification(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('forbidden_existing.txt').unlink()\""
+        )
+        self._prepare(command)
+
+        result = self._run_qh("review")
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("forbidden_existing.txt: forbidden", result.stdout)
+        self.assertIn("Final Gate: FAIL", result.stdout)
+
+    def test_verification_runs_once_before_evidence_refresh(self):
+        command = (
+            'python -c "from pathlib import Path; p=Path(\'counter.txt\'); '
+            "p.write_text(p.read_text(encoding='utf-8') + 'x' if p.exists() else 'x', encoding='utf-8')\""
+        )
+        self._prepare(command)
+
+        result = self._run_qh("review")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual((self.repo / "counter.txt").read_text(encoding="utf-8"), "x")
+        self.assertIn("counter.txt: allowed", result.stdout)
+        self.assertEqual(result.stdout.count(command + ": exit 0"), 1)
+
+    def test_close_refreshed_evidence_failure_preserves_lifecycle_bytes(self):
+        command = (
+            'python -c "from pathlib import Path; '
+            "Path('forbidden_generated.txt').write_text('bad', encoding='utf-8')\""
+        )
+        head = self._prepare(command)
+        before = self._lifecycle_bytes()
+
+        result = self._run_qh("close", head)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("forbidden_generated.txt: forbidden", result.stdout)
+        self.assertIn("Final Gate: FAIL", result.stdout)
+        self.assertEqual(self._lifecycle_bytes(), before)
 
 
 if __name__ == "__main__":
