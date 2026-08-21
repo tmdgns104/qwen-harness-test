@@ -264,9 +264,9 @@ def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
     if baseline_type != "commit":
         raise ValueError("review baseline must resolve to a commit")
     baseline = GitBaseline(head=baseline_head)
-    changed_paths = get_changed_paths(str(repo_root), baseline)
     verification_contract = parse_verification_commands(task_markdown)
     verification_results = run_verification_commands(verification_contract, str(repo_root))
+    changed_paths = get_changed_paths(str(repo_root), baseline)
     evidence = assemble_evidence(scope, baseline, changed_paths, verification_results)
     diff_result = run_verification_commands(VerificationContract(commands=("git diff --check",)), str(repo_root))[0]
     print(f"Current Task: {task_id}")
