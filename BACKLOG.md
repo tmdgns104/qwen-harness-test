@@ -223,3 +223,125 @@ the queue inside an implementation Task.
 QH-V2-DOC-002 is the first queue stage and is already COMPLETE - VERIFIED. The first
 unfinished candidate is `QH-V2-HARD-003`; `STATUS.md` points to it as PLANNED.
 Activation still requires explicit Human approval. `AUTONOMOUS QUEUE = NOT AUTHORIZED`.
+
+## Future Roadmap (Strategic Direction Only; Non-Executable)
+
+This section records the long-term relationship accepted by ADR-011. It is not an
+execution queue, Task contract, activation record, or implementation authorization.
+It does not insert a queue node, nominate or start a Task, change a dependency, or
+reorder the deterministic Queue above.
+
+`GLOBALIZATION = NOT AUTHORIZED`
+
+`M3 = FUTURE / NOT AUTHORIZED`
+
+The conceptual long-term relationship is:
+
+```text
+Current Hardening / Operations
+  -> future Globalization Gate
+  -> Cross-Repository Evidence Phase
+  -> Evidence-Driven Harness Evolution
+  -> Human Architecture Gates
+```
+
+This diagram is a strategic dependency relationship, not executable queue order.
+The current HARD/OPS Queue continues exactly as defined above.
+
+### Globalization Eligibility
+
+Before a future Globalization Gate can be considered, objective Evidence must show
+the following minimum prerequisites are COMPLETE - VERIFIED:
+
+- QH-V2-HARD-003;
+- QH-V2-HARD-004;
+- QH-V2-HARD-005;
+- QH-V2-HARD-006;
+- QH-V2-HARD-007;
+- QH-V2-OPS-002 (`qh doctor`);
+- QH-V2-OPS-004 (Worker Smoke / E2E Standardization).
+
+Completion is necessary but not sufficient. It neither inserts the Globalization
+Gate into the current Queue nor authorizes cross-Repository use. Exact timing, scope,
+Stable version, covered Repositories, operations, and audit policy require a separate
+Human Globalization Gate after Evidence review.
+
+QH-V2-ARCH-008 only prepares a proposal. The subsequent Human One-Time Autonomous
+Queue Gate may accept, reject, or defer a narrow policy for the exact queue in this
+Repository. Neither ARCH-008 nor Gate G1 authorizes global or cross-Repository use;
+Globalization requires its own later Human Gate.
+
+### First Globalization Phase
+
+If separately approved, the first phase is `GLOBAL OPTIONAL EXECUTOR`. Qwen Harness
+would remain optional rather than becoming the mandatory or default executor for all
+Tasks.
+
+Future routing guidance:
+
+- small and clear + limited scope + explicit Verification + no Architecture change
+  -> possible Qwen Harness Stable candidate;
+- Architecture work, large refactor, ambiguous requirements, complex debugging, or
+  broad authority need -> Codex or Human Gate.
+
+Qwen remains without general shell, Git, Architecture, or Final PASS authority.
+Codex delegation does not change the Qwen Worker Trust Boundary.
+
+### Cross-Repository Evidence Phase
+
+After a separate Globalization approval, future work may define an Evidence schema
+for Repository/Task type, language, expected and actual changed files, Worker steps,
+Runner attempts, NORMAL/FAIL/BLOCKED outcome, Verification, Final Gate, duration,
+failure classification, write side-effect risk, and Codex fallback.
+
+No Evidence logging or schema is implemented by this roadmap. Schema, storage,
+retention, repository identification, access, and redaction require a separate
+approved Task. Credentials, secrets, and unnecessary private content must not be
+collected.
+
+### Evidence-Driven Evolution
+
+Future Harness improvement follows:
+
+```text
+Evidence
+  -> Improvement Candidate
+  -> Task Contract
+  -> Candidate Implementation
+  -> Regression / Benchmark
+  -> Promotion Gate
+  -> Stable Version
+```
+
+The Harness used by actual projects remains logically Stable. A developing Candidate
+must not replace or affect Stable before objective comparison and a Promotion Gate.
+Codex self-assessment is not promotion Evidence. Safety regression or scope violation
+makes a Candidate ineligible for automatic promotion.
+
+- Level A improvements preserve Architecture and Trust Boundaries and may only become
+  automation candidates under a future approved policy.
+- Level B policy changes remain inside the existing Trust Boundary but require
+  Stable-versus-Candidate benchmark Evidence.
+- Level C Architecture or Trust Boundary changes require
+  `Proposal -> STOP -> Human + ChatGPT Architecture Gate`, where ChatGPT supplies
+  mandatory technical review and the Human retains final approval authority.
+
+A Level C Candidate can never be promoted automatically. Even after approved
+implementation and objective evaluation, Stable promotion requires an explicit Human
+Promotion Gate informed by ChatGPT Architecture review.
+
+Representative success and failure Tasks may later become a reproducible Regression
+Corpus. Stable and Candidate comparison must cover safety, scope, Verification,
+Final Gate, PASS/FAIL/BLOCKED behavior, Task success, and runtime/performance.
+
+### Future Milestone 3
+
+`Milestone 3 - Evidence-Driven Harness Evolution` is a future roadmap candidate only.
+Candidate areas include Global Usage Evidence Schema, Cross-Repository Execution
+Logging, Failure Pattern Classification, Improvement Candidate Generation, Harness
+Regression Corpus, Stable vs Candidate Benchmark, Candidate Promotion Gate,
+Evidence-Based Task Router, and Autonomous Improvement Cycle E2E.
+
+These are not Task IDs or approved contracts. Do not generate or start a Milestone 3
+implementation Task automatically. Milestone 3 remains blocked until the Milestone 2
+Human Architecture Gate or another explicit Human approval.

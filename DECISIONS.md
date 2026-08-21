@@ -753,3 +753,233 @@ Verification Contract Fail-Closed Hardening.
 
 Capability expansion remains blocked until the two REQUIRED-BEFORE-NEXT-MILESTONE
 items are complete and verified.
+
+## ADR-011 - Evidence-Driven Global Harness Evolution Strategy
+
+### Status
+
+Accepted
+
+Acceptance approves the long-term strategic direction only. It does not authorize
+Globalization, cross-Repository execution, Evidence logging, self-modification,
+Milestone 3 implementation, lifecycle automation, authority expansion, or any
+implementation Task.
+
+`GLOBALIZATION = NOT AUTHORIZED`
+
+`M3 = FUTURE / NOT AUTHORIZED`
+
+### Context
+
+Milestone 1 proved that a local Qwen Worker can complete a small Repository Task
+through Harness-owned scope, tools, Git/Test Evidence, Verification, and Final Gate.
+The post-Milestone 1 queue now prioritizes lifecycle, Evidence, path, test-integrity,
+and operational hardening before broader capability use.
+
+The long-term product direction is to make a sufficiently stabilized Qwen Harness
+available to Codex as an optional external executor for small, bounded, verifiable
+Repository Tasks. Difficult work and Architecture or Trust Boundary decisions remain
+with Codex or a Human Gate.
+
+Without an explicit strategy, the phrase "self-improvement" could be misread as
+permission for a running Harness to edit or promote its own code. It could also blur
+the boundary between the Stable Harness used by real projects and a Candidate Harness
+being developed or evaluated. The Repository therefore records the intended Evidence,
+evaluation, isolation, and promotion sequence before any implementation is authorized.
+
+### Decision
+
+Adopt the following long-term target structure:
+
+```text
+Human
+  -> Codex Supervisor / Router
+       -> small, bounded, verifiable Task -> Qwen Harness Stable -> Qwen Local Worker
+       -> difficult Task -> Codex
+       -> Architecture / Trust Boundary decision -> Human Gate
+```
+
+The Codex Supervisor / Router is an optional external role. Harness Core and the Qwen
+Worker must remain usable without Codex, consistent with FR-001 and FR-009. The exact
+global installation, discovery, configuration, invocation, and version-selection
+mechanisms are deferred to separately approved work.
+
+Initial future routing policy should treat a Task as a Qwen Harness candidate only
+when it is small and clear, has a limited change scope, has explicit Verification,
+and requires no Architecture change. Architecture work, large refactors, ambiguous
+requirements, complex debugging, or broad authority needs remain Codex or Human work.
+This routing direction does not itself authorize automatic routing or execution.
+
+Codex use of Qwen Harness must not expand Qwen Worker authority. Qwen continues to:
+
+- receive only one explicitly assigned current Task;
+- have no general shell authority;
+- have no Git authority;
+- have no Architecture authority;
+- have no Final PASS authority.
+
+Deterministic Harness code continues to own scope enforcement, Repository tool
+authorization, Git/Test Evidence, Verification execution, and Final Gate.
+
+### Globalization Gate
+
+Before Codex may use a Global Qwen Harness in another Repository, objective Evidence
+must show at least the following Tasks are COMPLETE - VERIFIED:
+
+- QH-V2-HARD-003;
+- QH-V2-HARD-004;
+- QH-V2-HARD-005;
+- QH-V2-HARD-006;
+- QH-V2-HARD-007;
+- QH-V2-OPS-002 (`qh doctor`);
+- QH-V2-OPS-004 (Worker Smoke / E2E Standardization).
+
+These are necessary Evidence prerequisites, not sufficient authorization. Their
+completion only makes a separate Human Globalization Gate eligible for review. The
+Human decides the exact approval time, covered version, repositories, operations,
+expiry, revocation, audit requirements, and rollback limits after reviewing the Task
+Evidence. No current Task or this ADR grants that approval.
+
+QH-V2-ARCH-008 only prepares a proposal for the separate Human One-Time Autonomous
+Queue Gate. That Gate may accept, reject, or defer a narrow policy for an exact queue
+in this Repository. Neither ARCH-008 nor Gate G1 authorizes cross-Repository or global
+use; Globalization requires its own later Human Gate.
+
+If Globalization is later approved, its first phase is `GLOBAL OPTIONAL EXECUTOR`.
+Codex may consider the approved Stable Harness for eligible Tasks, but the Harness is
+not mandatory and is not the default executor for every Task.
+
+### Cross-Repository Evidence Policy
+
+After a separate Globalization approval, future work may design privacy-conscious
+Evidence collection across multiple Repositories. Candidate fields include:
+
+- non-sensitive Repository and Task type;
+- language;
+- expected and actual changed files;
+- Worker steps and Runner attempts;
+- NORMAL, FAIL, or BLOCKED outcome;
+- Verification and Final Gate results;
+- duration and failure classification;
+- write side-effect risk;
+- Codex fallback use.
+
+The exact schema, storage, retention, repository identification, redaction, and access
+policy are not defined or implemented here. They require a separate approved Task.
+Credentials, secrets, or unnecessary private Repository content must not be collected.
+
+### Evidence-Driven Improvement Policy
+
+"Automatic evolution" means using objective execution Evidence to propose and evaluate
+improvements. It does not mean that the Harness may modify or promote its own code
+during normal use.
+
+Every improvement follows this sequence:
+
+```text
+Evidence
+  -> Improvement Candidate
+  -> Task Contract
+  -> Candidate Implementation
+  -> Regression / Benchmark
+  -> Promotion Gate
+  -> Stable Version
+```
+
+A future Codex Improvement Analyzer is only a conceptual role for finding repeated
+failures, bottlenecks, and successful patterns. Its proposal or self-evaluation is not
+promotion Evidence and does not authorize a Task, implementation, or release.
+
+The Harness used by real projects is logically `Stable`. Development and evaluation
+occur against a logically separate `Candidate`. The physical isolation, packaging,
+versioning, and rollback mechanisms require later design. A Candidate must not replace,
+modify, or impair Stable before a Promotion Gate. Safety regression or scope violation
+makes a Candidate ineligible for automatic promotion.
+
+### Improvement Levels
+
+- **Level A - No Architecture or Trust Boundary change.** Examples include error
+  messages, status UX, diagnostics, documentation, regression tests, and verified
+  performance optimizations. These may become candidates for a future pre-approved
+  improvement policy, but no such policy is authorized here.
+- **Level B - Policy change inside the existing Trust Boundary.** Examples include
+  retry tuning, Worker step-budget tuning, Router thresholds, context strategy, and
+  prompt or model-routing policy. Promotion requires objective Stable-versus-Candidate
+  regression and benchmark Evidence.
+- **Level C - Architecture or Trust Boundary change.** Examples include shell, Git,
+  network, or new write authority; multi-agent or LangGraph orchestration; Final Gate
+  authority changes; and automatic escalation Architecture. The required path is
+  `Proposal -> STOP -> Human + ChatGPT Architecture Gate`.
+
+For Level C, `Human + ChatGPT Architecture Gate` means mandatory ChatGPT technical
+Architecture review followed by Human final approval. ChatGPT analysis alone never
+accepts an Architecture or authority change.
+
+A Level C Candidate can never be promoted automatically. After an approved
+implementation and objective evaluation, Stable promotion still requires an explicit
+Human Promotion Gate informed by ChatGPT Architecture review.
+
+### Regression Corpus and Promotion
+
+Representative successful and failed cross-Repository Tasks may later become a
+reproducible Harness Regression Corpus. Stable and Candidate must be evaluated against
+the same applicable corpus. Evaluation must compare at least:
+
+- safety regression;
+- scope violation;
+- Verification integrity;
+- Final Gate integrity;
+- PASS, FAIL, and BLOCKED behavior;
+- Task success;
+- runtime and performance.
+
+"Looks better" and Codex self-assessment are not promotion Evidence. Promotion requires
+the applicable objective regression and benchmark Evidence plus the required Promotion
+Gate. Safety regression or scope violation cannot be waived by a performance gain.
+
+### Future Milestone 3
+
+Record `Milestone 3 - Evidence-Driven Harness Evolution` as a future roadmap candidate.
+Illustrative work areas are:
+
+- Global Usage Evidence Schema;
+- Cross-Repository Execution Logging;
+- Failure Pattern Classification;
+- Improvement Candidate Generation;
+- Harness Regression Corpus;
+- Stable vs Candidate Benchmark;
+- Candidate Promotion Gate;
+- Evidence-Based Task Router;
+- Autonomous Improvement Cycle E2E.
+
+These labels are not Task IDs, approved contracts, or an implementation sequence.
+No Milestone 3 implementation Task may be generated or started automatically before
+the Milestone 2 Human Architecture Gate or another explicit Human approval.
+
+### Compatibility and Boundaries
+
+- The current deterministic HARD/OPS Queue and its order remain unchanged.
+- FR-004 remains authoritative: a Qwen Worker executes only its explicitly assigned
+  current Task and never selects or starts the next Task.
+- ADR-005 through ADR-010 remain authoritative. This ADR does not authorize automatic
+  commit, Task completion, `qh close`, lifecycle commit, push, next-Task start,
+  automatic Codex escalation, or Architecture mutation.
+- QH-V2-ARCH-008 remains a proposal-only future Task and is not accepted or activated
+  by this strategic direction.
+- Every implementation or policy change still requires the applicable approved Task,
+  objective Evidence, and Human Gate.
+- Any future conflict with a Functional Requirement or Accepted ADR requires an
+  explicit Human-approved clarification or superseding decision before implementation.
+- Cross-Repository Evidence collection, Candidate execution, promotion automation,
+  global installation, and Milestone 3 are not implemented or authorized.
+
+### Consequences
+
+- Future Globalization and improvement proposals have a common Evidence-first target.
+- Qwen authority stays narrow while Codex may later gain an optional delegation path
+  through a separately approved external integration.
+- Stable users are protected from unpromoted Candidate behavior by the required
+  logical separation and Promotion Gate.
+- The current Queue continues from QH-V2-HARD-003 without reordering or skipping.
+- Exact Evidence schemas, global integration, Stable/Candidate mechanics, routing,
+  evaluation infrastructure, and Milestone 3 Tasks remain deferred.
