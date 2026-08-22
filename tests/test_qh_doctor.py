@@ -1,14 +1,22 @@
 from __future__ import annotations
 
+import io
+import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from urllib.error import URLError
 
 
 ROOT = Path(__file__).resolve().parents[1]
 QH = ROOT / "tools" / "qh.py"
+TOOLS = ROOT / "tools"
+if str(TOOLS) not in sys.path:
+    sys.path.insert(0, str(TOOLS))
+import qh as qh_module
 
 
 VALID_STATUS = (
@@ -44,6 +52,20 @@ Run exactly:
 """
 
 
+class FakeJsonResponse:
+    def __init__(self, payload: object) -> None:
+        self.payload = json.dumps(payload).encode("utf-8")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def read(self) -> bytes:
+        return self.payload
+
+
 def _git_status() -> str:
     return subprocess.run(
         ["git", "-C", str(ROOT), "status", "--porcelain=v1"],
@@ -74,6 +96,13 @@ def _run_doctor_at(repo: Path) -> subprocess.CompletedProcess[str]:
         text=True,
         check=False,
     )
+
+
+def _run_doctor_direct(repo: Path, opener) -> tuple[int, str]:
+    output = io.StringIO()
+    with redirect_stdout(output):
+        result = qh_module.command_doctor(repo, ollama_opener=opener)
+    return result, output.getvalue()
 
 
 class QhDoctorCliTests(unittest.TestCase):
@@ -184,6 +213,68 @@ class QhDoctorCliTests(unittest.TestCase):
                 verification_output,
                 r"VERIFICATION_CONTRACT:\s+FAIL\b",
             )
+
+    def test_ollama_reachable_and_default_model_present_are_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            _prepare_contract_repo(repo)
+            captured: dict[str, object] = {}
+
+            def fake_opener(request, timeout):
+                captured["url"] = request.full_url
+                captured["method"] = request.get_method()
+                captured["timeout"] = timeout
+                return FakeJsonResponse({"models": [{"name": "qwen3:8b"}]})
+
+            result, output = _run_doctor_direct(repo, fake_opener)
+
+            self.assertEqual(result, 0, output)
+            self.assertRegex(output, r"OLLAMA_ENDPOINT:\s+PASS\b")
+            self.assertRegex(output, r"OLLAMA_MODEL:\s+PASS\b")
+            self.assertEqual(captured["method"], "GET")
+            self.assertTrue(str(captured["url"]).endswith("/api/tags"))
+            self.assertGreater(float(captured["timeout"]), 0.0)
+
+    def test_ollama_model_missing_is_fail_and_nonzero(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            _prepare_contract_repo(repo)
+
+            def fake_opener(request, timeout):
+                return FakeJsonResponse({"models": [{"name": "other-model:latest"}]})
+
+            result, output = _run_doctor_direct(repo, fake_opener)
+
+            self.assertNotEqual(result, 0, output)
+            self.assertRegex(output, r"OLLAMA_ENDPOINT:\s+PASS\b")
+            self.assertRegex(output, r"OLLAMA_MODEL:\s+FAIL\b")
+
+    def test_ollama_unreachable_timeout_and_backend_errors_are_sanitized(self) -> None:
+        cases = (
+            URLError("connection refused"),
+            TimeoutError("timed out"),
+            RuntimeError(
+                "Bearer supersecret http://user:password@127.0.0.1:11434/api/tags"
+            ),
+        )
+        for error in cases:
+            with self.subTest(error=type(error).__name__):
+                with tempfile.TemporaryDirectory() as tmp:
+                    repo = Path(tmp)
+                    _prepare_contract_repo(repo)
+
+                    def fake_opener(request, timeout, error=error):
+                        raise error
+
+                    result, output = _run_doctor_direct(repo, fake_opener)
+
+                    self.assertNotEqual(result, 0, output)
+                    self.assertRegex(output, r"OLLAMA_ENDPOINT:\s+FAIL\b")
+                    self.assertRegex(output, r"OLLAMA_MODEL:\s+FAIL\b")
+                    self.assertNotIn("supersecret", output)
+                    self.assertNotIn("password", output)
+                    self.assertNotIn("Bearer", output)
+                    self.assertNotIn("user:", output)
 
 
 if __name__ == "__main__":
