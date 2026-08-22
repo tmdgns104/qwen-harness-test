@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED - READY FOR CONTRACT BASELINE
+COMPLETE - VERIFIED
 
 ## Problem
 
@@ -196,3 +196,18 @@ Queue successor candidate: QH-V2-OPS-001.
 
 After PERF-005 completion, progression returns to the ordinary Human-controlled Task
 lifecycle unless a separate later Human decision authorizes another exact manifest.
+
+## Completion Evidence
+
+- Stage A same-host `tests.test_harness_core`: 130.997s -> 54.394s, saving 76.603s (58.48%).
+- Stage B fixture microbenchmark: `QhPostVerificationEvidenceRefreshTests` 1.796s/test -> 0.026s/test; `QhCleanWorktreeLifecycleTests` 2.810s/test -> 0.037s/test.
+- Stage B adjacent `tests.test_qh` measurement: 508.527s -> 496.796s, saving 11.731s (2.31%). Host-load variability was observed, so earlier 282.076s is retained as context and is not used as causal Stage B evidence.
+- Final selected regression: 259 tests in 422.114s, OK, skipped=1. External stopwatch: 422.363s.
+- Baseline selected regression: 259 tests in 560.059s, skipped=1.
+- Final saving against baseline: 137.945s, 24.63% improvement.
+- Acceptance target <=448.047s (20% reduction): ACHIEVED.
+- Preferred target <=392.041s (30% reduction): NOT ACHIEVED.
+- Exact implementation HEAD used by `qh close`: 204dedd.
+- `qh close`: all Verification commands exit 0, Diff Check 0, Unexpected Changed Paths no, Final Gate PASS.
+- Production `tools/**` and `ops/qhops/**` were not modified.
+- Remaining dominant cost is production qh review/close Git subprocess behavior; further production optimization is deferred beyond PERF-005 Stage C boundary.
