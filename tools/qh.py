@@ -139,8 +139,55 @@ def command_task_new(repo_root: Path, task_id: str) -> int:
 
 
 def command_doctor(repo_root: Path) -> int:
-    print(f"PYTHON_RUNTIME: PASS Python {sys.version.split()[0]}")
-    return 0
+    failures = 0
+
+    def report(label: str, state: str, detail: str) -> None:
+        print(f"{label}: {state} {detail}")
+
+    report("PYTHON_RUNTIME", "PASS", f"Python {sys.version.split()[0]}")
+
+    try:
+        git_version = _run_git(str(repo_root), ("--version",)).stdout.strip()
+        report("GIT_AVAILABLE", "PASS", git_version)
+    except (OSError, RuntimeError, ValueError):
+        report("GIT_AVAILABLE", "FAIL", "Git is unavailable")
+        failures += 1
+
+    try:
+        _require_git_top_level(str(repo_root))
+        report("REPOSITORY_ROOT", "PASS", "current directory is Repository root")
+    except (OSError, RuntimeError, ValueError):
+        report("REPOSITORY_ROOT", "FAIL", "current directory is not Repository root")
+        failures += 1
+
+    required_files = ("PROJECT.md", "REQUIREMENTS.md", "DECISIONS.md", "STATUS.md")
+    missing = [name for name in required_files if not (repo_root / name).is_file()]
+    if missing:
+        report("SOURCE_OF_TRUTH", "FAIL", "missing required files: " + ", ".join(missing))
+        failures += 1
+    else:
+        report("SOURCE_OF_TRUTH", "PASS", "required files present")
+
+    try:
+        status = _run_git(str(repo_root), ("status", "--porcelain=v1")).stdout
+        if status.strip():
+            report("WORKTREE", "WARN", "working tree is dirty")
+        else:
+            report("WORKTREE", "PASS", "working tree is clean")
+    except (OSError, RuntimeError, ValueError):
+        report("WORKTREE", "FAIL", "unable to inspect working tree")
+        failures += 1
+
+    try:
+        remotes = _run_git(str(repo_root), ("remote",)).stdout.splitlines()
+        if remotes:
+            report("GIT_REMOTE", "PASS", f"{len(remotes)} remote(s) configured")
+        else:
+            report("GIT_REMOTE", "WARN", "no Git remote configured")
+    except (OSError, RuntimeError, ValueError):
+        report("GIT_REMOTE", "WARN", "unable to inspect optional Git remote")
+
+    return 1 if failures else 0
 
 
 def command_start(repo_root: Path, target_task_id: str) -> int:
