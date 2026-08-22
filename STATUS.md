@@ -1,9 +1,9 @@
-Current Task: QH-V2-PERF-005 - COMPLETE - VERIFIED - commit 204dedd
+Current Task: QH-V2-OPS-001 - ACTIVE
 
-Previous Task: QH-V2-HARD-007 - COMPLETE - VERIFIED - commit 55fedc3282aa858a7ed68a3f52cfd0d64cbf46f1
+Previous Task: QH-V2-PERF-005 - COMPLETE - VERIFIED - commit 204dedd
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: d5a1dbe3ba55cab7805537922cd78a63619c5e2d
+Task Baseline: 6401c250ad0dcd447b3ac710342fb9db216ef502
 
 Handoff:
 - QH-V2-HARD-007 is COMPLETE - VERIFIED; authoritative close used implementation commit 55fedc3282aa858a7ed68a3f52cfd0d64cbf46f1 and lifecycle commit 36e0357d44a9a3e1aba423b891811294e4ec9a71 is pushed to origin/main.
