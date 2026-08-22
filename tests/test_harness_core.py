@@ -152,6 +152,33 @@ class PathScopeMatcherTests(unittest.TestCase):
         self.assertFalse(harness_core.is_path_allowed("README.md", scope))
 
 
+    def test_windows_case_alias_forbidden_wins(self) -> None:
+        import tools.harness_core as harness_core
+        from unittest.mock import patch
+
+        scope = ChangeScope(
+            allowed=("src/**",),
+            forbidden=("src/secret/**",),
+        )
+        with patch.object(harness_core.os, "name", "nt"):
+            self.assertFalse(
+                harness_core.is_path_allowed("src/SECRET/key.py", scope)
+            )
+
+    def test_posix_case_alias_remains_distinct(self) -> None:
+        import tools.harness_core as harness_core
+        from unittest.mock import patch
+
+        scope = ChangeScope(
+            allowed=("src/**",),
+            forbidden=("src/secret/**",),
+        )
+        with patch.object(harness_core.os, "name", "posix"):
+            self.assertTrue(
+                harness_core.is_path_allowed("src/SECRET/key.py", scope)
+            )
+
+
 
 class GitExecutionAndRootTests(unittest.TestCase):
     def setUp(self) -> None:
