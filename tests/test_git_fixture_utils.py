@@ -23,6 +23,32 @@ class GitSeedRepositoryTests(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.seed.cleanup()
 
+    def test_empty_seed_repository_supports_independent_clean_copies(self) -> None:
+        seed = GitSeedRepository(
+            {},
+            user_email="perf005-empty@example.test",
+            user_name="PERF-005 Empty Seed",
+        )
+        try:
+            first = seed.new_copy()
+            second = seed.new_copy()
+            try:
+                self.assertEqual(run_git(first.path, "status", "--porcelain"), "")
+                self.assertEqual(run_git(second.path, "status", "--porcelain"), "")
+                self.assertEqual(
+                    run_git(first.path, "rev-parse", "HEAD"),
+                    run_git(second.path, "rev-parse", "HEAD"),
+                )
+                (first.path / "only-first.txt").write_text("first\n", encoding="utf-8")
+                self.assertNotEqual(run_git(first.path, "status", "--porcelain"), "")
+                self.assertEqual(run_git(second.path, "status", "--porcelain"), "")
+                self.assertFalse((second.path / "only-first.txt").exists())
+            finally:
+                first.cleanup()
+                second.cleanup()
+        finally:
+            seed.cleanup()
+
     def test_copies_are_clean_and_use_independent_git_directories(self) -> None:
         first = self.seed.new_copy()
         second = self.seed.new_copy()
