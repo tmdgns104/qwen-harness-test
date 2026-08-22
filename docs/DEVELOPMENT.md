@@ -111,6 +111,31 @@ discovery에는 아직 구현하지 않은 QH-V2-MD-001 RED fixture 때문에
 수정하지 않았다면 “전체 suite PASS”라고 주장하지 말고 focused regression과
 Git non-regression Evidence를 정확히 기록합니다.
 
+### unittest discovery 기준
+
+Repository root에서 표준 unittest discovery를 확인할 때는 다음 두 명령을
+사용합니다.
+
+```powershell
+python -m unittest discover
+python -m unittest discover -s tests
+```
+
+두 명령은 동일한 Repository test tree를 발견해야 하며, root discovery가
+0개를 반환하면 유효한 regression Evidence로 취급하지 않습니다. Discovery
+구조 자체는 다음 meta-test로 검증합니다.
+
+```powershell
+python -m unittest tests.test_test_discovery
+```
+
+현재 전체 discovery에는 QH-V2-MD-001의 역사적 RED fixture 3개가
+`tests/test_markdown_append.py`에 남아 있으므로, 위 full discovery 명령의
+non-zero 종료를 새 Task regression과 혼동하지 않습니다. HARD-007과 같은
+Task의 GREEN 완료 판정은 현재 Task 계약에 명시된 focused regression 명령과
+Git non-regression Evidence를 사용하며, 알려진 3개 fixture를 수정하거나
+skip해서 전체 suite를 GREEN으로 만들지 않습니다.
+
 ## Verification Contract 작성 규칙
 
 `## Verification` 아래에서 인식되는 marker는 정확히 다음 세 가지입니다.
