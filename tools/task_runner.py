@@ -15,8 +15,8 @@ from tools.harness_core import (
     ToolSpec,
     WorkerRequest,
     WorkerStep,
-    is_path_allowed,
     parse_change_scope,
+    resolve_scoped_write_target,
 )
 from tools.ollama_worker import OllamaToolSession
 from tools.repo_tools import read_repo_text, write_repo_text
@@ -202,16 +202,17 @@ def _execute_tool_request(
             False,
         )
 
-    requested_target = (repo_root / relative_path).resolve()
+    requested_target = resolve_scoped_write_target(
+        repo_root,
+        relative_path,
+        scope,
+    )
     lifecycle_targets = {
         os.path.normcase(str((repo_root / "STATUS.md").resolve())),
         os.path.normcase(str((repo_root / "tasks" / f"{task_id}.md").resolve())),
     }
     if os.path.normcase(str(requested_target)) in lifecycle_targets:
         raise ValueError("Worker write to lifecycle-control path is not allowed")
-
-    if not is_path_allowed(relative_path, scope):
-        raise ValueError("Worker write path is outside current Task scope")
 
     content = arguments["content"]
 
