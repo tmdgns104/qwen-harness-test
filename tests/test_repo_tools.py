@@ -235,6 +235,24 @@ class RepositoryReadToolsTests(unittest.TestCase):
                 "ORIGINAL\n",
             )
 
+    def test_resolved_scope_identity_rejects_forbidden_canonical_target(self):
+        from tools.harness_core import (
+            ChangeScope,
+            _is_scoped_write_identity_allowed,
+        )
+
+        scope = ChangeScope(
+            allowed=("allowed/**",),
+            forbidden=("protected/**",),
+        )
+        self.assertFalse(
+            _is_scoped_write_identity_allowed(
+                "allowed/alias/target.txt",
+                "protected/target.txt",
+                scope,
+            )
+        )
+
     def test_write_repo_text_rejects_resolved_in_repo_forbidden_alias_without_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
