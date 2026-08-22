@@ -64,6 +64,33 @@ Worker retries must be bounded.
 
 Repeated failure must terminate as FAIL or BLOCKED rather than loop indefinitely or increase prompt complexity without limit.
 
+### FR-014 - Manifest-bound optional external Codex CLI Supervisor
+
+An optional external Codex CLI Supervisor may execute only the exact ordered queue
+covered by a Human-approved immutable Approval Manifest.
+
+This delegated authority is external to the Qwen Worker. FR-004 remains unchanged:
+a Worker executes only its explicitly assigned current Task and never selects or
+starts a successor.
+
+Before every delegated mutation, deterministic qhops guard logic must validate the
+manifest, current branch/remote, authority-source blobs, queue order, covered Task
+identity and Immutable Contract Sections, lifecycle eligibility, and revocation state.
+Any mismatch must fail closed.
+
+For one valid manifest, the Supervisor may start the exact next already-approved
+covered Task, create its implementation commit, invoke authoritative `qh close` at
+the exact implementation HEAD, create the separate lifecycle commit, advance only
+to the exact manifest successor after revalidation, and fast-forward push only
+`HEAD:main` to `origin`.
+
+Force push, rebase/history rewrite, Task creation, covered-contract or queue mutation,
+Architecture or Requirements mutation during covered execution, scope expansion,
+Final Gate bypass, and Qwen/Worker authority expansion remain forbidden.
+
+Authorization expires on revocation, manifest mismatch, policy invalidation, or
+completion of the covered queue at the Human Architecture Gate.
+
 ## Verification Requirements
 
 - Actual changed paths must be checkable independently from Worker self-report.

@@ -983,3 +983,126 @@ the Milestone 2 Human Architecture Gate or another explicit Human approval.
 - The current Queue continues from QH-V2-HARD-003 without reordering or skipping.
 - Exact Evidence schemas, global integration, Stable/Candidate mechanics, routing,
   evaluation infrastructure, and Milestone 3 Tasks remain deferred.
+
+
+## ADR-012 - HUMAN ONE-TIME AUTONOMOUS QUEUE GATE G1
+
+### Status
+
+Accepted
+
+### Context
+
+QH-V2-ARCH-008 completed a proposal-only review for reducing repeated Human relay
+without transferring Harness or Qwen safety authority to an LLM. On 2026-08-22 the
+Human explicitly accepted the recommended narrow policy for one exact Repository
+queue and approved fast-forward-only push to `origin/main`.
+
+The accepted decision must not be confused with immediate execution authority.
+QH-V2-GATE-001 must first materialize the policy, pre-approve the exact covered Task
+contracts, implement deterministic manifest validation, seal the exact Gate Change
+Set, and pass authoritative `qh close`.
+
+### Decision
+
+Accept the Human One-Time Autonomous Queue Gate only for this exact covered order:
+
+1. QH-V2-HARD-006
+2. QH-V2-HARD-007
+3. QH-V2-OPS-001
+4. QH-V2-OPS-002
+5. QH-V2-OPS-003
+6. QH-V2-OPS-004
+7. QH-V2-OPS-005
+8. QH-V2-OPS-006
+9. QH-V2-M2-SPEC-001
+10. HUMAN ARCHITECTURE GATE - mandatory STOP
+
+After QH-V2-GATE-001 is COMPLETE - VERIFIED and an exact sealed manifest passes
+deterministic `gate-check`, an optional external Codex CLI Supervisor may, without a
+new Human prompt for each covered lifecycle step:
+
+- start only the exact next already-approved covered Task;
+- create Task implementation commits within that Task's existing scope;
+- invoke authoritative `qh close <exact implementation HEAD>`;
+- create the separate lifecycle commit after Final Gate PASS;
+- revalidate and proceed only to the exact manifest successor;
+- push only `HEAD:main` to `origin`, using fast-forward-only behavior.
+
+This is a narrow supersession of the repeated Human lifecycle prompts described by
+ADR-005, ADR-006, ADR-007, and ADR-010 for the one exact valid manifest. It does not
+supersede deterministic qh/Harness authority.
+
+FR-004 remains authoritative for the Qwen Worker. The external Supervisor is not the
+Worker and must not expand Worker tools or authority. ADR-008 remains unchanged:
+Qwen has no shell, Git, lifecycle, Verification, Evidence, commit, push, Architecture,
+or Final PASS authority.
+
+`qh close` remains the sole authoritative final full Verification / Evidence / Final
+Gate path. Focused development tests remain non-authoritative.
+
+### Manifest and Failure Boundary
+
+The approval manifest must bind at least:
+
+- the Gate Change Set commit;
+- exact BACKLOG, REQUIREMENTS, and DECISIONS Git blob identities;
+- the exact ordered covered Task IDs;
+- each covered Task's exact pre-start whole-file Git blob;
+- deterministic SHA-256 of its Immutable Contract Sections;
+- local branch `master`;
+- remote `origin`, remote branch `main`, and push refspec `HEAD:main`;
+- fast-forward-only policy;
+- delegated and forbidden operations;
+- Gate Evidence, revocation, validity, and terminal Human Gate policy.
+
+Every Supervisor mutation must revalidate the manifest and current Repository/Git
+state first. Manifest tamper, queue mismatch, covered-contract mutation, wrong branch
+or remote, invalid lifecycle, revocation, scope violation, dirty state where clean is
+required, or policy mismatch causes deterministic STOP.
+
+A pending or ACTIVE covered Task must retain its exact pre-start whole-file identity.
+After normal close, only the approved Status lifecycle value may differ; Immutable
+Contract Sections remain exact.
+
+### Push and Recovery Boundary
+
+Push authority is exactly `origin` / `main` / `HEAD:main`, fast-forward only.
+
+Force push, rebase, reset/history rewrite, destructive recovery, skipping a failed
+Task, or silently repairing a manifest mismatch are never authorized.
+
+If the remote diverges, validation or Final Gate fails, or safe fast-forward push
+cannot be proven, execution stops for Human review.
+
+### Expiry and Terminal Gate
+
+Authorization ends at the first of:
+
+- explicit Human revocation;
+- manifest or authority-source mismatch;
+- covered queue / contract invalidation;
+- policy invalidation;
+- successful completion of QH-V2-M2-SPEC-001 at the HUMAN ARCHITECTURE GATE.
+
+No Task may be generated, approved, or started automatically after that terminal Gate.
+
+### Compatibility and Boundaries
+
+- ADR-001 through ADR-011 remain Accepted except for the narrow repeated-Human-prompt
+  supersession stated above.
+- Qwen/Worker authority, Harness Core scope/Verification/Evidence/Final Gate semantics,
+  Retry policy, and native Ollama model policy are unchanged.
+- `GLOBALIZATION = NOT AUTHORIZED` remains unchanged.
+- `M3 = FUTURE / NOT AUTHORIZED` remains unchanged.
+- Codex remains optional. Harness Core and the Qwen Worker remain usable without Codex.
+- The accepted G1 queue is Repository-local and grants no cross-Repository authority.
+
+### Consequences
+
+QH-V2-GATE-001 may implement the deterministic qhops manifest guard and seal the
+accepted queue. Covered autonomous execution is eligible only after that Task is
+COMPLETE - VERIFIED and the exact manifest passes `gate-check`.
+
+Until then, the Human-approved policy exists but autonomous queue execution remains
+disabled.

@@ -347,3 +347,38 @@ Evidence-Based Task Router, and Autonomous Improvement Cycle E2E.
 These are not Task IDs or approved contracts. Do not generate or start a Milestone 3
 implementation Task automatically. Milestone 3 remains blocked until the Milestone 2
 Human Architecture Gate or another explicit Human approval.
+
+
+## G1 Accepted Policy Overlay - 2026-08-22
+
+`G1 POLICY = ACCEPTED`
+
+This section is the later Gate decision record and supersedes earlier pre-G1
+`AUTONOMOUS QUEUE = NOT AUTHORIZED` wording only for the exact manifest-bound policy
+accepted by ADR-012. It does not alter the deterministic queue order above.
+
+`AUTONOMOUS QUEUE EXECUTION = NOT ENABLED UNTIL QH-V2-GATE-001 COMPLETE - VERIFIED AND SEALED gate-check PASS`
+
+QH-V2-GATE-001 is the Gate-materialization prerequisite outside the covered queue.
+The covered queue itself remains exactly:
+
+QH-V2-HARD-006 -> QH-V2-HARD-007 -> QH-V2-OPS-001 -> QH-V2-OPS-002 ->
+QH-V2-OPS-003 -> QH-V2-OPS-004 -> QH-V2-OPS-005 -> QH-V2-OPS-006 ->
+QH-V2-M2-SPEC-001 -> HUMAN ARCHITECTURE GATE.
+
+After QH-V2-GATE-001 is COMPLETE - VERIFIED, only a manifest-guarded optional
+external Codex CLI Supervisor may replace repeated Human lifecycle prompts for this
+exact queue. Every delegated mutation must pass deterministic `gate-check`.
+FR-004 remains unchanged for the Qwen Worker.
+
+The approved push boundary is `origin/main`, refspec `HEAD:main`, fast-forward only.
+Force push, history rewrite, Task creation, contract/queue mutation, Architecture or
+Requirements mutation during covered execution, Final Gate bypass, scope expansion,
+and Qwen authority expansion remain forbidden.
+
+Any manifest, queue, immutable-section, branch, remote, lifecycle, authority-source,
+scope, revocation, or approval mismatch stops execution. QH-V2-M2-SPEC-001 completion
+always stops at the Human Architecture Gate; no automatic successor is authorized.
+
+Until the materialization Task is COMPLETE - VERIFIED and the sealed manifest passes,
+ordinary Human-controlled lifecycle rules remain in force.
