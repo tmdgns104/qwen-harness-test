@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
+from urllib.request import Request, urlopen
 
 from harness_core import GitBaseline, VerificationContract, _require_git_top_level, _run_git, assemble_evidence, capture_git_baseline, evaluate_final_gate, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
 
@@ -16,6 +18,9 @@ COMPLETED_CURRENT_TASK_RE = re.compile(
 )
 APPROVED_TASK_STATUS = "APPROVED - READY FOR CONTRACT BASELINE"
 TASK_DRAFT_STATUS = "DRAFT - HUMAN REVIEW REQUIRED"
+DOCTOR_OLLAMA_BASE_URL = "http://127.0.0.1:11434"
+DOCTOR_OLLAMA_MODEL = "qwen3:8b"
+DOCTOR_OLLAMA_TIMEOUT_SECONDS = 5.0
 
 
 def _load_current_task(repo_root: Path) -> tuple[str, Path, str]:
@@ -138,8 +143,10 @@ def command_task_new(repo_root: Path, task_id: str) -> int:
     return 0
 
 
-def command_doctor(repo_root: Path) -> int:
+def command_doctor(repo_root: Path, *, ollama_opener=None) -> int:
     failures = 0
+    if ollama_opener is None:
+        ollama_opener = urlopen
 
     def report(label: str, state: str, detail: str) -> None:
         print(f"{label}: {state} {detail}")
@@ -231,6 +238,52 @@ def command_doctor(repo_root: Path) -> int:
             report("GIT_REMOTE", "WARN", "no Git remote configured")
     except (OSError, RuntimeError, ValueError):
         report("GIT_REMOTE", "WARN", "unable to inspect optional Git remote")
+
+    try:
+        request = Request(
+            f"{DOCTOR_OLLAMA_BASE_URL.rstrip('/')}/api/tags",
+            method="GET",
+        )
+        with ollama_opener(
+            request,
+            timeout=DOCTOR_OLLAMA_TIMEOUT_SECONDS,
+        ) as response:
+            decoded = json.loads(response.read().decode("utf-8"))
+        if not isinstance(decoded, dict):
+            raise ValueError("invalid Ollama response")
+        models = decoded.get("models")
+        if not isinstance(models, list):
+            raise ValueError("invalid Ollama response")
+        model_names: list[str] = []
+        for item in models:
+            if not isinstance(item, dict):
+                continue
+            for key in ("name", "model"):
+                value = item.get(key)
+                if isinstance(value, str):
+                    model_names.append(value)
+        report("OLLAMA_ENDPOINT", "PASS", "Ollama /api/tags is reachable")
+        if DOCTOR_OLLAMA_MODEL in model_names:
+            report(
+                "OLLAMA_MODEL",
+                "PASS",
+                f"default model {DOCTOR_OLLAMA_MODEL} is present",
+            )
+        else:
+            report(
+                "OLLAMA_MODEL",
+                "FAIL",
+                f"default model {DOCTOR_OLLAMA_MODEL} is not present",
+            )
+            failures += 1
+    except Exception:
+        report("OLLAMA_ENDPOINT", "FAIL", "Ollama /api/tags is unavailable")
+        report(
+            "OLLAMA_MODEL",
+            "FAIL",
+            f"default model {DOCTOR_OLLAMA_MODEL} readiness is unknown",
+        )
+        failures += 2
 
     return 1 if failures else 0
 
