@@ -138,6 +138,11 @@ def command_task_new(repo_root: Path, task_id: str) -> int:
     return 0
 
 
+def command_doctor(repo_root: Path) -> int:
+    print(f"PYTHON_RUNTIME: PASS Python {sys.version.split()[0]}")
+    return 0
+
+
 def command_start(repo_root: Path, target_task_id: str) -> int:
     _require_git_top_level(str(repo_root))
     if re.fullmatch(TASK_ID_PATTERN, target_task_id) is None:
@@ -392,11 +397,15 @@ def command_run(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close", "run", "task-new"))
+    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close", "run", "task-new", "doctor"))
     parser.add_argument("task_id", nargs="?")
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
     try:
+        if args.command == "doctor":
+            if args.task_id is not None:
+                raise ValueError("doctor does not accept a Task ID")
+            return command_doctor(repo_root)
         if args.command == "task-new":
             if args.task_id is None:
                 raise ValueError("task-new requires a Task ID")
