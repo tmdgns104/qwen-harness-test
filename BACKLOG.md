@@ -382,3 +382,45 @@ always stops at the Human Architecture Gate; no automatic successor is authorize
 
 Until the materialization Task is COMPLETE - VERIFIED and the sealed manifest passes,
 ordinary Human-controlled lifecycle rules remain in force.
+
+## Post-G1 Human Override - PERF-005 Before OPS-001 - 2026-08-22
+
+`G1 REMAINING AUTHORIZATION = REVOKED AFTER QH-V2-HARD-007`
+
+ADR-013 records the Human decision to stop the remaining sealed G1 progression after
+HARD-007 and perform one additional Evidence-driven performance round before OPS-001.
+The existing G1 manifest is retained as historical Evidence only. It is not edited or
+resealed, and its authority-source identities are intentionally invalidated by this
+Backlog/Decision update. A later `gate-check` against that manifest must therefore stop.
+
+For nomination after HARD-007, this later section supersedes the earlier deterministic
+table and G1 overlay only where they conflict. The revised remaining order is:
+
+```text
+QH-V2-HARD-007 - COMPLETE - VERIFIED
+  -> QH-V2-PERF-005
+  -> QH-V2-OPS-001
+  -> QH-V2-OPS-002
+  -> QH-V2-OPS-003
+  -> QH-V2-OPS-004
+  -> QH-V2-OPS-005
+  -> QH-V2-OPS-006
+  -> QH-V2-M2-SPEC-001
+  -> HUMAN ARCHITECTURE GATE
+```
+
+QH-V2-PERF-005 is Human-approved for contract baseline preparation and is limited to
+Git-heavy test-fixture performance optimization. It does not authorize production
+Harness/qh behavior changes, Verification weakening, stale PASS reuse, test deletion,
+new test skipping, or Verification concurrency.
+
+After G1 revocation, PERF-005 and the remaining OPS/M2 Tasks use the ordinary
+Human-controlled Task lifecycle. No G2/resealed autonomous manifest is authorized by
+this override. Any later autonomous policy requires a separate Human decision.
+
+### Current Nomination Override
+
+QH-V2-HARD-007 is COMPLETE - VERIFIED. The next queue candidate is
+`QH-V2-PERF-005`, already recorded as `APPROVED - READY FOR CONTRACT BASELINE`.
+After PERF-005 completes, nominate QH-V2-OPS-001 through the ordinary Human-controlled
+lifecycle.

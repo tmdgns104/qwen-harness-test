@@ -940,7 +940,7 @@ Gate. Safety regression or scope violation cannot be waived by a performance gai
 ### Future Milestone 3
 
 Record `Milestone 3 - Evidence-Driven Harness Evolution` as a future roadmap candidate.
-Illustrative work areas are:
+Illustrative work areas include:
 
 - Global Usage Evidence Schema;
 - Cross-Repository Execution Logging;
@@ -1106,3 +1106,69 @@ COMPLETE - VERIFIED and the exact manifest passes `gate-check`.
 
 Until then, the Human-approved policy exists but autonomous queue execution remains
 disabled.
+
+## ADR-013 - Human Revocation of Remaining G1 Queue and PERF-005 Insertion
+
+### Status
+
+Accepted
+
+### Context
+
+QH-V2-HARD-006 and QH-V2-HARD-007 both completed successfully under the sealed G1
+queue. After HARD-007, measured regression performance remained material on the current
+Windows host:
+
+- selected 259-test regression: 560.059 seconds;
+- `tests.test_qh`: 48 tests in 470.073 seconds;
+- `tests.test_harness_core`: 119 tests in 207.330 seconds.
+
+Profiling shows the slowest tests are concentrated in Git-heavy qh review/close and
+Harness Core Git baseline/evidence fixtures. The Human explicitly chose to perform one
+additional Evidence-driven performance optimization round before OPS-001 rather than
+continue the sealed queue unchanged.
+
+ADR-012 already defines explicit Human revocation, authority-source mismatch, and queue
+invalidation as terminal conditions for G1 authorization.
+
+### Decision
+
+1. Revoke the remaining G1 autonomous queue authorization immediately after the
+   successful completion of QH-V2-HARD-007.
+2. Preserve the existing sealed G1 manifest as historical Evidence; do not rewrite,
+   reseal, or reinterpret it as covering a different queue.
+3. The DECISIONS/BACKLOG change that records this decision intentionally invalidates
+   the manifest's sealed authority-source identities, so any later `gate-check` against
+   G1 must fail closed rather than silently continue.
+4. Insert QH-V2-PERF-005 before QH-V2-OPS-001 as a Human-approved Level A performance
+   optimization round limited to test infrastructure and objective benchmark Evidence.
+5. After PERF-005, resume the existing order:
+   QH-V2-OPS-001 -> QH-V2-OPS-002 -> QH-V2-OPS-003 -> QH-V2-OPS-004 ->
+   QH-V2-OPS-005 -> QH-V2-OPS-006 -> QH-V2-M2-SPEC-001 -> HUMAN ARCHITECTURE GATE.
+6. Remaining Tasks use the ordinary Human-controlled lifecycle. No new autonomous
+   manifest is authorized by this decision.
+7. If PERF-005 Evidence shows the remaining dominant bottleneck requires production
+   Harness/qh changes, stop at the test-only boundary and require a separate approved
+   performance Task.
+
+### Safety Boundaries
+
+- `qh close` remains the authoritative full Verification / Evidence / Final Gate path.
+- No test may be deleted, skipped, weakened, or removed from authoritative Verification
+  for speed.
+- Stale or cached PASS Evidence remains forbidden.
+- Verification concurrency remains rejected unless a separate future Task provides new
+  Evidence and approval.
+- Qwen Worker authority, Repository tools, Runner, Retry, lifecycle semantics, and
+  Final Gate semantics remain unchanged.
+- `GLOBALIZATION = NOT AUTHORIZED` and `M3 = FUTURE / NOT AUTHORIZED` remain unchanged.
+- This decision grants no automatic Task creation, start, commit, close, push, or
+  Architecture mutation authority.
+
+### Consequences
+
+- G1 is retained only as historical Evidence of the completed HARD-006/HARD-007 portion.
+- PERF-005 becomes the next nominated Task after HARD-007.
+- The Repository returns to ordinary per-Task Human Gates for PERF-005 and the remaining
+  OPS/M2 queue unless another explicit Human decision later authorizes a new exact
+  manifest.
