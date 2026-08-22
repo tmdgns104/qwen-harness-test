@@ -123,7 +123,7 @@ approval mismatch must STOP fail-closed.
 
 ### B. Pre-approve the exact covered Task contracts
 
-Change only the `## Status` value of these existing Task files from `PLANNED` to
+Change only the Status field value of these existing Task files from `PLANNED` to
 `APPROVED - READY FOR CONTRACT BASELINE`:
 
 - `tasks/QH-V2-HARD-006.md`
@@ -347,7 +347,7 @@ Then run:
 
 Then run:
 
-`python -c "from pathlib import Path; import re; ids=('QH-V2-HARD-006','QH-V2-HARD-007','QH-V2-OPS-001','QH-V2-OPS-002','QH-V2-OPS-003','QH-V2-OPS-004','QH-V2-OPS-005','QH-V2-OPS-006','QH-V2-M2-SPEC-001'); expected='APPROVED - READY FOR CONTRACT BASELINE'; assert all(re.search(r'(?m)^## Status\s*\n\s*'+re.escape(expected)+r'\s*$', Path('tasks', f'{x}.md').read_text(encoding='utf-8')) for x in ids)"`
+`python -c "from pathlib import Path; import re; ids=('QH-V2-HARD-006','QH-V2-HARD-007','QH-V2-OPS-001','QH-V2-OPS-002','QH-V2-OPS-003','QH-V2-OPS-004','QH-V2-OPS-005','QH-V2-OPS-006','QH-V2-M2-SPEC-001'); expected='APPROVED - READY FOR CONTRACT BASELINE'; heading='##'+' Status'; assert all(re.search(r'(?m)^'+re.escape(heading)+r'\s*\n\s*'+re.escape(expected)+r'\s*$', Path('tasks', f'{x}.md').read_text(encoding='utf-8')) for x in ids)"`
 
 Then run:
 
