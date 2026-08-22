@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 REMOTE = "origin"
@@ -108,21 +109,17 @@ def save_default_repo(root: Path) -> None:
 
 
 def resolve_repo(explicit: str | None = None) -> Path:
-    # 1) Explicit CLI override.
     if explicit:
         return validate_repo(Path(explicit))
 
-    # 2) Current working directory, if it is already inside a Qwen Harness repo.
     cwd_root = git_root_from(Path.cwd())
     if cwd_root is not None and (cwd_root / "tools" / "qh.py").is_file():
         return cwd_root
 
-    # 3) Environment override.
     env_repo = os.environ.get("QH_REPO")
     if env_repo:
         return validate_repo(Path(env_repo))
 
-    # 4) User-level configured default repo.
     config = load_config()
     configured = config.get("default_repo")
     if configured:
@@ -252,6 +249,20 @@ def first_verification(root: Path) -> tuple[str, object]:
     return command, result
 
 
+def print_verification_result(label: str, command: str, result: object, duration: float) -> None:
+    print(f"Focused {label} command: {command}")
+    print(f"Exit Code: {result.exit_code}")
+    if result.stdout:
+        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+    if result.stderr:
+        print(
+            result.stderr,
+            file=sys.stderr,
+            end="" if result.stderr.endswith("\n") else "\n",
+        )
+    print(f"Focused {label} Duration: {duration:.3f}s")
+
+
 def qh(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess:
     return run(
         [sys.executable, str(root / "tools" / "qh.py"), *args],
@@ -343,17 +354,10 @@ def cmd_red(root: Path, sha: str) -> None:
     git(root, "cherry-pick", sha)
     require_clean(root)
 
+    started = time.perf_counter()
     command, result = first_verification(root)
-    print(f"Focused RED command: {command}")
-    print(f"Exit Code: {result.exit_code}")
-    if result.stdout:
-        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
-    if result.stderr:
-        print(
-            result.stderr,
-            file=sys.stderr,
-            end="" if result.stderr.endswith("\n") else "\n",
-        )
+    duration = time.perf_counter() - started
+    print_verification_result("RED", command, result, duration)
 
     if result.exit_code == 0:
         raise Stop("focused RED unexpectedly passed; stop and review")
@@ -367,13 +371,17 @@ def cmd_green(root: Path, sha: str) -> None:
     git(root, "cherry-pick", sha)
     require_clean(root)
 
-    print("== full Task Verification ==")
-    qh(root, "verify")
-    require_clean(root)
+    started = time.perf_counter()
+    command, result = first_verification(root)
+    duration = time.perf_counter() - started
+    print_verification_result("GREEN", command, result, duration)
 
+    if result.exit_code != 0:
+        raise Stop("focused GREEN failed; stop before final close")
+
+    require_clean(root)
     git(root, "diff", "--check")
-    safe_push(root)
-    print("GREEN verified and implementation history pushed.")
+    print("Focused GREEN verified locally. Do not push yet.")
 
 
 def cmd_verify(root: Path) -> None:
@@ -402,29 +410,36 @@ def cmd_commit_impl(root: Path) -> None:
     if bad:
         raise Stop(f"changed paths outside Task scope: {bad}")
 
-    cmd_verify(root)
+    started = time.perf_counter()
+    command, result = first_verification(root)
+    duration = time.perf_counter() - started
+    print_verification_result("GREEN", command, result, duration)
+    if result.exit_code != 0:
+        raise Stop("focused GREEN failed; implementation not committed")
 
     after = changed_paths(root)
     if any(path in lifecycle for path in after):
-        raise Stop(f"Verification changed lifecycle files: {after}")
+        raise Stop(f"Focused Verification changed lifecycle files: {after}")
 
     bad = [path for path in after if not is_path_allowed(path, scope)]
     if bad:
         raise Stop(f"post-Verification paths outside Task scope: {bad}")
 
     if not after:
-        raise Stop("no changes remain after Verification")
+        raise Stop("no changes remain after focused Verification")
 
+    git(root, "diff", "--check")
     for path in after:
         git(root, "add", "--", path)
 
     git(root, "commit", "-m", f"implement {task_id}")
     require_clean(root)
-    safe_push(root)
-    print(f"Implementation committed and pushed: {task_id}")
+    print(f"Implementation committed locally: {task_id}")
+    print("Authoritative full Verification and push are deferred to qhops finish.")
 
 
 def cmd_finish(root: Path) -> None:
+    finish_started = time.perf_counter()
     require_clean(root)
 
     task_id = current_task_id(root)
@@ -433,7 +448,11 @@ def cmd_finish(root: Path) -> None:
     head = git(root, "rev-parse", "HEAD").stdout.strip()
 
     print(f"== authoritative close {task_id} @ {head} ==")
+    close_started = time.perf_counter()
     qh(root, "close", head)
+    close_duration = time.perf_counter() - close_started
+    print(f"Authoritative Close Duration: {close_duration:.3f}s")
+    print("Authoritative Full Verification Count: 1")
 
     paths = changed_paths(root)
     expected = tuple(sorted(("STATUS.md", task_rel)))
@@ -447,6 +466,8 @@ def cmd_finish(root: Path) -> None:
     git(root, "commit", "-m", f"mark {task_id} complete")
     require_clean(root)
     safe_push(root)
+    finish_duration = time.perf_counter() - finish_started
+    print(f"Finish Total Duration: {finish_duration:.3f}s")
     print(f"COMPLETE - VERIFIED and pushed: {task_id}")
 
 
