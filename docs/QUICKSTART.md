@@ -14,13 +14,13 @@
   Harness 내부 구현을 이해하지 않아도 기본 흐름을 사용할 수 있습니다.
 - Git commit은 이 문서의 명령을 순서대로 따라 하면 됩니다. 다만 commit 전에
   `git diff`와 stage된 파일을 직접 확인하세요.
-- 처음에는 이 문서에 적힌 `QH-LOCAL-001` 학습용 Task 계약을 직접 만들어
-  그대로 실행해보는 것을 권장합니다. Repository에 예제 Task 파일이 미리
-  들어 있는 것은 아닙니다.
+- 처음에는 `python tools\qh.py task-new QH-LOCAL-001`로 학습용 Task 초안을 만든 뒤
+  Human이 내용을 채우고 검토하여 승인하는 흐름을 권장합니다.
 
 ## 시작 전에 알아둘 점
 
-- Harness는 Task 파일을 자동으로 만들지 않습니다.
+- `task-new`는 Task 초안만 만들며 자동 승인, start, commit, close, push를 하지 않습니다.
+- 생성된 초안의 상태는 `DRAFT - HUMAN REVIEW REQUIRED`이며 그대로는 시작할 수 없습니다.
 - 공개 Repository의 현재 Task가 `COMPLETE - VERIFIED`라면 바로 실행할 ACTIVE
   Task가 없는 것이 정상입니다.
 - 아래 `QH-LOCAL-001`은 사용자가 직접 만들 예시 ID입니다. 이미 같은 ID가
@@ -131,12 +131,34 @@ python tools\qh.py preflight
   확인하세요.
 - Current Task가 `ACTIVE`라면 새 Task를 시작하지 마세요.
 
+## Task 초안 만들기와 Human 승인 경계
+
+새 Task를 처음부터 빈 파일로 작성하는 대신 다음 명령으로 필수 섹션이 들어간
+초안을 만들 수 있습니다.
+
+```powershell
+python tools\qh.py task-new QH-LOCAL-001
+```
+
+생성되는 `tasks/QH-LOCAL-001.md`는 정확히 `DRAFT - HUMAN REVIEW REQUIRED`
+상태입니다. `task-new`는 구조만 만들 뿐 Goal, Architecture Basis, Allowed/Forbidden
+Changes, Acceptance Criteria, Verification을 대신 결정하거나 승인하지 않습니다.
+또한 STATUS를 수정하거나 `start`, commit, close, push를 실행하지 않습니다.
+
+Human은 생성된 초안의 placeholder를 실제 Task 계약 내용으로 교체하고 범위와
+Verification을 직접 검토해야 합니다. 검토가 끝난 뒤에만 Status를
+`APPROVED - READY FOR CONTRACT BASELINE`으로 명시적으로 바꾸고 Task 계약을
+baseline commit으로 보존합니다. untouched DRAFT를 `qh start`에 넘기면 거부되는
+것이 정상입니다. 즉 `task-new`와 `start`는 서로 다른 단계이며 Human 승인 없이
+자동으로 연결되지 않습니다.
+
 ## 5. 작은 Task 계약 만들기
 
 아래 예시는 Repository root의 `example.txt`에 한 줄을 쓰는 학습용 Task입니다.
 먼저 Human이 내용과 범위를 읽고 승인해야 합니다.
 
-`tasks/QH-LOCAL-001.md` 파일을 만들고 다음 내용을 저장합니다.
+`tasks/QH-LOCAL-001.md` 파일을 만들거나 위 `task-new`로 만든 초안을 검토한 뒤
+다음 계약 내용으로 완성합니다.
 
 ```markdown
 # QH-LOCAL-001 - Write a Harness greeting
