@@ -43,10 +43,12 @@ candidate, but Codex, Qwen, and automation must not:
 - treat `## Next Task` as lifecycle mutation authority.
 
 QH-V2-DOC-002 is already COMPLETE - VERIFIED and remains the first completed queue
-stage. QH-V2-HARD-003, QH-V2-HARD-004, and QH-V2-HARD-005 are the next trust-critical
-Hardening sequence and must each be completed through the current Human-controlled
-lifecycle. QH-V2-ARCH-008 follows those fixes, remains proposal-only, and must also
-be Human-approved before start. None of these Tasks authorizes autonomous execution.
+stage. QH-V2-HARD-003, QH-V2-HARD-004, and QH-V2-HARD-005 form the completed
+trust-critical Hardening sequence before the next Architecture proposal. After
+HARD-005, QH-V2-PERF-004 is intentionally inserted as a Human-approved operational
+performance Task because duplicate full Verification is already materially affecting
+iteration speed. QH-V2-ARCH-008 follows PERF-004, remains proposal-only, and must
+also be Human-approved before start. None of these Tasks authorizes autonomous execution.
 
 After QH-V2-ARCH-008, the separate **HUMAN ONE-TIME AUTONOMOUS QUEUE GATE** may
 accept, reject, or defer a narrow policy for the exact unchanged queue and exact
@@ -111,18 +113,19 @@ is readable; its authoritative completion record remains STATUS, its Task file, 
 | 1 | QH-V2-DOC-002 | Beginner onboarding documentation stage | DOC-001 complete | QH-V2-HARD-003 |
 | 2 | QH-V2-HARD-003 | ADR-010 REQUIRED-BEFORE-NEXT-MILESTONE | QH-V2-DOC-002 | QH-V2-HARD-004 |
 | 3 | QH-V2-HARD-004 | Audit-derived lifecycle hardening | QH-V2-HARD-003 | QH-V2-HARD-005 |
-| 4 | QH-V2-HARD-005 | Audit-derived Evidence hardening | QH-V2-HARD-004 | QH-V2-ARCH-008 |
-| 5 | QH-V2-ARCH-008 | Architecture decision preparation only | QH-V2-HARD-005 | HUMAN ONE-TIME AUTONOMOUS QUEUE GATE |
+| 4 | QH-V2-HARD-005 | Audit-derived Evidence hardening | QH-V2-HARD-004 | QH-V2-PERF-004 |
+| 5 | QH-V2-PERF-004 | ADR-007 Verification workflow optimization | QH-V2-HARD-005 | QH-V2-ARCH-008 |
+| 6 | QH-V2-ARCH-008 | Architecture decision preparation only | QH-V2-PERF-004 | HUMAN ONE-TIME AUTONOMOUS QUEUE GATE |
 | G1 | HUMAN ONE-TIME AUTONOMOUS QUEUE GATE | Human Architecture decision | QH-V2-ARCH-008 | QH-V2-HARD-006: autonomous only if accepted; otherwise ordinary Human Task Gate |
-| 6 | QH-V2-HARD-006 | Audit-derived Windows scope hardening | Gate G1 plus QH-V2-HARD-005 and QH-V2-ARCH-008 | QH-V2-HARD-007 |
-| 7 | QH-V2-HARD-007 | Audit-derived test-integrity hardening | QH-V2-HARD-006 | QH-V2-OPS-001 |
-| 8 | QH-V2-OPS-001 | ADR-010 NEXT-HARDENING | QH-V2-HARD-007 | QH-V2-OPS-002 |
-| 9 | QH-V2-OPS-002 | ADR-010 NEXT-HARDENING | QH-V2-OPS-001 | QH-V2-OPS-003 |
-| 10 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | QH-V2-OPS-002 | QH-V2-OPS-004 |
-| 11 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-OPS-003 | QH-V2-OPS-005 |
-| 12 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
-| 13 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
-| 14 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
+| 7 | QH-V2-HARD-006 | Audit-derived Windows scope hardening | Gate G1 plus QH-V2-HARD-005 and QH-V2-ARCH-008 | QH-V2-HARD-007 |
+| 8 | QH-V2-HARD-007 | Audit-derived test-integrity hardening | QH-V2-HARD-006 | QH-V2-OPS-001 |
+| 9 | QH-V2-OPS-001 | ADR-010 NEXT-HARDENING | QH-V2-HARD-007 | QH-V2-OPS-002 |
+| 10 | QH-V2-OPS-002 | ADR-010 NEXT-HARDENING | QH-V2-OPS-001 | QH-V2-OPS-003 |
+| 11 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | QH-V2-OPS-002 | QH-V2-OPS-004 |
+| 12 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-OPS-003 | QH-V2-OPS-005 |
+| 13 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
+| 14 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
+| 15 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
 
 ## Dependency Graph
 
@@ -131,7 +134,8 @@ flowchart TD
     D002["QH-V2-DOC-002<br/>COMPLETE - VERIFIED"] --> H003["QH-V2-HARD-003"]
     H003 --> H004["QH-V2-HARD-004"]
     H004 --> H005["QH-V2-HARD-005"]
-    H005 --> A008["QH-V2-ARCH-008<br/>proposal only"]
+    H005 --> P004["QH-V2-PERF-004<br/>Verification workflow optimization"]
+    P004 --> A008["QH-V2-ARCH-008<br/>proposal only"]
     A008 --> Gate1["HUMAN ONE-TIME<br/>AUTONOMOUS QUEUE GATE"]
     Gate1 -->|"manual Human Gate or accepted manifest"| H006["QH-V2-HARD-006"]
     H006 --> H007["QH-V2-HARD-007"]
@@ -148,20 +152,17 @@ flowchart TD
 ## Dependency Interpretation
 
 - QH-V2-DOC-002 is a completed historical queue stage, not a PLANNED candidate.
-  Its completion must not be reverted; the first unfinished nomination is HARD-003.
-- HARD-003, HARD-004, and HARD-005 remain Human-controlled and must each complete
-  before ARCH-008. HARD-004 clean-lifecycle enforcement and HARD-005 final
-  post-Verification Evidence refresh are trust-critical Harness prerequisites for
-  unattended repetition. No temporary Supervisor compensation layer replaces them.
-- ARCH-008 begins only after those three Hardening Tasks and remains proposal-only.
-  No autonomous execution is enabled before or by ARCH-008 completion.
+- HARD-003, HARD-004, and HARD-005 are COMPLETE - VERIFIED. HARD-004 clean-lifecycle
+  enforcement and HARD-005 final post-Verification Evidence refresh remain
+  trust-critical Harness prerequisites for unattended repetition.
+- PERF-004 is a narrow ADR-007 operational optimization inserted after HARD-005. It
+  changes qhops operator workflow only, keeps `qh close` authoritative, and does not
+  expand Architecture or lifecycle authority.
+- ARCH-008 begins only after PERF-004 and remains proposal-only. No autonomous
+  execution is enabled before or by ARCH-008 completion.
 - Gate G1 is a Human Architecture decision, not a Task. Without accepted and committed
   Requirement/Decision changes, it authorizes no autonomous successor. HARD-006
   remains the next candidate but requires the ordinary per-Task Human Gate.
-- HARD-003 -> HARD-004 -> HARD-005 is a strong sequence because the Tasks
-  overlap `tools/qh.py` lifecycle/review behavior and later Evidence depends on
-  earlier lifecycle invariants. ARCH-008 and Gate G1 follow those trust-critical
-  fixes and do not add a second lifecycle or Evidence engine.
 - HARD-006 and HARD-007 are technically more independent, but remain serialized
   after Gate G1 to keep the trust-hardening wave deterministic and one-Task-at-a-time.
 - OPS-001 through OPS-004 follow ADR-010 priority. Several are technically
@@ -180,10 +181,10 @@ new, audit-derived contracts supported by current code and Repository Evidence.
 2. Require the current Task to be `COMPLETE - VERIFIED`.
 3. Require `git status --short` to be empty.
 4. Read this queue in order and inspect each Task file's recorded status.
-5. Skip only Tasks whose file says `COMPLETE - VERIFIED`; this currently skips DOC-002.
+5. Skip Tasks whose file says `COMPLETE - VERIFIED`.
 6. Require every declared dependency of the first remaining Task to be complete.
-7. Until an ARCH-008 policy is Human-Accepted and committed, nominate that PLANNED
-   Task at the ordinary Human Task Gate.
+7. Until an ARCH-008 policy is Human-Accepted and committed, nominate that Task at
+   the ordinary Human Task Gate.
 8. Human reviews the contract, resolves open choices, and records the exact
    `APPROVED - READY FOR CONTRACT BASELINE` status.
 9. Commit the approved contract baseline before an explicit `qh start`.
@@ -220,9 +221,10 @@ the queue inside an implementation Task.
 
 ## Current Nomination
 
-QH-V2-DOC-002 is the first queue stage and is already COMPLETE - VERIFIED. The first
-unfinished candidate is `QH-V2-HARD-003`; `STATUS.md` points to it as PLANNED.
-Activation still requires explicit Human approval. `AUTONOMOUS QUEUE = NOT AUTHORIZED`.
+QH-V2-HARD-005 is COMPLETE - VERIFIED. The next queue candidate is
+`QH-V2-PERF-004`, whose contract has been Human-approved for baseline preparation.
+Activation still requires explicit `qh start` through the Human-invoked workflow.
+`AUTONOMOUS QUEUE = NOT AUTHORIZED`.
 
 ## Future Roadmap (Strategic Direction Only; Non-Executable)
 
