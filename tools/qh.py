@@ -145,10 +145,14 @@ def command_task_new(repo_root: Path, task_id: str) -> int:
 
 def command_doctor(repo_root: Path, *, ollama_opener=None) -> int:
     failures = 0
+    warnings = 0
     if ollama_opener is None:
         ollama_opener = urlopen
 
     def report(label: str, state: str, detail: str) -> None:
+        nonlocal warnings
+        if state == "WARN":
+            warnings += 1
         print(f"{label}: {state} {detail}")
 
     report("PYTHON_RUNTIME", "PASS", f"Python {sys.version.split()[0]}")
@@ -284,6 +288,13 @@ def command_doctor(repo_root: Path, *, ollama_opener=None) -> int:
             f"default model {DOCTOR_OLLAMA_MODEL} readiness is unknown",
         )
         failures += 2
+
+    if failures:
+        print(f"OVERALL: FAIL {failures} required check(s) failed")
+    elif warnings:
+        print(f"OVERALL: WARN {warnings} warning(s)")
+    else:
+        print("OVERALL: PASS all required checks passed")
 
     return 1 if failures else 0
 
