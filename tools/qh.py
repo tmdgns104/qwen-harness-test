@@ -168,6 +168,51 @@ def command_doctor(repo_root: Path) -> int:
     else:
         report("SOURCE_OF_TRUTH", "PASS", "required files present")
 
+    status_markdown: str | None = None
+    try:
+        status_markdown = (repo_root / "STATUS.md").read_text(encoding="utf-8")
+        for label in (
+            "Current Task",
+            "Previous Task",
+            "Next Planned Task",
+            "Task Baseline",
+        ):
+            _require_single_lifecycle_line(status_markdown, label)
+        report("LIFECYCLE", "PASS", "STATUS lifecycle shape is valid")
+    except (OSError, RuntimeError, ValueError):
+        report("LIFECYCLE", "FAIL", "STATUS lifecycle shape is invalid")
+        failures += 1
+
+    task_markdown: str | None = None
+    try:
+        task_id, task_path, task_markdown = _load_current_task(repo_root)
+        report(
+            "CURRENT_TASK",
+            "PASS",
+            f"{task_id} at {task_path.relative_to(repo_root).as_posix()}",
+        )
+    except (OSError, RuntimeError, ValueError):
+        report("CURRENT_TASK", "FAIL", "current Task cannot be loaded")
+        failures += 1
+
+    try:
+        if task_markdown is None:
+            raise ValueError("current Task unavailable")
+        parse_change_scope(task_markdown)
+        report("CHANGE_SCOPE", "PASS", "Task ChangeScope parses")
+    except (OSError, RuntimeError, ValueError):
+        report("CHANGE_SCOPE", "FAIL", "Task ChangeScope is invalid")
+        failures += 1
+
+    try:
+        if task_markdown is None:
+            raise ValueError("current Task unavailable")
+        parse_verification_commands(task_markdown)
+        report("VERIFICATION_CONTRACT", "PASS", "Task Verification parses")
+    except (OSError, RuntimeError, ValueError):
+        report("VERIFICATION_CONTRACT", "FAIL", "Task Verification is invalid")
+        failures += 1
+
     try:
         status = _run_git(str(repo_root), ("status", "--porcelain=v1")).stdout
         if status.strip():
