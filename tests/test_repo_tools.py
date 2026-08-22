@@ -185,7 +185,6 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             self.assertTrue(target.is_dir())
 
-
     def test_write_repo_text_allows_recursive_allowed_pattern(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
@@ -229,6 +228,36 @@ class RepositoryReadToolsTests(unittest.TestCase):
                     "CHANGED\n",
                     allowed_changes=("allowed/**",),
                     forbidden_changes=("allowed/blocked/**",),
+                )
+
+            self.assertEqual(
+                target.read_text(encoding="utf-8"),
+                "ORIGINAL\n",
+            )
+
+    def test_write_repo_text_rejects_resolved_in_repo_forbidden_alias_without_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            allowed_dir = repo / "allowed"
+            protected_dir = repo / "protected"
+            allowed_dir.mkdir()
+            protected_dir.mkdir()
+            target = protected_dir / "target.txt"
+            target.write_text("ORIGINAL\n", encoding="utf-8")
+            alias = allowed_dir / "alias"
+
+            try:
+                alias.symlink_to(protected_dir, target_is_directory=True)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"symlink unavailable on this host: {exc}")
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    "allowed/alias/target.txt",
+                    "CHANGED\n",
+                    allowed_changes=("allowed/**",),
+                    forbidden_changes=("protected/**",),
                 )
 
             self.assertEqual(
