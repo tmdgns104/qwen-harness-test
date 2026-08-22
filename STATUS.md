@@ -2,10 +2,16 @@ Current Task: QH-V2-HARD-007 - COMPLETE - VERIFIED - commit 55fedc3282aa858a7ed6
 
 Previous Task: QH-V2-HARD-006 - COMPLETE - VERIFIED - commit 9dff95f4c288c00bf6e758fa4085e115a2fed318
 
-Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
+Next Planned Task: QH-V2-PERF-005 - APPROVED - READY FOR CONTRACT BASELINE
 Task Baseline: 1ad8c21d47d207a7f62c2375b963d80d3bba5937
 
 Handoff:
+- QH-V2-HARD-007 is COMPLETE - VERIFIED; authoritative close used implementation commit 55fedc3282aa858a7ed68a3f52cfd0d64cbf46f1 and lifecycle commit 36e0357d44a9a3e1aba423b891811294e4ec9a71 is pushed to origin/main.
+- Post-HARD-007 performance baseline on 2026-08-22: selected 259-test regression 560.059s OK with one existing skip; tests.test_qh 48 tests in 470.073s; tests.test_harness_core 119 tests in 207.330s.
+- Human explicitly revoked the remaining G1 autonomous queue authorization after HARD-007 to insert QH-V2-PERF-005 before OPS-001; ADR-013 and the later BACKLOG override are authoritative for this change.
+- Existing G1 manifest remains historical Evidence only and must not be edited/resealed; its authority-source identities are intentionally invalid after the ADR-013/BACKLOG change, so G1 gate-check must fail closed.
+- QH-V2-PERF-005 is APPROVED - READY FOR CONTRACT BASELINE and uses the ordinary Human-controlled lifecycle. No G2 autonomous manifest is authorized.
+- PERF-005 is test-infrastructure-only: first optimize Harness Core Git fixture construction, then measure/optimize remaining qh fixture cost; production Harness/qh changes require a separate Task.
 - QH-V2-RUN-001A implementation commit 80cdfff adds frozen backend-neutral ToolSpec, ToolRequest, ToolResult, and WorkerStep records.
 - Existing WorkerRequest and WorkerResponse contracts remain unchanged.
 - QH-V2-RUN-001A Verification Evidence: focused RED confirmed missing records; focused GREEN PASS; WorkerStep PASS; full tests.test_harness_core 114 PASS; git diff --check PASS.
