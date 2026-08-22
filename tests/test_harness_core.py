@@ -1,6 +1,43 @@
 import unittest
 
 from tools.harness_core import ChangeScope, parse_change_scope
+from tests.git_fixture_utils import GitSeedRepository, run_git
+
+
+_GIT_TEST_SEED: GitSeedRepository | None = None
+
+
+def setUpModule() -> None:
+    global _GIT_TEST_SEED
+    _GIT_TEST_SEED = GitSeedRepository(
+        {
+            "tracked.txt": "base\n",
+            "delete.txt": "delete\n",
+        },
+        user_email="hc003@example.test",
+        user_name="HC003 Test",
+    )
+
+
+def tearDownModule() -> None:
+    global _GIT_TEST_SEED
+    if _GIT_TEST_SEED is not None:
+        _GIT_TEST_SEED.cleanup()
+        _GIT_TEST_SEED = None
+
+
+class _SeededGitRepositoryTestCase(unittest.TestCase):
+    def setUp(self) -> None:
+        if _GIT_TEST_SEED is None:
+            raise RuntimeError("Git test seed is not initialized")
+        self._repo_copy = _GIT_TEST_SEED.new_copy()
+        self.repo = self._repo_copy.path
+
+    def tearDown(self) -> None:
+        self._repo_copy.cleanup()
+
+    def _git(self, *args: str) -> str:
+        return run_git(self.repo, *args)
 
 
 class ParseChangeScopeTests(unittest.TestCase):
@@ -180,34 +217,7 @@ class PathScopeMatcherTests(unittest.TestCase):
 
 
 
-class GitExecutionAndRootTests(unittest.TestCase):
-    def setUp(self) -> None:
-        import tempfile
-        from pathlib import Path
-
-        self._tempdir = tempfile.TemporaryDirectory()
-        self.repo = Path(self._tempdir.name)
-        self._git("init", "-q")
-        self._git("config", "user.email", "hc003a@example.test")
-        self._git("config", "user.name", "HC003A Test")
-        (self.repo / "tracked.txt").write_text("base\n", encoding="utf-8")
-        self._git("add", "tracked.txt")
-        self._git("commit", "-q", "-m", "baseline")
-
-    def tearDown(self) -> None:
-        self._tempdir.cleanup()
-
-    def _git(self, *args: str) -> str:
-        import subprocess
-
-        result = subprocess.run(
-            ["git", "-C", str(self.repo), *args],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout.strip()
-
+class GitExecutionAndRootTests(_SeededGitRepositoryTestCase):
     def _hc(self):
         import tools.harness_core as harness_core
         return harness_core
@@ -287,35 +297,7 @@ class GitExecutionAndRootTests(unittest.TestCase):
         hc = self._hc()
         with self.assertRaises(RuntimeError):
             hc._run_git(str(self.repo), ("rev-parse", "--verify", "not-a-real-ref"))
-class GitBaselineCaptureTests(unittest.TestCase):
-    def setUp(self) -> None:
-        import tempfile
-        from pathlib import Path
-
-        self._tempdir = tempfile.TemporaryDirectory()
-        self.repo = Path(self._tempdir.name)
-        self._git("init", "-q")
-        self._git("config", "user.email", "hc003b@example.test")
-        self._git("config", "user.name", "HC003B Test")
-        (self.repo / "tracked.txt").write_text("base\n", encoding="utf-8")
-        (self.repo / "delete.txt").write_text("delete\n", encoding="utf-8")
-        self._git("add", "tracked.txt", "delete.txt")
-        self._git("commit", "-q", "-m", "baseline")
-
-    def tearDown(self) -> None:
-        self._tempdir.cleanup()
-
-    def _git(self, *args: str) -> str:
-        import subprocess
-
-        result = subprocess.run(
-            ["git", "-C", str(self.repo), *args],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout.strip()
-
+class GitBaselineCaptureTests(_SeededGitRepositoryTestCase):
     def _hc(self):
         import tools.harness_core as harness_core
 
@@ -416,35 +398,7 @@ class GitBaselineCaptureTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 hc.capture_git_baseline(str(self.repo))
 
-class GitEvidenceTests(unittest.TestCase):
-    def setUp(self) -> None:
-        import tempfile
-        from pathlib import Path
-
-        self._tempdir = tempfile.TemporaryDirectory()
-        self.repo = Path(self._tempdir.name)
-        self._git("init", "-q")
-        self._git("config", "user.email", "hc003@example.test")
-        self._git("config", "user.name", "HC003 Test")
-        (self.repo / "tracked.txt").write_text("base\n", encoding="utf-8")
-        (self.repo / "delete.txt").write_text("delete\n", encoding="utf-8")
-        self._git("add", "tracked.txt", "delete.txt")
-        self._git("commit", "-q", "-m", "baseline")
-
-    def tearDown(self) -> None:
-        self._tempdir.cleanup()
-
-    def _git(self, *args: str) -> str:
-        import subprocess
-
-        result = subprocess.run(
-            ["git", "-C", str(self.repo), *args],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout.strip()
-
+class GitEvidenceTests(_SeededGitRepositoryTestCase):
     def _hc(self):
         import tools.harness_core as harness_core
         return harness_core
