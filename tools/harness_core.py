@@ -177,6 +177,18 @@ def is_path_allowed(path: str, scope: ChangeScope) -> bool:
     return False
 
 
+def _is_scoped_write_identity_allowed(
+    requested_relative: str,
+    resolved_relative: str,
+    scope: ChangeScope,
+) -> bool:
+    """Require both requested and resolved Repository identities to be authorized."""
+    return is_path_allowed(requested_relative, scope) and is_path_allowed(
+        resolved_relative,
+        scope,
+    )
+
+
 def resolve_scoped_write_target(
     repo_root: str | Path,
     relative_path: str | Path,
@@ -202,7 +214,11 @@ def resolve_scoped_write_target(
     except ValueError as exc:
         raise ValueError("path escapes repository root") from exc
 
-    if not is_path_allowed(resolved_relative, scope):
+    if not _is_scoped_write_identity_allowed(
+        requested_relative,
+        resolved_relative,
+        scope,
+    ):
         raise ValueError("resolved path is not allowed")
 
     return target
