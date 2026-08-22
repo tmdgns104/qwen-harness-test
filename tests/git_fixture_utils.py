@@ -49,7 +49,7 @@ class GitSeedRepository:
             target.write_text(content, encoding="utf-8")
 
         run_git(self.path, "add", "--", ".")
-        run_git(self.path, "commit", "-q", "-m", "baseline")
+        run_git(self.path, "commit", "-q", "--allow-empty", "-m", "baseline")
 
     def new_copy(self) -> GitRepositoryCopy:
         return GitRepositoryCopy(self.path)
