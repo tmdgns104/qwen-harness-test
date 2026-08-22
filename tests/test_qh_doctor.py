@@ -6,13 +6,13 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 from urllib.error import URLError
 
 
 ROOT = Path(__file__).resolve().parents[1]
-QH = ROOT / "tools" / "qh.py"
 TOOLS = ROOT / "tools"
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
@@ -66,16 +66,20 @@ class FakeJsonResponse:
         return self.payload
 
 
-def _git_status() -> str:
+def _fake_success_opener(request, timeout):
+    return FakeJsonResponse({"models": [{"name": "qwen3:8b"}]})
+
+
+def _git_status(repo: Path) -> str:
     return subprocess.run(
-        ["git", "-C", str(ROOT), "status", "--porcelain=v1"],
+        ["git", "-C", str(repo), "status", "--porcelain=v1"],
         capture_output=True,
         text=True,
         check=True,
     ).stdout
 
 
-def _prepare_contract_repo(repo: Path) -> None:
+def _prepare_contract_repo(repo: Path, *, clean: bool = False, remote: bool = False) -> None:
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     (repo / "tasks").mkdir()
     for name in ("PROJECT.md", "REQUIREMENTS.md", "DECISIONS.md"):
@@ -86,19 +90,31 @@ def _prepare_contract_repo(repo: Path) -> None:
         encoding="utf-8",
         newline="\n",
     )
+    if remote:
+        subprocess.run(
+            ["git", "-C", str(repo), "remote", "add", "origin", "https://example.invalid/demo.git"],
+            check=True,
+        )
+    if clean:
+        subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repo),
+                "-c",
+                "user.name=Doctor Fixture",
+                "-c",
+                "user.email=doctor@example.invalid",
+                "commit",
+                "-qm",
+                "fixture baseline",
+            ],
+            check=True,
+        )
 
 
-def _run_doctor_at(repo: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, str(QH), "doctor"],
-        cwd=repo,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-
-
-def _run_doctor_direct(repo: Path, opener) -> tuple[int, str]:
+def _run_doctor_direct(repo: Path, opener=_fake_success_opener) -> tuple[int, str]:
     output = io.StringIO()
     with redirect_stdout(output):
         result = qh_module.command_doctor(repo, ollama_opener=opener)
@@ -106,25 +122,28 @@ def _run_doctor_direct(repo: Path, opener) -> tuple[int, str]:
 
 
 class QhDoctorCliTests(unittest.TestCase):
-    def _run_doctor(self) -> subprocess.CompletedProcess[str]:
-        return _run_doctor_at(ROOT)
+    def test_doctor_command_is_recognized_without_live_backend(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with (
+            patch.object(sys, "argv", ["qh.py", "doctor"]),
+            patch.object(qh_module, "command_doctor", return_value=0) as doctor,
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+        ):
+            result = qh_module.main()
 
-    def test_doctor_command_is_recognized_and_reports_python_runtime(self) -> None:
-        result = self._run_doctor()
+        self.assertEqual(result, 0, stdout.getvalue() + stderr.getvalue())
+        doctor.assert_called_once()
 
-        combined = result.stdout + result.stderr
-        self.assertNotEqual(result.returncode, 2, combined)
-        self.assertIn("PYTHON_RUNTIME", combined)
-        self.assertRegex(combined, r"PYTHON_RUNTIME:\s+(PASS|WARN|FAIL)\b")
+    def test_doctor_reports_python_and_local_repository_checks_without_mutation(self) -> None:
+        before_status = _git_status(ROOT)
 
-    def test_doctor_reports_local_repository_checks_without_mutation(self) -> None:
-        before_status = _git_status()
+        result, output = _run_doctor_direct(ROOT)
 
-        result = self._run_doctor()
-        combined = result.stdout + result.stderr
-
-        self.assertEqual(result.returncode, 0, combined)
+        self.assertEqual(result, 0, output)
         for label in (
+            "PYTHON_RUNTIME",
             "GIT_AVAILABLE",
             "REPOSITORY_ROOT",
             "SOURCE_OF_TRUTH",
@@ -132,9 +151,8 @@ class QhDoctorCliTests(unittest.TestCase):
             "GIT_REMOTE",
         ):
             with self.subTest(label=label):
-                self.assertRegex(combined, rf"{label}:\s+(PASS|WARN|FAIL)\b")
-
-        self.assertEqual(_git_status(), before_status)
+                self.assertRegex(output, rf"{label}:\s+(PASS|WARN|FAIL)\b")
+        self.assertEqual(_git_status(ROOT), before_status)
 
     def test_valid_contract_reports_lifecycle_task_scope_and_verification(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -142,11 +160,11 @@ class QhDoctorCliTests(unittest.TestCase):
             _prepare_contract_repo(repo)
             before_status = (repo / "STATUS.md").read_bytes()
             before_task = (repo / "tasks" / "QH-V2-DEMO-001.md").read_bytes()
+            before_git = _git_status(repo)
 
-            result = _run_doctor_at(repo)
-            combined = result.stdout + result.stderr
+            result, output = _run_doctor_direct(repo)
 
-            self.assertEqual(result.returncode, 0, combined)
+            self.assertEqual(result, 0, output)
             for label in (
                 "LIFECYCLE",
                 "CURRENT_TASK",
@@ -154,12 +172,13 @@ class QhDoctorCliTests(unittest.TestCase):
                 "VERIFICATION_CONTRACT",
             ):
                 with self.subTest(label=label):
-                    self.assertRegex(combined, rf"{label}:\s+PASS\b")
+                    self.assertRegex(output, rf"{label}:\s+PASS\b")
             self.assertEqual((repo / "STATUS.md").read_bytes(), before_status)
             self.assertEqual(
                 (repo / "tasks" / "QH-V2-DEMO-001.md").read_bytes(),
                 before_task,
             )
+            self.assertEqual(_git_status(repo), before_git)
 
     def test_contract_failures_are_nonzero_and_later_checks_still_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -173,9 +192,8 @@ class QhDoctorCliTests(unittest.TestCase):
                 encoding="utf-8",
                 newline="\n",
             )
-            lifecycle_result = _run_doctor_at(repo)
-            lifecycle_output = lifecycle_result.stdout + lifecycle_result.stderr
-            self.assertNotEqual(lifecycle_result.returncode, 0, lifecycle_output)
+            lifecycle_result, lifecycle_output = _run_doctor_direct(repo)
+            self.assertNotEqual(lifecycle_result, 0, lifecycle_output)
             self.assertRegex(lifecycle_output, r"LIFECYCLE:\s+FAIL\b")
             self.assertRegex(
                 lifecycle_output,
@@ -188,9 +206,8 @@ class QhDoctorCliTests(unittest.TestCase):
                 encoding="utf-8",
                 newline="\n",
             )
-            scope_result = _run_doctor_at(repo)
-            scope_output = scope_result.stdout + scope_result.stderr
-            self.assertNotEqual(scope_result.returncode, 0, scope_output)
+            scope_result, scope_output = _run_doctor_direct(repo)
+            self.assertNotEqual(scope_result, 0, scope_output)
             self.assertRegex(scope_output, r"CHANGE_SCOPE:\s+FAIL\b")
             self.assertRegex(scope_output, r"VERIFICATION_CONTRACT:\s+PASS\b")
 
@@ -202,13 +219,8 @@ class QhDoctorCliTests(unittest.TestCase):
                 encoding="utf-8",
                 newline="\n",
             )
-            verification_result = _run_doctor_at(repo)
-            verification_output = verification_result.stdout + verification_result.stderr
-            self.assertNotEqual(
-                verification_result.returncode,
-                0,
-                verification_output,
-            )
+            verification_result, verification_output = _run_doctor_direct(repo)
+            self.assertNotEqual(verification_result, 0, verification_output)
             self.assertRegex(
                 verification_output,
                 r"VERIFICATION_CONTRACT:\s+FAIL\b",
@@ -275,6 +287,37 @@ class QhDoctorCliTests(unittest.TestCase):
                     self.assertNotIn("password", output)
                     self.assertNotIn("Bearer", output)
                     self.assertNotIn("user:", output)
+
+    def test_overall_status_distinguishes_pass_warn_and_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            pass_repo = Path(tmp) / "pass"
+            pass_repo.mkdir()
+            _prepare_contract_repo(pass_repo, clean=True, remote=True)
+            result, output = _run_doctor_direct(pass_repo)
+            self.assertEqual(result, 0, output)
+            self.assertRegex(output, r"OVERALL:\s+PASS\b")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            warn_repo = Path(tmp)
+            _prepare_contract_repo(warn_repo)
+            result, output = _run_doctor_direct(warn_repo)
+            self.assertEqual(result, 0, output)
+            self.assertRegex(output, r"WORKTREE:\s+WARN\b")
+            self.assertRegex(output, r"GIT_REMOTE:\s+WARN\b")
+            self.assertRegex(output, r"OVERALL:\s+WARN\b")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            fail_repo = Path(tmp)
+            _prepare_contract_repo(fail_repo)
+            (fail_repo / "STATUS.md").write_text(
+                VALID_STATUS + "Current Task: DUPLICATE - ACTIVE\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            result, output = _run_doctor_direct(fail_repo)
+            self.assertNotEqual(result, 0, output)
+            self.assertRegex(output, r"LIFECYCLE:\s+FAIL\b")
+            self.assertRegex(output, r"OVERALL:\s+FAIL\b")
 
 
 if __name__ == "__main__":
