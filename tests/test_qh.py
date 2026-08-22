@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.git_fixture_utils import GitSeedRepository
+
 
 QH = Path(__file__).resolve().parents[1] / "tools" / "qh.py"
 
@@ -839,37 +841,39 @@ class QhCleanWorktreeLifecycleTests(unittest.TestCase):
     CURRENT_TASK_ID = "QH-V2-CURRENT-001"
     TARGET_TASK_ID = "QH-V2-TARGET-002"
 
+    @classmethod
+    def setUpClass(cls):
+        cls.seed = GitSeedRepository(
+            {
+                ".gitignore": "ignored.tmp\n",
+                "seed.txt": "seed\n",
+                f"tasks/{cls.CURRENT_TASK_ID}.md": (
+                    "# Current Task\n\n## Status\n\nCOMPLETE - VERIFIED\n"
+                ),
+                f"tasks/{cls.TARGET_TASK_ID}.md": (
+                    "# Target Task\n\n## Status\n\n"
+                    "APPROVED - READY FOR CONTRACT BASELINE\n"
+                ),
+                "STATUS.md": (
+                    f"Current Task: {cls.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234\n\n"
+                    "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
+                    f"Next Planned Task: {cls.TARGET_TASK_ID} - PLANNED\n"
+                ),
+            },
+            user_email="test@example.com",
+            user_name="Test User",
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.seed.cleanup()
+
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.repo = Path(self.tmp.name)
-        (self.repo / "tasks").mkdir()
-
-        self._git("init")
-        self._git("config", "user.email", "test@example.com")
-        self._git("config", "user.name", "Test User")
-
-        (self.repo / ".gitignore").write_text("ignored.tmp\n", encoding="utf-8")
-        (self.repo / "seed.txt").write_text("seed\n", encoding="utf-8")
-        self.current_task_path.write_text(
-            "# Current Task\n\n## Status\n\nCOMPLETE - VERIFIED\n",
-            encoding="utf-8",
-        )
-        self.target_task_path.write_text(
-            "# Target Task\n\n## Status\n\n"
-            "APPROVED - READY FOR CONTRACT BASELINE\n",
-            encoding="utf-8",
-        )
-        self.status_path.write_text(
-            f"Current Task: {self.CURRENT_TASK_ID} - COMPLETE - VERIFIED - commit abc1234\n\n"
-            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
-            f"Next Planned Task: {self.TARGET_TASK_ID} - PLANNED\n",
-            encoding="utf-8",
-        )
-        self._git("add", ".")
-        self._git("commit", "-m", "clean lifecycle seed")
+        self._repo_copy = self.seed.new_copy()
+        self.repo = self._repo_copy.path
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self._repo_copy.cleanup()
 
     @property
     def status_path(self):
@@ -1069,16 +1073,25 @@ class QhCleanWorktreeLifecycleTests(unittest.TestCase):
 class QhPostVerificationEvidenceRefreshTests(unittest.TestCase):
     TASK_ID = "QH-V2-EVIDENCE-001"
 
+    @classmethod
+    def setUpClass(cls):
+        cls.seed = GitSeedRepository(
+            {},
+            user_email="test@example.com",
+            user_name="Test User",
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.seed.cleanup()
+
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.repo = Path(self.tmp.name)
+        self._repo_copy = self.seed.new_copy()
+        self.repo = self._repo_copy.path
         (self.repo / "tasks").mkdir()
-        self._git("init")
-        self._git("config", "user.email", "test@example.com")
-        self._git("config", "user.name", "Test User")
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self._repo_copy.cleanup()
 
     @property
     def status_path(self):
