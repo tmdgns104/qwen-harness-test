@@ -15,6 +15,7 @@ COMPLETED_CURRENT_TASK_RE = re.compile(
     r" - COMPLETE - VERIFIED - commit \S+"
 )
 APPROVED_TASK_STATUS = "APPROVED - READY FOR CONTRACT BASELINE"
+TASK_DRAFT_STATUS = "DRAFT - HUMAN REVIEW REQUIRED"
 
 
 def _load_current_task(repo_root: Path) -> tuple[str, Path, str]:
@@ -81,6 +82,60 @@ def _require_approved_target_status(markdown: str) -> None:
         raise ValueError(
             f"Target Task Status must be exactly {APPROVED_TASK_STATUS}"
         )
+
+
+def _task_draft_markdown(task_id: str) -> str:
+    placeholder = "HUMAN REVIEW REQUIRED. Replace this placeholder before approval."
+    return (
+        f"# {task_id} - Human-Review Task Draft\n\n"
+        "## Status\n\n"
+        f"{TASK_DRAFT_STATUS}\n\n"
+        "This file is only a scaffold. Human review and explicit approval are required before start.\n\n"
+        "## Problem\n\n"
+        f"{placeholder}\n\n"
+        "## Goal\n\n"
+        f"{placeholder}\n\n"
+        "## Architecture Basis\n\n"
+        f"{placeholder}\n\n"
+        "## Dependencies\n\n"
+        f"{placeholder}\n\n"
+        "## Scope\n\n"
+        f"{placeholder}\n\n"
+        "## Allowed Changes\n\n"
+        f"{placeholder}\n\n"
+        "## Forbidden Changes\n\n"
+        f"{placeholder}\n\n"
+        "## Acceptance Criteria\n\n"
+        f"{placeholder}\n\n"
+        "## Verification\n\n"
+        "HUMAN REVIEW REQUIRED. Add explicitly marked commands before approval.\n\n"
+        "## Evidence Requirements\n\n"
+        f"{placeholder}\n\n"
+        "## Stop Conditions\n\n"
+        f"{placeholder}\n\n"
+        "## Next Task\n\n"
+        f"{placeholder}\n"
+    )
+
+
+def command_task_new(repo_root: Path, task_id: str) -> int:
+    if re.fullmatch(TASK_ID_PATTERN, task_id) is None:
+        raise ValueError("Invalid Task ID")
+
+    tasks_dir = repo_root / "tasks"
+    if not tasks_dir.is_dir():
+        raise FileNotFoundError("Task directory not found: tasks")
+
+    task_path = tasks_dir / f"{task_id}.md"
+    try:
+        with task_path.open("x", encoding="utf-8", newline="\n") as handle:
+            handle.write(_task_draft_markdown(task_id))
+    except FileExistsError as exc:
+        raise ValueError(f"Task file already exists: tasks/{task_id}.md") from exc
+
+    print(f"Created Task Draft: tasks/{task_id}.md")
+    print(f"Status: {TASK_DRAFT_STATUS}")
+    return 0
 
 
 def command_start(repo_root: Path, target_task_id: str) -> int:
@@ -337,11 +392,15 @@ def command_run(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close", "run"))
+    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close", "run", "task-new"))
     parser.add_argument("task_id", nargs="?")
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
     try:
+        if args.command == "task-new":
+            if args.task_id is None:
+                raise ValueError("task-new requires a Task ID")
+            return command_task_new(repo_root, args.task_id)
         if args.command == "start":
             if args.task_id is None:
                 raise ValueError("start requires a Task ID")
