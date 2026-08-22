@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "policy": "HUMAN ONE-TIME AUTONOMOUS QUEUE GATE",
+  "gate_change_set_commit": "42f3dc458dc25fdea83cd57f106cf6ec3936d44c",
+  "authority_source_blobs": {
+    "BACKLOG.md": "fbc4fc9976ed69384ca9c36a6edfe5a44b841f83",
+    "REQUIREMENTS.md": "bb660620b84f950f37c9347951ed7c673a6430fb",
+    "DECISIONS.md": "92943ef3b5d7bb6e1d918b343e13c5ecf3ba6034"
+  },
+  "human_gate_evidence": {
+    "path": "docs/AUTONOMOUS_QUEUE_GATE_EVIDENCE.md",
+    "blob": "34a14d8386dbebf1cad8716c7b3233e6fc023d6b"
+  },
+  "covered_queue": [
+    "QH-V2-HARD-006",
+    "QH-V2-HARD-007",
+    "QH-V2-OPS-001",
+    "QH-V2-OPS-002",
+    "QH-V2-OPS-003",
+    "QH-V2-OPS-004",
+    "QH-V2-OPS-005",
+    "QH-V2-OPS-006",
+    "QH-V2-M2-SPEC-001"
+  ],
+  "tasks": {
+    "QH-V2-HARD-006": {
+      "path": "tasks/QH-V2-HARD-006.md",
+      "prestart_blob": "aa11f35d2add20162f53fe5429a73ebb4d180631",
+      "immutable_sha256": "d1e192f4aaaf0ea1f68a4fc7ab15023dbf19496e6bb1b44ce629073d40c90975"
+    },
+    "QH-V2-HARD-007": {
+      "path": "tasks/QH-V2-HARD-007.md",
+      "prestart_blob": "1e0d18f57aa61fdf6be69bb06ac578525e9cfec3",
+      "immutable_sha256": "389e7d59fa05f7765f62eb27b2eed346611017d31302c78c6a6ea551763ae452"
+    },
+    "QH-V2-OPS-001": {
+      "path": "tasks/QH-V2-OPS-001.md",
+      "prestart_blob": "464449025083a63ba7e2d05b76209635d1d937b1",
+      "immutable_sha256": "6dc2267b215cb1ceec36e61eb007ff489d723aaafbc83bd969fae1415966379f"
+    },
+    "QH-V2-OPS-002": {
+      "path": "tasks/QH-V2-OPS-002.md",
+      "prestart_blob": "f2cca9ef86de2889d6a50fb3e66e46540fe36f47",
+      "immutable_sha256": "53eafa68591ac07d4a34e1d0bf9789cca96956f06b386c9dc10e1323c6029fa0"
+    },
+    "QH-V2-OPS-003": {
+      "path": "tasks/QH-V2-OPS-003.md",
+      "prestart_blob": "39b83352baff1e6dadf298e938fb15d524438e48",
+      "immutable_sha256": "31b298ad75559b87111d3cb717723304863c34b723a402c0926cfdc0eb8c86b7"
+    },
+    "QH-V2-OPS-004": {
+      "path": "tasks/QH-V2-OPS-004.md",
+      "prestart_blob": "cfaa2c4ad983e07e457eeb63700b4250af383a3d",
+      "immutable_sha256": "81dd1e8d9b9fae34e9f7c0c62428046df74e562fd89d4317d515766ec07e7943"
+    },
+    "QH-V2-OPS-005": {
+      "path": "tasks/QH-V2-OPS-005.md",
+      "prestart_blob": "7c648fdf7a8676623d42b7a9cb35450f174ba6a0",
+      "immutable_sha256": "7133763473402744f2d1f873e63c1068b2976f08251fe0893160c37cebedeb2f"
+    },
+    "QH-V2-OPS-006": {
+      "path": "tasks/QH-V2-OPS-006.md",
+      "prestart_blob": "6cea76ecd0440c85a8034956a3547c58b38996a2",
+      "immutable_sha256": "310ed2fc3e5152149abd182c72130df092a73338c956d46fa6e577a2c56cf612"
+    },
+    "QH-V2-M2-SPEC-001": {
+      "path": "tasks/QH-V2-M2-SPEC-001.md",
+      "prestart_blob": "6a231e8eb7c79034af6b8d887eec5a50ed1ece1f",
+      "immutable_sha256": "c7da445e92e002cc4cb7f9c91173cd0c19081a6a8927384a642ef1512dbc1dee"
+    }
+  },
+  "git": {
+    "local_branch": "master",
+    "remote": "origin",
+    "remote_identity": "github.com/tmdgns104/qwen-harness-test.git",
+    "remote_branch": "main",
+    "push_refspec": "HEAD:main",
+    "fast_forward_only": true
+  },
+  "delegated_operations": [
+    "start exact next pre-approved covered Task",
+    "create Task implementation commit",
+    "invoke authoritative qh close at exact implementation HEAD",
+    "create separate lifecycle commit after Final Gate PASS",
+    "advance only to exact manifest successor after revalidation",
+    "push HEAD:main to origin using fast-forward-only behavior"
+  ],
+  "forbidden_operations": [
+    "create Task during autonomous queue execution",
+    "edit Task immutable contract authority",
+    "insert remove or reorder covered queue",
+    "edit Architecture or Requirements during covered execution",
+    "expand Task scope or bypass Forbidden precedence",
+    "force push rebase reset history rewrite or destructive recovery",
+    "bypass Verification Evidence Diff Check or Final Gate",
+    "expand Qwen Worker authority",
+    "continue past HUMAN ARCHITECTURE GATE"
+  ],
+  "validity": {
+    "revoked": false,
+    "valid_until": "first of revocation, manifest mismatch, policy invalidation, or covered queue completion at HUMAN ARCHITECTURE GATE",
+    "terminal_gate": "HUMAN ARCHITECTURE GATE"
+  },
+  "audit": {
+    "authoritative_resume": "Repository Git state plus exact manifest",
+    "supplemental_local_audit": "%USERPROFILE%\\.qhops\\audit\\",
+    "chat_or_session_memory_authority": false
+  },
+  "manifest_sha256": "4b39f0319f10c8191c28224ef6eb622d5f9627f082e6314fb80e7dda69e17682"
+}
