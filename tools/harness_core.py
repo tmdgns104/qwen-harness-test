@@ -121,17 +121,25 @@ def parse_change_scope(markdown: str) -> ChangeScope:
     )
 
 
+def _normalize_scope_path(value: str) -> str:
+    """Normalize scope path spelling for platform-native path identity."""
+    normalized = value.replace("\\", "/")
+    if os.name == "nt":
+        normalized = normalized.casefold()
+    return normalized
+
+
 def path_matches(path: str, pattern: str) -> bool:
     """
     Determine if a repository-relative path matches a given pattern.
     
-    Normalizes both inputs by replacing backslashes with forward slashes.
+    Normalizes slash direction on all platforms and applies case-insensitive
+    comparison only on Windows. POSIX case-sensitive semantics are preserved.
     Supports exact matching and trailing /** for recursive directory matching.
     Does not support other glob syntax (e.g., *.py).
     """
-    # Normalize backslashes to forward slashes
-    normalized_path = path.replace("\\", "/")
-    normalized_pattern = pattern.replace("\\", "/")
+    normalized_path = _normalize_scope_path(path)
+    normalized_pattern = _normalize_scope_path(pattern)
     
     # Check for exact match first
     if normalized_path == normalized_pattern:
@@ -167,6 +175,37 @@ def is_path_allowed(path: str, scope: ChangeScope) -> bool:
     
     # Default deny
     return False
+
+
+def resolve_scoped_write_target(
+    repo_root: str | Path,
+    relative_path: str | Path,
+    scope: ChangeScope,
+) -> Path:
+    """Resolve a Repository write target and authorize both lexical and resolved identity."""
+    requested = Path(relative_path)
+    if requested.is_absolute() or requested.drive:
+        raise ValueError("absolute paths are not allowed")
+
+    requested_relative = requested.as_posix()
+    if not is_path_allowed(requested_relative, scope):
+        raise ValueError("path is not allowed")
+
+    try:
+        root = Path(repo_root).resolve()
+        target = (root / requested).resolve()
+    except OSError as exc:
+        raise ValueError(f"failed to resolve repository path: {exc}") from exc
+
+    try:
+        resolved_relative = target.relative_to(root).as_posix()
+    except ValueError as exc:
+        raise ValueError("path escapes repository root") from exc
+
+    if not is_path_allowed(resolved_relative, scope):
+        raise ValueError("resolved path is not allowed")
+
+    return target
 
 
 def _run_git(
