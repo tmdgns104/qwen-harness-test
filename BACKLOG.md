@@ -120,12 +120,14 @@ is readable; its authoritative completion record remains STATUS, its Task file, 
 | 7 | QH-V2-HARD-006 | Audit-derived Windows scope hardening | Gate G1 plus QH-V2-HARD-005 and QH-V2-ARCH-008 | QH-V2-HARD-007 |
 | 8 | QH-V2-HARD-007 | Audit-derived test-integrity hardening | QH-V2-HARD-006 | QH-V2-OPS-001 |
 | 9 | QH-V2-OPS-001 | ADR-010 NEXT-HARDENING | QH-V2-HARD-007 | QH-V2-OPS-002 |
-| 10 | QH-V2-OPS-002 | ADR-010 NEXT-HARDENING | QH-V2-OPS-001 | QH-V2-OPS-003 |
-| 11 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | QH-V2-OPS-002 | QH-V2-OPS-004 |
-| 12 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-OPS-003 | QH-V2-OPS-005 |
-| 13 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
-| 14 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
-| 15 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
+| 10 | QH-V2-OPS-002 | ADR-010 NEXT-HARDENING | QH-V2-OPS-001 | QH-V2-HARD-008 |
+| 11 | QH-V2-HARD-008 | ADR-014 cross-Repository runtime portability hardening | QH-V2-OPS-002 | QH-V2-WORKER-ROB-001 |
+| 12 | QH-V2-WORKER-ROB-001 | ADR-014 Level B Worker protocol robustness | QH-V2-HARD-008 | QH-V2-OPS-003 |
+| 13 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | QH-V2-WORKER-ROB-001 | QH-V2-OPS-004 |
+| 14 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-OPS-003 | QH-V2-OPS-005 |
+| 15 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
+| 16 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
+| 17 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
 
 ## Dependency Graph
 
@@ -141,7 +143,9 @@ flowchart TD
     H006 --> H007["QH-V2-HARD-007"]
     H007 --> O001["QH-V2-OPS-001"]
     O001 --> O002["QH-V2-OPS-002"]
-    O002 --> O003["QH-V2-OPS-003"]
+    O002 --> H008["QH-V2-HARD-008<br/>runtime portability"]
+    H008 --> WROB["QH-V2-WORKER-ROB-001<br/>single-tool robustness"]
+    WROB --> O003["QH-V2-OPS-003"]
     O003 --> O004["QH-V2-OPS-004"]
     O004 --> O005["QH-V2-OPS-005"]
     O005 --> O006["QH-V2-OPS-006"]
@@ -165,7 +169,10 @@ flowchart TD
   remains the next candidate but requires the ordinary per-Task Human Gate.
 - HARD-006 and HARD-007 are technically more independent, but remain serialized
   after Gate G1 to keep the trust-hardening wave deterministic and one-Task-at-a-time.
-- OPS-001 through OPS-004 follow ADR-010 priority. Several are technically
+- ADR-014 inserts HARD-008 and WORKER-ROB-001 after OPS-002 because GitHub Issue #1
+  exposed runtime portability and Worker interaction failures during a real
+  cross-Repository trial. OPS-003 is deferred until both complete.
+- OPS-001 through OPS-004 otherwise retain ADR-010 priority. Several are technically
   independent; their edges are governance order, not claims of code dependency.
 - OPS-005 precedes OPS-006 so current-state presentation is stabilized before
   historical Handoff material is reorganized.
@@ -420,7 +427,38 @@ this override. Any later autonomous policy requires a separate Human decision.
 
 ### Current Nomination Override
 
-QH-V2-HARD-007 is COMPLETE - VERIFIED. The next queue candidate is
-`QH-V2-PERF-005`, already recorded as `APPROVED - READY FOR CONTRACT BASELINE`.
-After PERF-005 completes, nominate QH-V2-OPS-001 through the ordinary Human-controlled
-lifecycle.
+QH-V2-HARD-007, QH-V2-PERF-005, QH-V2-OPS-001, and QH-V2-OPS-002 are complete.
+QH-V2-ARCH-014 is the current planning Task. After it is COMPLETE - VERIFIED,
+nominate QH-V2-HARD-008 through the ordinary Human-controlled lifecycle.
+
+## Post-OPS-002 Cross-Repository Trial Override - ADR-014 - 2026-08-23
+
+GitHub Issue #1 is new operational Evidence and ADR-014 supersedes the earlier
+post-PERF-005 remaining order only where they conflict.
+
+`GLOBALIZATION = NOT AUTHORIZED`
+
+The Human-controlled remaining order after QH-V2-OPS-002 is:
+
+```text
+QH-V2-OPS-002 - COMPLETE - VERIFIED
+  -> QH-V2-HARD-008
+  -> QH-V2-WORKER-ROB-001
+  -> QH-V2-OPS-003
+  -> QH-V2-OPS-004
+  -> QH-V2-OPS-005
+  -> QH-V2-OPS-006
+  -> QH-V2-M2-SPEC-001
+  -> HUMAN ARCHITECTURE GATE
+```
+
+HARD-008 is limited to runtime/import portability and diagnostics.
+WORKER-ROB-001 is limited to strengthening single-tool Worker interaction while
+preserving the existing deterministic SAFETY boundary. Neither Task authorizes
+Globalization, automatic multi-tool execution, expanded Worker authority, or a new
+autonomous queue.
+
+### Current Nomination Override
+
+QH-V2-ARCH-014 is the current planning Task. After it is COMPLETE - VERIFIED, nominate
+QH-V2-HARD-008 as the next Human-controlled candidate. Do not auto-start it.

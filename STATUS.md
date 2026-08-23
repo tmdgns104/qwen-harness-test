@@ -2,7 +2,7 @@ Current Task: QH-V2-ARCH-014 - ACTIVE
 
 Previous Task: QH-V2-OPS-002 - COMPLETE - VERIFIED - commit 5a7157b
 
-Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
+Next Planned Task: QH-V2-HARD-008 - HUMAN-CONTROLLED CANDIDATE
 Task Baseline: 914ffe22b977099c0e7982b68b272d4523a1e7e6
 
 Handoff:

@@ -26,12 +26,12 @@ path contains spaces.
 
 ## Dependencies
 
-- QH-V2-OPS-002 must be COMPLETE - VERIFIED in the deterministic queue.
+- QH-V2-WORKER-ROB-001 must be COMPLETE - VERIFIED in the ADR-014 deterministic
+  queue; it follows QH-V2-HARD-008.
 - Doctor remains a separate diagnostic command; the launcher does not combine it
   with lifecycle steps.
-- Until committed Requirement/Accepted Decision updates and the Human-approved G1
-  manifest cover this exact unchanged Task and queue blob identity, explicit Human
-  approval is required before activation.
+- The reprioritized queue uses the ordinary Human-controlled lifecycle. No autonomous
+  manifest covers this Task after ADR-014.
 
 ## Scope
 

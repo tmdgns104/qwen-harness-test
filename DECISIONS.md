@@ -1172,3 +1172,75 @@ invalidation as terminal conditions for G1 authorization.
 - The Repository returns to ordinary per-Task Human Gates for PERF-005 and the remaining
   OPS/M2 queue unless another explicit Human decision later authorizes a new exact
   manifest.
+
+## ADR-014 - Cross-Repository Trial Hardening Reprioritization
+
+### Status
+
+Accepted
+
+### Context
+
+GitHub Issue #1 records the first real cross-Repository trial Evidence from
+`ai_data_analyst`. The trial exposed two independent operational failures that were
+not covered by the in-Repository Milestone 1 Evidence:
+
+1. the documented `python tools\qh.py run ...` entry path can fail with
+   `ModuleNotFoundError: No module named 'tools'` unless the operator manually adjusts
+   `PYTHONPATH`; and
+2. after that workaround, real `qwen3:8b` produced multiple ToolRequests in one
+   WorkerStep on two controlled runs, causing the deterministic Runner to fail closed
+   with `SAFETY` and zero Repository mutation.
+
+Issue #1 is authoritative new operational Evidence for planning purposes. It is not
+implementation authority by itself.
+
+### Decision
+
+1. Treat the import-path failure as a runtime portability defect and address it first
+   in QH-V2-HARD-008.
+2. Treat the repeated multi-ToolRequest behavior as a Worker interaction robustness
+   problem and address it second in QH-V2-WORKER-ROB-001.
+3. After those Tasks, resume QH-V2-OPS-003 and the existing remaining OPS/M2 order.
+   QH-V2-OPS-003 is deferred, not cancelled.
+4. The existing `zero or one ToolRequest per WorkerStep` rule remains authoritative.
+   More than one ToolRequest remains deterministic SAFETY failure. An invalid step is
+   not silently split, repaired, retried as a continuation, or executed.
+5. QH-V2-WORKER-ROB-001 may strengthen Worker instructions/context inside the existing
+   Trust Boundary. Because prompt/context policy is ADR-011 Level B, promotion requires
+   objective Stable-versus-Candidate Evidence.
+6. Any change that converts a multi-tool violation into continuation/retry, changes
+   retry classification, expands Worker authority, changes model routing or step
+   budget, or changes Final Gate authority requires a separate Human Architecture
+   review before implementation.
+7. `GLOBALIZATION = NOT AUTHORIZED` remains unchanged. The trial and these hardening
+   fixes do not authorize stable cross-Repository use.
+8. ADR-011 Globalization prerequisites remain in force, including QH-V2-OPS-004 and a
+   later explicit Human Globalization Gate.
+
+### Queue
+
+The Human-controlled candidate order after QH-V2-OPS-002 is:
+
+```text
+QH-V2-HARD-008
+  -> QH-V2-WORKER-ROB-001
+  -> QH-V2-OPS-003
+  -> QH-V2-OPS-004
+  -> QH-V2-OPS-005
+  -> QH-V2-OPS-006
+  -> QH-V2-M2-SPEC-001
+  -> HUMAN ARCHITECTURE GATE
+```
+
+No autonomous manifest covers this reprioritized queue. Ordinary Human-controlled
+Task lifecycle rules remain authoritative.
+
+### Consequences
+
+- Runtime/import portability is fixed before changing Worker interaction policy.
+- Worker robustness work preserves deterministic multi-tool fail-closed semantics.
+- Existing OPS work is preserved and resumes after the two evidence-driven Tasks.
+- Formal Globalization remains a separate future Human decision.
+- Qwen Worker authority, Repository tool authority, Verification, Evidence, and Final
+  Gate ownership remain unchanged.
