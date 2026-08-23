@@ -77,6 +77,8 @@ The experimental projector must build the Worker Brief only from exact tracked T
 It must copy, without paraphrasing, the Task identity/title plus the bodies of these required sections:
 
 - `Goal`
+- `Architecture Basis`
+- `Dependencies`
 - `Scope`
 - `Allowed Changes`
 - `Forbidden Changes`
@@ -132,8 +134,10 @@ For every measured run record at minimum:
 - ToolRequest arguments sufficient for deterministic validity review;
 - output length when applicable;
 - whether a multi-tool SAFETY shape occurred;
-- whether a requested path is Repository-relative and compatible with the original Task scope;
+- whether requested paths comply with the current tool's own read/write authorization semantics;
 - whether any Repository write was executed (`false` for this experiment).
+
+For `write_repo_text`, raw generated file content does not need to be persisted in benchmark Evidence when path plus content length/hash is sufficient for deterministic review. This avoids unnecessary Evidence bloat while preserving the requested-path and schema checks.
 
 Record the raw measured results in `docs/WORKER_ROB_002_RESULTS.json` and the reviewed interpretation in `docs/WORKER_ROB_002_EVIDENCE.md`.
 
@@ -158,8 +162,10 @@ For this experiment, a **valid bounded first step** means all of the following:
 - exactly one ToolRequest is returned;
 - the ToolRequest name exists in the current Worker tool schema;
 - its argument object satisfies the current schema shape;
-- any Repository path is relative and does not request an operation outside the original Task contract;
+- path validity is evaluated according to that tool's actual authority: `read_repo_text` requires a Repository-relative path that remains inside the Repository, while `write_repo_text` additionally requires the target to satisfy the original Task's Allowed/Forbidden ChangeScope;
 - no tool is executed by the benchmark itself.
+
+A read of a file that is forbidden to change is not automatically a scope violation when the current read tool contract permits that Repository-relative read. A write request is judged against the original Task ChangeScope.
 
 This metric is an interaction-quality benchmark, not Repository Task PASS and not Final Gate PASS.
 
@@ -241,7 +247,7 @@ The experimental code must not be imported or invoked by the normal production q
 5. Exactly 10 measured runs per variant are recorded in the raw results artifact.
 6. Variant order is interleaved or otherwise controlled so a one-time cold start is not assigned only to one variant.
 7. The benchmark requests only the initial Worker step and executes no returned Worker ToolRequest.
-8. Raw Evidence records elapsed time, transport/timeout classification, ToolRequest count/name/arguments, output length, safety shape, path/scope compatibility, and write-executed=false.
+8. Raw Evidence records elapsed time, transport/timeout classification, ToolRequest count/name/arguments or a deterministic bounded representation, output length, safety shape, tool-aware path/scope compatibility, and write-executed=false.
 9. The Evidence summary reports every metric listed in Evaluation Metrics.
 10. The Evidence explicitly distinguishes interaction-quality success from Repository PASS / Verification / Final Gate PASS.
 11. Promotion recommendation uses the predefined threshold and does not reinterpret failure as success.
