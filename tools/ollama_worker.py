@@ -46,7 +46,7 @@ def call_ollama_worker(
     }
     body = json.dumps(payload).encode("utf-8")
     http_request = Request(
-        f"{base_url.rstrip('/')}/api/chat",
+        f"{base_url.rstrip("/")}/api/chat",
         data=body,
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -67,7 +67,6 @@ def call_ollama_worker(
         return WorkerResponse(transport_ok=False, output_text="", error=f"invalid Ollama response schema: {exc}")
 
     return WorkerResponse(transport_ok=True, output_text=content, error=None)
-
 
 class OllamaToolSession:
     """Native Ollama tool interaction translated through backend-neutral records."""
