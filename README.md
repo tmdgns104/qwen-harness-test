@@ -338,6 +338,19 @@ git push origin master:main
 현재 Repository에는 별도의 `ARCHITECTURE.md`와 `AGENTS.md`가 없습니다.
 Architecture 권위는 Accepted `DECISIONS.md`와 Requirements/Task 계약에 있습니다.
 
+## Project History & Research
+
+처음 실험부터 현재 Worker robustness 연구까지의 과정은 아래 Engineering Journal에서 확인할 수 있습니다.
+
+| 문서 | 내용 |
+|---|---|
+| [Project Timeline](docs/PROJECT_TIMELINE.md) | 프로젝트가 어떤 단계와 Evidence를 거쳐 발전했는지 시간순 기록 |
+| [Development Log](docs/DEVELOPMENT_LOG.md) | 문제 → 구현 → Verification → 결과 중심 개발일지 |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | 실제 장애의 증상, 원인, 검증된 해결과 예방 |
+| [Research Log](docs/RESEARCH_LOG.md) | Qwen/Ollama, Worker, 성능 실험의 가설·측정·판단 기록 |
+
+성공한 실험뿐 아니라 실패·비승격 결과도 보존합니다. 특히 `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED`는 PASS가 아니며, Candidate 추천 역시 production integration과 구분됩니다.
+
 ## Source of Truth
 
 Chat 기록이 아니라 Repository 문서와 Git Evidence를 프로젝트 상태의 권위로 사용합니다.
