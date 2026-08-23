@@ -32,15 +32,16 @@ available Repository Source of Truth.
 
 **AUTONOMOUS QUEUE = NOT AUTHORIZED**
 
-FR-004 and ADR-005, ADR-006, ADR-007, ADR-008, and ADR-010 preserve Human
-lifecycle authority or explicitly defer/forbid automatic commit, completion, and
-next-Task start. Therefore this queue may deterministically nominate the next
-candidate, but Codex, Qwen, and automation must not:
+ADR-017 supersedes the repeated fresh-Human-prompt requirement for routine external
+Human/ChatGPT/Supervisor continuation inside already-approved boundaries. FR-004
+remains unchanged for Qwen: the Worker never selects or starts a successor.
 
-- change a PLANNED Task to approved without Human review;
-- invoke `qh start` for the candidate without explicit Human authorization;
-- continue from one completed Task into the next Task in the same execution;
-- treat `## Next Task` as lifecycle mutation authority.
+`AUTONOMOUS QUEUE = NOT AUTHORIZED` still means unattended production queue automation is not authorized. An external workflow must not:
+
+- change a PLANNED or DRAFT Task to approved without Human review;
+- create or reprioritize a Task without Human review;
+- continue after FAIL, BLOCKED, SAFETY, unsuccessful, or ambiguous termination;
+- treat `## Next Task` alone as lifecycle mutation authority.
 
 QH-V2-DOC-002 is already COMPLETE - VERIFIED and remains the first completed queue
 stage. QH-V2-HARD-003, QH-V2-HARD-004, and QH-V2-HARD-005 form the completed
@@ -53,9 +54,7 @@ also be Human-approved before start. None of these Tasks authorizes autonomous e
 After QH-V2-ARCH-008, the separate **HUMAN ONE-TIME AUTONOMOUS QUEUE GATE** may
 accept, reject, or defer a narrow policy for the exact unchanged queue and exact
 Task-contract versions. Acceptance is effective only after required Requirement
-clarification and an Accepted Decision are recorded and committed. Until that
-happens, the state remains `AUTONOMOUS QUEUE = NOT AUTHORIZED` and ordinary
-per-Task Human Gates remain mandatory.
+clarification and an Accepted Decision are recorded and committed. The former G1 authorization was later revoked by ADR-013 and remains historical Evidence only. `AUTONOMOUS QUEUE = NOT AUTHORIZED` continues to prohibit unattended software queue execution. ADR-017 separately governs approval cadence for external Human/ChatGPT/Supervisor continuation.
 
 The Gate must also record and commit every covered Task in the exact approved
 pre-start form required by HARD-003. `PLANNED` contracts are not executable, and a
@@ -96,9 +95,7 @@ Every queued Task preserves these rules:
 - A normal implementation failure is diagnosed, fixed, and reverified inside the current Task scope unless an Accepted ADR explicitly authorizes an Evidence-backed non-success terminal disposition.
 - `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` is terminal but is never PASS, `COMPLETE - VERIFIED`, or successful dependency Evidence. ADR-015 is the authority for this state and for the one-time WORKER-ROB-001 bootstrap only.
 - A later Task never justifies widening the current Task.
-- Under the current Accepted Architecture, completion stops the current execution
-  and does not auto-start the successor. Only a later Human-Accepted ARCH-008 policy
-  may define a narrow exception for its exact immutable approval manifest.
+- Under ADR-017, an external Human/ChatGPT/Supervisor workflow may continue after successful completion without a fresh Human prompt only to an exact already-approved successor identified unambiguously by Repository Source of Truth, with dependencies satisfied and no exception condition. Qwen itself never selects or starts a successor.
 
 ## Deterministic Queue
 
@@ -194,50 +191,29 @@ new, audit-derived contracts supported by current code and Repository Evidence.
 
 ## Deterministic Nomination Procedure
 
-1. Read `STATUS.md` and stop if any Task is ACTIVE.
-2. Require the current Task to be a terminal state permitted by Accepted Architecture.
-   `COMPLETE - VERIFIED` is successful completion. ADR-015 additionally defines
-   `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` as terminal non-success; it never
-   satisfies a dependency that requires successful completion.
-3. Require `git status --short` to be empty.
-4. Read this queue in order and inspect each Task file's recorded status.
-5. Skip Tasks whose file says `COMPLETE - VERIFIED` or `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED`. The unsuccessful terminal state is skipped as already concluded work, but it does not satisfy any dependency that explicitly requires successful completion.
-6. Require every declared dependency of the first remaining Task to be complete.
-7. Until an ARCH-008 policy is Human-Accepted and committed, nominate that Task at
-   the ordinary Human Task Gate.
-8. Human reviews the contract, resolves open choices, and records the exact
-   `APPROVED - READY FOR CONTRACT BASELINE` status.
-9. Commit the approved contract baseline before an explicit `qh start`.
-10. After completion, stop. A later execution repeats this procedure.
+1. Read `STATUS.md` and stop if any Task is ACTIVE unless continuing that already-approved ACTIVE Task.
+2. Require the current Task to be a terminal state before successor activation. `COMPLETE - VERIFIED` is successful completion. `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` is terminal non-success and never satisfies a successful dependency.
+3. Require `git status --short` to be empty where the lifecycle operation requires a clean Repository.
+4. Read this queue, STATUS, and Task contracts together and identify the exact successor candidate.
+5. Skip concluded Tasks, but never treat an unsuccessful terminal state as successful dependency Evidence.
+6. Require every declared dependency of the successor to be satisfied.
+7. If the exact successor is already `APPROVED - READY FOR CONTRACT BASELINE`, Repository Source of Truth identifies it unambiguously, and no ADR-017 exception exists, an external Human/ChatGPT/Supervisor workflow may continue without a fresh Human prompt.
+8. If the successor is PLANNED or DRAFT, is ambiguous, requires a new Task, reprioritization, Candidate promotion, Architecture, Requirements, Trust Boundary, or another policy decision, stop for Human review.
+9. Preserve the required Task baseline and invoke `qh start` only for the exact eligible approved successor.
+10. After successful completion, re-run this procedure. Continue only while the next Task is already approved, unambiguous, dependency-valid, and exception-free.
 
-ARCH-008 may propose a conditional post-Gate procedure, but this Backlog does not
-activate it. Any accepted procedure must revalidate the exact approval manifest,
-one-ACTIVE invariant, predecessor completion, clean state, unchanged queue and
-Immutable Contract Sections, only expected allowlisted lifecycle/status/Result/Evidence
-transitions, scope, Verification, exact implementation HEAD, `qh close` Final Gate
-PASS, separate lifecycle commit, and final clean state before successor eligibility.
-Optional push is disabled unless the Human explicitly approves one remote/branch/refspec
-and fast-forward-only behavior. Any mismatch or STOP condition ends the queue.
+The revoked G1 manifest remains historical Evidence only and grants no current execution authority. ADR-017 is an approval-cadence policy, not unattended production automation authority. Safe push may proceed without a fresh Human prompt only to an already-authorized remote/branch using fast-forward-only behavior; divergence, ambiguity, or destructive recovery requires Human review.
 
-If queue order, scope, Architecture basis, or dependencies need revision, stop and
-perform a separate Human-approved backlog-planning change. Do not silently edit
-the queue inside an implementation Task.
+If queue order, scope, Architecture basis, dependencies, or successor authority need revision, stop for Human review. Do not silently edit the queue inside an implementation Task.
 
 ## Human Gates
 
-- **Task Gate:** before every PLANNED -> approved -> ACTIVE transition under the
-  current Accepted Architecture. A future one-time exception requires the exact
-  Human-Accepted ARCH-008 policy and immutable approval manifest.
-- **One-Time Autonomous Queue Gate:** after ARCH-008. It decides whether advance
-  approval may replace repeated Task/commit/close/transition decisions, which exact
-  artifacts and operations are covered, and when authorization expires or is revoked.
-  Gate acceptance must be recorded in Requirements/Accepted Decisions before use.
-- **Design Change Gate:** whenever a Task needs a new ADR, Requirements change,
-  public authority change, dependency, or Trust Boundary expansion.
-- **Completion Gate:** under current policy, Human invokes `qh close` with the exact
-  implementation HEAD. Delegation to a Supervisor is a specific unresolved G1 decision.
-- **Milestone 2 Architecture Gate:** after QH-V2-M2-SPEC-001. No M2 implementation
-  Task is created or started automatically.
+- **Task / Direction Gate:** Human review is required to approve a PLANNED or DRAFT Task, create a new Task, reprioritize work, resolve ambiguous successor authority, or choose a materially different direction. An exact already-approved successor does not require a fresh Human prompt when ADR-017 normal-continuation conditions hold.
+- **Exception Gate:** Human review is required for FAIL, BLOCKED, SAFETY, repeated unresolved Worker failure or timeout, unexpected mutation, scope violation, Git divergence or ambiguity, or deterministic gate failure.
+- **Design Change Gate:** Human review remains mandatory for Architecture, Requirements, Trust Boundary, authority, model/reasoning policy, Retry/step policy, Candidate production promotion, or Globalization changes.
+- **Completion Gate:** `qh close` remains the authoritative Final Gate. Under ADR-017, an external workflow may invoke it at the exact implementation HEAD without a fresh Human prompt when the current Task is already approved and no exception exists. Deterministic FAIL cannot be overridden.
+- **Historical G1 Gate:** the former One-Time Autonomous Queue Gate is revoked and retained only as historical Evidence.
+- **Milestone 2 Architecture Gate:** after QH-V2-M2-SPEC-001, mandatory Human Architecture review remains required before any Milestone 2 implementation authority.
 
 ## Current Nomination
 

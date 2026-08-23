@@ -22,6 +22,8 @@ Qwen implementation work must be assignable as small Tasks with one clear Goal a
 
 A Worker must execute only the explicitly assigned current Task and must not automatically select or start another Task.
 
+This Worker restriction does not prohibit an external Human/ChatGPT/Supervisor workflow from continuing routine already-authorized lifecycle steps or starting an exact already-approved successor under an Accepted governance policy. Such external continuation must not transfer successor-selection, lifecycle, Git, Verification, or Final PASS authority to the Worker, and must stop when Human-review exception conditions apply.
+
 ### FR-005 - Change scope contract
 
 A Task must be able to declare Allowed Changes and Forbidden Changes so actual Repository changes can be checked against the Task contract.

@@ -1350,3 +1350,44 @@ The Human reviewed this Evidence and selected a dedicated Worker diagnosis befor
 - A repair Task is Evidence-driven rather than assumed in advance.
 - OPS-003 and the remaining OPS/M2 work stay preserved and deferred, not cancelled.
 - `GLOBALIZATION = NOT AUTHORIZED` and `M3 = FUTURE / NOT AUTHORIZED` remain unchanged.
+
+## ADR-017 - Exception-Driven Human Supervision
+
+### Status
+
+Accepted
+
+### Context
+
+Repeated Human approval for every mechanical lifecycle step adds relay overhead even when a Task is already approved and deterministic Harness checks remain authoritative. The Human has approved an exception-driven supervision model: normal work inside already-approved boundaries may continue without a fresh approval prompt, while failures, ambiguity, new direction, promotion, Architecture, Requirements, or Trust Boundary decisions still require Human review.
+
+### Decision
+
+Adopt Exception-Driven Human Supervision for Human/ChatGPT/Supervisor workflow governance.
+
+Routine continuation does not require a new Human prompt when the current Task and successor authority are already explicit in Repository Source of Truth, scope and dependencies remain valid, deterministic checks pass, qh close reaches Final Gate PASS, lifecycle mutation is expected, and Git operations are clean and fast-forward-only.
+
+Routine continuation may include scoped implementation, focused tests, Verification, authoritative qh close at the exact implementation HEAD, the separate lifecycle commit, safe fast-forward push to an already-authorized target, and starting an exact already-approved successor.
+
+Human review is still required for deterministic FAIL, BLOCKED, SAFETY failure, repeated unresolved Worker failure or timeout, unexpected Repository mutation, scope violation, Git divergence or ambiguity, new Task creation, queue reprioritization, Candidate production promotion, Architecture or Requirements change, Trust Boundary or authority change, model/reasoning/timeout/Retry/step-budget policy change, or a materially different proposed direction.
+
+FR-004 remains unchanged: Qwen Worker executes only its explicitly assigned current Task and never selects or starts a successor. External workflow continuation does not transfer successor-selection authority to Qwen.
+
+CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED, FAIL, BLOCKED, SAFETY, or ambiguous termination never auto-advances.
+
+Deterministic Harness scope, Evidence, Verification, and Final Gate authority remain unchanged. An LLM recommendation cannot override deterministic FAIL Evidence.
+
+The revoked G1 manifest remains historical Evidence only and is not rewritten, resealed, or reactivated.
+
+This decision changes approval cadence only. It does not itself implement unattended production automation. Such automation requires a separate approved implementation Task.
+
+GLOBALIZATION = NOT AUTHORIZED remains unchanged.
+
+### Consequences
+
+- Human involvement moves from repeated mechanical approval to exception and direction review.
+- Normal already-authorized work can proceed with less relay overhead.
+- Qwen Worker authority does not expand.
+- qh close remains the authoritative Final Gate.
+- New Tasks, reprioritization, production Candidate promotion, Architecture changes, and unsafe or ambiguous states still stop for Human review.
+- After QH-V2-ARCH-017 completes, the already selected QH-V2-WORKER-ROB-002 experiment path may resume under this approval cadence.
