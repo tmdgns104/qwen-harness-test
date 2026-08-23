@@ -477,5 +477,44 @@ class OllamaWorkerTests(unittest.TestCase):
         self.assertIsNotNone(step.error)
 
 
+class WorkerProtocolContractTests(unittest.TestCase):
+    def test_tool_session_sends_bounded_single_tool_protocol(self):
+        from tools.harness_core import ToolSpec
+        from tools.ollama_worker import OllamaToolSession
+
+        captured = {}
+
+        def fake_urlopen(request, timeout):
+            captured["payload"] = json.loads(request.data.decode("utf-8"))
+            return FakeResponse(
+                {
+                    "message": {
+                        "role": "assistant",
+                        "content": "done",
+                    }
+                }
+            )
+
+        with patch("tools.ollama_worker.urlopen", side_effect=fake_urlopen):
+            session = OllamaToolSession(
+                WorkerRequest("perform sequential repository work"),
+                tools=(ToolSpec("read_repo_text", "Read", {"type": "object"}),),
+            )
+            session.start()
+
+        messages = captured["payload"]["messages"]
+        self.assertGreaterEqual(len(messages), 2)
+        self.assertEqual(messages[0]["role"], "system")
+        protocol = messages[0]["content"]
+        self.assertIn("at most one Tool", protocol)
+        self.assertIn("stop after requesting it", protocol)
+        self.assertIn("wait for ToolResult", protocol)
+        self.assertIn("use the returned ToolResult", protocol)
+        self.assertEqual(
+            messages[1],
+            {"role": "user", "content": "perform sequential repository work"},
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
