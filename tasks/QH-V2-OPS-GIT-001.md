@@ -1,4 +1,4 @@
-# QH-V2-OPS-GIT-001 - Safe Remote Work Handoff and Git Integration
+# QH-V2-OPS-GIT-001 - 안전한 원격 작업 인계와 Git 통합
 
 ## Status
 
@@ -6,76 +6,76 @@ APPROVED - READY FOR CONTRACT BASELINE
 
 ## Problem
 
-The Repository repeatedly transfers ChatGPT/GitHub work from a remote work branch into the local `main` branch. The current ad-hoc multi-commit `cherry-pick` workflow is error-prone.
+이 Repository는 ChatGPT/GitHub에서 만든 작업을 원격 작업 브랜치에서 로컬 `main`으로 반복해서 가져온다. 현재의 임시 다중 커밋 `cherry-pick` 방식은 사람이 실수하기 쉽고, 적용 누락 여부를 즉시 알기 어렵다.
 
-A concrete recurrence occurred during QH-V2-DOC-003:
+QH-V2-DOC-003 진행 중 실제로 다음 문제가 재현됐다.
 
-- a remote work branch contained several documentation commits;
-- a range cherry-pick encountered empty commits and required repeated `git cherry-pick --skip`;
-- after the sequence completed, `docs/PROJECT_TIMELINE.md` was missing locally;
-- the missing exact commit had to be identified and cherry-picked separately;
-- deterministic diff/file checks caught the omission before final Verification.
+- 원격 작업 브랜치에 여러 문서 커밋이 존재했다.
+- 범위 cherry-pick 중 empty commit이 발생해 `git cherry-pick --skip`을 여러 번 사용해야 했다.
+- 시퀀스가 끝난 뒤 `docs/PROJECT_TIMELINE.md`가 로컬에 누락되어 있었다.
+- 누락된 정확한 커밋을 다시 찾아 별도로 cherry-pick해야 했다.
+- 최종 Verification 전에 deterministic diff/file 검사로 누락을 발견했기 때문에 완료 Task 자체의 무결성은 지켜졌다.
 
-Earlier Git/CMD incidents also showed that repeated manual recovery procedures should become a deterministic workflow candidate rather than remain shell ritual.
+이전 Git/CMD 사고 기록에서도 반복되는 수동 복구 절차는 shell ritual로 남기기보다 작은 deterministic workflow로 승격해야 한다는 Evidence가 있다.
 
-The failure did not corrupt the completed Task because the missing path was detected before `qh close`, but the handoff process itself is not yet reliable enough for repeated use.
+이번 문제는 Repository를 손상시키지는 않았지만, 현재 인계 절차는 앞으로 여러 Task를 반복 수행하기에 충분히 신뢰할 수 있는 상태가 아니다.
 
 ## Goal
 
-Define and implement the minimum deterministic remote-to-local handoff workflow that prevents routine multi-commit cherry-pick ambiguity, preserves exact commit identity when the baseline permits it, and fails closed instead of requiring manual skip/recovery sequences.
+일상적인 다중 커밋 cherry-pick 모호성을 제거하고, 기준점이 맞는 경우 원격 커밋의 정확한 SHA를 보존하며, 수동 `--skip` 복구 대신 조건이 맞지 않으면 fail closed하는 최소 deterministic 원격→로컬 인계 절차를 설계하고 구현한다.
 
-The preferred normal path is:
+권장 정상 경로는 다음과 같다.
 
-`exact local/main baseline -> remote work branch created from that exact SHA -> one atomic handoff commit -> fetch -> deterministic read-only handoff check -> git merge --ff-only -> exact commit preserved`
+`정확한 local/main baseline -> 그 SHA에서 원격 작업 브랜치 생성 -> 단일 atomic handoff commit -> fetch -> read-only handoff check -> git merge --ff-only -> 동일 commit SHA 보존`
 
-This Task must not introduce automatic destructive Git recovery or broaden Harness lifecycle authority.
+이 Task는 자동 destructive Git 복구를 추가하거나 Harness lifecycle 권한을 넓히지 않는다.
 
 ## Requirements
 
-1. Remote work intended for routine handoff must be finalized as exactly one atomic handoff commit on a branch created from an explicitly recorded baseline SHA.
-2. The routine happy path must not require a multi-commit range cherry-pick.
-3. When local HEAD still equals the handoff commit parent, integration must use fast-forward-only semantics so the exact remote commit SHA is preserved.
-4. Before integration, a deterministic read-only check must report at minimum:
-   - current local HEAD;
-   - remote handoff ref/commit;
-   - handoff parent SHA;
-   - changed paths;
-   - whether the state is safe for exact fast-forward integration.
-5. The read-only check must distinguish at least:
-   - `FAST_FORWARD_SAFE` - local HEAD is the exact handoff parent;
-   - `ALREADY_APPLIED_EXACT` - local HEAD is the exact handoff commit;
-   - `ALREADY_CONTAINED` - the exact handoff commit is already an ancestor of local HEAD;
-   - `STOP_DIRTY` - worktree/index is not clean;
-   - `STOP_NON_ATOMIC_OR_DIVERGED` - baseline/parent/history shape does not match the safe contract.
-6. The deterministic check must not fetch, merge, cherry-pick, reset, rebase, force-update, delete branches, push, or otherwise mutate Git state.
-7. If the safe contract is not satisfied, the normal workflow must STOP. It must not recommend repeated `cherry-pick --skip` as automatic recovery.
-8. A divergent/non-atomic handoff requires a new exact handoff prepared from the current approved baseline or separate Human-reviewed integration.
-9. Existing `qh close`, Verification, lifecycle, Git Evidence, Worker authority, and Human Gates remain unchanged.
-10. `GLOBALIZATION = NOT AUTHORIZED` remains unchanged.
+1. 일상 인계용 원격 작업은 명시적으로 기록된 baseline SHA에서 시작한 브랜치 위의 정확히 1개 atomic handoff commit으로 최종화한다.
+2. 정상 경로에서는 multi-commit range cherry-pick을 사용하지 않는다.
+3. 로컬 HEAD가 handoff commit의 정확한 parent와 같다면 `git merge --ff-only` 방식으로 통합해 원격 commit SHA를 그대로 보존한다.
+4. 통합 전 deterministic read-only check는 최소한 다음을 보고한다.
+   - 현재 로컬 HEAD
+   - 원격 handoff ref/commit
+   - handoff parent SHA
+   - changed paths
+   - exact fast-forward 통합이 안전한지 여부
+5. read-only check는 최소 다음 상태를 구분한다.
+   - `FAST_FORWARD_SAFE` - 로컬 HEAD가 정확히 handoff parent임
+   - `ALREADY_APPLIED_EXACT` - 로컬 HEAD가 정확히 handoff commit임
+   - `ALREADY_CONTAINED` - handoff commit이 이미 로컬 HEAD의 ancestor임
+   - `STOP_DIRTY` - worktree/index가 clean하지 않음
+   - `STOP_NON_ATOMIC_OR_DIVERGED` - baseline/parent/history 형태가 안전 계약과 맞지 않음
+6. deterministic check는 fetch, merge, cherry-pick, reset, rebase, force-update, branch 삭제, push 등 Git mutation을 수행하지 않는다.
+7. 안전 계약이 만족되지 않으면 정상 workflow는 STOP한다. repeated `cherry-pick --skip`을 자동 복구 절차로 권장하지 않는다.
+8. divergent/non-atomic handoff는 현재 승인된 baseline에서 새 exact handoff를 다시 만들거나 별도 Human-reviewed integration으로 처리한다.
+9. 기존 `qh close`, Verification, lifecycle, Git Evidence, Worker authority, Human Gate는 변경하지 않는다.
+10. `GLOBALIZATION = NOT AUTHORIZED`를 유지한다.
 
 ## Architecture Basis
 
-- ADR-001 keeps deterministic mechanically checkable workflow in Harness code.
-- ADR-003 requires verified recurring operational failures to be recorded and repeated error-prone manual recovery to be promoted to a small deterministic utility through a separate approved Task.
-- ADR-005/ADR-006 permit deterministic workflow/UX improvements while keeping lifecycle and completion authority unchanged.
-- ADR-007 keeps `qh close` authoritative for final Task Verification and lifecycle completion.
-- ADR-017 permits routine already-approved continuation but requires STOP on Git divergence, ambiguity, conflict, destructive recovery, or unexpected state.
+- ADR-001: 기계적으로 판정 가능한 workflow는 deterministic Harness 코드가 담당한다.
+- ADR-003: 반복적으로 검증된 운영 실패와 수동 복구는 별도 승인 Task를 통해 작은 deterministic utility 후보로 승격할 수 있다.
+- ADR-005/ADR-006: lifecycle과 completion authority를 유지한 채 workflow/UX 개선을 허용한다.
+- ADR-007: 최종 Task Verification과 lifecycle completion의 권위는 `qh close`에 유지된다.
+- ADR-017: 이미 승인된 일상 진행은 계속할 수 있지만 Git divergence, ambiguity, conflict, destructive recovery, unexpected state에서는 STOP해야 한다.
 
-This is an Operations hardening Task. It does not change the Worker Architecture or Trust Boundary.
+이 Task는 Operations hardening이며 Worker Architecture나 Trust Boundary를 변경하지 않는다.
 
 ## Scope
 
-1. Record the Human-selected operational priority in Repository Source of Truth.
-2. Add an Accepted decision documenting the atomic handoff + fast-forward-only policy and the QH-V2-DOC-003 recurrence Evidence.
-3. Update BACKLOG so the planned order becomes:
+1. Human이 선택한 Git handoff 우선순위를 Repository Source of Truth에 기록한다.
+2. atomic handoff + fast-forward-only 정책과 QH-V2-DOC-003 재현 Evidence를 Accepted decision으로 기록한다.
+3. BACKLOG 순서를 다음과 같이 조정한다.
 
    `QH-V2-OPS-GIT-001 -> QH-V2-ARCH-018 -> QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003`
 
-   without cancelling the existing Operations/M2 queue.
-4. Add a read-only `qh handoff-check <remote-ref>` workflow using existing deterministic Git helpers where practical.
-5. Add focused tests covering the required classifications and zero-mutation behavior.
-6. Update the relevant development/troubleshooting documentation with the verified safe handoff procedure.
-7. Demonstrate the resulting flow with a temporary/local Git fixture; do not use production remote mutation as the test mechanism.
+   기존 Operations/M2 queue는 취소하지 않는다.
+4. 기존 deterministic Git helper를 재사용할 수 있으면 재사용하여 read-only `qh handoff-check <remote-ref>` workflow를 추가한다.
+5. 필수 classification과 zero-mutation 동작을 검증하는 focused tests를 추가한다.
+6. 검증된 안전 인계 절차를 관련 개발/트러블슈팅 문서에 한국어로 반영한다.
+7. 실제 production remote mutation을 테스트 수단으로 사용하지 않고 temporary/local Git fixture로 동작을 입증한다.
 
 ## Allowed Changes
 
@@ -84,9 +84,9 @@ This is an Operations hardening Task. It does not change the Worker Architecture
 - `STATUS.md`
 - `tasks/QH-V2-OPS-GIT-001.md`
 - `tools/qh.py`
-- `tools/harness_core.py` only if a small reusable read-only Git helper is required
+- 작은 재사용 read-only Git helper가 필요한 경우에만 `tools/harness_core.py`
 - `tests/test_qh.py`
-- `tests/test_harness_core.py` only if `tools/harness_core.py` changes
+- `tools/harness_core.py`가 변경될 경우에만 `tests/test_harness_core.py`
 - `docs/DEVELOPMENT.md`
 - `docs/TROUBLESHOOTING.md`
 
@@ -94,32 +94,33 @@ This is an Operations hardening Task. It does not change the Worker Architecture
 
 - `PROJECT.md`
 - `REQUIREMENTS.md`
-- Worker Adapter/Runner/Retry behavior
-- model, `think`, timeout, Retry budget, Worker-step budget, or Tool authority changes
-- automatic fetch/merge/cherry-pick/reset/rebase/push/force operations inside Harness
-- automatic conflict resolution
-- automatic branch deletion
-- weakening `qh close`, Verification, Final Gate, lifecycle, or scope authority
-- historical G1 manifest modification/reactivation
-- Candidate A or Candidate B production integration
+- Worker Adapter/Runner/Retry 동작
+- model, `think`, timeout, Retry budget, Worker-step budget, Tool authority 변경
+- Harness 내부의 자동 fetch/merge/cherry-pick/reset/rebase/push/force 동작
+- 자동 conflict resolution
+- 자동 branch 삭제
+- `qh close`, Verification, Final Gate, lifecycle, scope authority 약화
+- historical G1 manifest 수정/재활성화
+- Candidate A/B production integration
 - Globalization
 
 ## Acceptance Criteria
 
-1. The QH-V2-DOC-003 multi-commit cherry-pick recurrence is recorded as objective motivation without claiming Repository corruption.
-2. An Accepted decision defines the exact normal handoff contract: exact baseline, one atomic handoff commit, read-only deterministic check, then manual `git merge --ff-only` only when safe.
-3. BACKLOG records `OPS-GIT-001 -> ARCH-018 -> WORKER-ROB-003 -> OPS-003` and preserves the remaining existing queue.
-4. `qh handoff-check <remote-ref>` is read-only and reports current HEAD, handoff commit, handoff parent, changed paths, and one deterministic classification.
-5. `FAST_FORWARD_SAFE` is returned only when the Repository is clean and current HEAD is the exact parent of the single handoff commit.
-6. Exact already-applied/contained states are distinguished from safe-to-apply state.
-7. Dirty, divergent, merge-commit, or otherwise non-atomic shapes fail closed.
-8. Focused regression proves the command performs zero Repository mutation in every classification.
-9. No automatic Git write operation is added.
-10. Existing qh lifecycle/Verification regressions remain PASS.
-11. Documentation tells operators not to use multi-commit range cherry-pick as the routine handoff path.
-12. `GLOBALIZATION = NOT AUTHORIZED` remains unchanged.
-13. Only Allowed Changes occur.
-14. `git diff --check` passes.
+1. QH-V2-DOC-003의 multi-commit cherry-pick 재현을 Repository corruption으로 과장하지 않고 객관적 동기로 기록한다.
+2. Accepted decision이 exact baseline, one atomic handoff commit, read-only deterministic check, safe일 때만 수동 `git merge --ff-only`를 사용하는 정상 handoff contract를 정의한다.
+3. BACKLOG에 `OPS-GIT-001 -> ARCH-018 -> WORKER-ROB-003 -> OPS-003` 순서가 기록되고 기존 후속 queue가 보존된다.
+4. `qh handoff-check <remote-ref>`는 read-only이며 현재 HEAD, handoff commit, handoff parent, changed paths, deterministic classification 하나를 출력한다.
+5. `FAST_FORWARD_SAFE`는 Repository가 clean이고 현재 HEAD가 정확히 handoff commit의 parent일 때만 반환된다.
+6. exact already-applied/contained 상태를 safe-to-apply 상태와 구분한다.
+7. dirty, divergent, merge-commit 또는 그 밖의 non-atomic 형태는 fail closed한다.
+8. focused regression으로 모든 classification에서 Repository mutation이 0임을 증명한다.
+9. 자동 Git write operation을 추가하지 않는다.
+10. 기존 qh lifecycle/Verification regression이 PASS한다.
+11. 운영 문서가 multi-commit range cherry-pick을 일상 handoff 경로로 사용하지 말라고 명시한다.
+12. `GLOBALIZATION = NOT AUTHORIZED`가 유지된다.
+13. Allowed Changes만 발생한다.
+14. `git diff --check`가 PASS한다.
+15. 사람이 읽는 새 GitHub 문서 서술은 한국어로 작성하고, command/status/API/file name 등 정확한 기술 literal만 원문 표기를 유지한다.
 
 ## Verification
 
@@ -149,35 +150,37 @@ Run exactly:
 
 ## Evidence Requirements
 
-Before successful close, preserve Evidence for:
+성공적으로 close하기 전에 다음 Evidence를 보존한다.
 
-- the QH-V2-DOC-003 handoff recurrence and missing-path detection;
-- exact Task baseline SHA;
-- focused RED reproducing at least dirty/diverged/non-atomic unsafe states before implementation where applicable;
-- focused GREEN for all required classifications;
-- zero mutation for every read-only classification;
-- `tests.test_qh` regression PASS;
-- exact changed paths and scope classification;
-- authoritative `qh close <exact implementation HEAD>` Final Gate PASS;
-- separate lifecycle commit after Final Gate PASS.
+- QH-V2-DOC-003 handoff 재현과 missing-path 탐지 기록
+- exact Task baseline SHA
+- 구현 전 가능한 범위에서 dirty/diverged/non-atomic unsafe state를 재현하는 focused RED
+- 모든 필수 classification의 focused GREEN
+- 모든 read-only classification의 zero mutation
+- `tests.test_qh` regression PASS
+- exact changed paths와 scope classification
+- exact implementation HEAD를 사용한 authoritative `qh close` Final Gate PASS
+- Final Gate 이후 별도 lifecycle commit
 
 ## Stop Conditions
 
-STOP for Human/ChatGPT review if implementation would require:
+다음이 필요하면 Human/ChatGPT review를 위해 STOP한다.
 
-- automatic cherry-pick, merge, reset, rebase, push, force, conflict resolution, or destructive Git recovery;
-- changing branch/remote authority globally;
-- changing lifecycle or Final Gate authority;
-- accepting a divergent/non-atomic remote state by heuristic instead of fail-closed classification;
-- Architecture, Requirements, Trust Boundary, Worker, model, Retry, Tool authority, or Globalization changes;
-- expanding scope beyond the exact remote/local handoff problem.
+- 자동 cherry-pick, merge, reset, rebase, push, force, conflict resolution 또는 destructive Git recovery
+- branch/remote authority의 전역 변경
+- lifecycle 또는 Final Gate authority 변경
+- divergent/non-atomic remote state를 heuristic으로 수용
+- Architecture, Requirements, Trust Boundary, Worker, model, Retry, Tool authority, Globalization 변경
+- 정확한 remote/local handoff 문제를 넘어서는 범위 확장
 
 ## Next Task
 
-If QH-V2-OPS-GIT-001 reaches COMPLETE - VERIFIED, the exact next direction is the already Human-selected Candidate A promotion path:
+QH-V2-OPS-GIT-001이 `COMPLETE - VERIFIED`에 도달하면, 다음 방향은 Human이 이미 선택한 Candidate A 승격 경로다.
 
 `QH-V2-ARCH-018 - Deterministic Worker Brief Production Promotion Decision`
 
-After ARCH-018, the planned sequence is:
+단, Human이 2026-08-24에 요청한 GitHub 문서 한국어 통일/최신화 작업은 별도 문서 Task로 분리해 OPS-GIT-001 이후 Source of Truth에 추가한다. 이 문서 Task는 기존 historical Evidence의 의미를 바꾸지 않고, 현재/사용자-facing 문서를 한국어로 최신화하는 것을 목표로 한다.
 
-`QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003 -> QH-V2-OPS-004 -> QH-V2-OPS-005 -> QH-V2-OPS-006 -> QH-V2-M2-SPEC-001 -> HUMAN ARCHITECTURE GATE`.
+그 이후 계획은 다음 순서를 유지한다.
+
+`QH-V2-ARCH-018 -> QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003 -> QH-V2-OPS-004 -> QH-V2-OPS-005 -> QH-V2-OPS-006 -> QH-V2-M2-SPEC-001 -> HUMAN ARCHITECTURE GATE`.
