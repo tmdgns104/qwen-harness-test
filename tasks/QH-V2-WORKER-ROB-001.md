@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED - READY FOR CONTRACT BASELINE
+CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED
 
 ## Problem
 
@@ -150,13 +150,18 @@ The Stop Condition is now triggered by measured Evidence.
 - Useful next investigation now requires Human Architecture judgment about model /
   backend / thinking-policy comparison and whether exact data binding belongs in the
   deterministic Harness rather than the LLM.
-- The current Task remains ACTIVE for lifecycle truthfulness. Do not run `qh close`,
-  do not claim Final Gate PASS, and do not start the next Task until the architecture
-  review resolves the lifecycle and Worker-responsibility questions.
+- ADR-015 resolves the lifecycle disposition as
+  `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` without promoting the Candidate or
+  claiming Final Gate PASS. Objective Evidence remains at
+  `docs/WORKER_ROB_001_EVIDENCE.md`.
+- QH-V2-LIFECYCLE-001 is activated only through the one-time Human-authorized ADR-015
+  bootstrap so durable deterministic unsuccessful-close support can be implemented.
 
-This section records the review trigger only. It does not authorize any lifecycle,
-Runner, Retry, model-routing, tool-authority, or Architecture implementation change.
+This disposition does not authorize Runner, Retry, model-routing, tool-authority, or
+Worker implementation changes.
 
 ## Next Task
 
-QH-V2-OPS-003 - Human-controlled candidate only. Do not auto-start.
+Human selection required after QH-V2-LIFECYCLE-001 is COMPLETE - VERIFIED.
+
+QH-V2-OPS-003 remains deferred until the Human decides whether separate Worker investigation must occur first. Do not auto-start either path.

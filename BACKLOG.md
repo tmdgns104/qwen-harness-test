@@ -93,7 +93,8 @@ Every queued Task preserves these rules:
 - Behavioral fixes use focused RED -> GREEN -> regression Evidence.
 - Failed lifecycle operations aim for byte-for-byte zero mutation.
 - `qh close` is the authoritative final Verification and lifecycle operation.
-- A failure is diagnosed, fixed, and reverified inside the current Task scope.
+- A normal implementation failure is diagnosed, fixed, and reverified inside the current Task scope unless an Accepted ADR explicitly authorizes an Evidence-backed non-success terminal disposition.
+- `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` is terminal but is never PASS, `COMPLETE - VERIFIED`, or successful dependency Evidence. ADR-015 is the authority for this state and for the one-time WORKER-ROB-001 bootstrap only.
 - A later Task never justifies widening the current Task.
 - Under the current Accepted Architecture, completion stops the current execution
   and does not auto-start the successor. Only a later Human-Accepted ARCH-008 policy
@@ -122,12 +123,13 @@ is readable; its authoritative completion record remains STATUS, its Task file, 
 | 9 | QH-V2-OPS-001 | ADR-010 NEXT-HARDENING | QH-V2-HARD-007 | QH-V2-OPS-002 |
 | 10 | QH-V2-OPS-002 | ADR-010 NEXT-HARDENING | QH-V2-OPS-001 | QH-V2-HARD-008 |
 | 11 | QH-V2-HARD-008 | ADR-014 cross-Repository runtime portability hardening | QH-V2-OPS-002 | QH-V2-WORKER-ROB-001 |
-| 12 | QH-V2-WORKER-ROB-001 | ADR-014 Level B Worker protocol robustness | QH-V2-HARD-008 | QH-V2-OPS-003 |
-| 13 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | QH-V2-WORKER-ROB-001 | QH-V2-OPS-004 |
-| 14 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-OPS-003 | QH-V2-OPS-005 |
-| 15 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
-| 16 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
-| 17 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
+| 12 | QH-V2-WORKER-ROB-001 | ADR-014 Level B Worker protocol robustness | QH-V2-HARD-008 | QH-V2-LIFECYCLE-001 |
+| 13 | QH-V2-LIFECYCLE-001 | ADR-015 Evidence-backed unsuccessful lifecycle hardening | QH-V2-WORKER-ROB-001 non-success Evidence | HUMAN SELECTION REQUIRED |
+| 14 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | Human selection after QH-V2-LIFECYCLE-001 | QH-V2-OPS-004 |
+| 15 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-OPS-003 | QH-V2-OPS-005 |
+| 16 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
+| 17 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
+| 18 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
 
 ## Dependency Graph
 
@@ -144,8 +146,10 @@ flowchart TD
     H007 --> O001["QH-V2-OPS-001"]
     O001 --> O002["QH-V2-OPS-002"]
     O002 --> H008["QH-V2-HARD-008<br/>runtime portability"]
-    H008 --> WROB["QH-V2-WORKER-ROB-001<br/>single-tool robustness"]
-    WROB --> O003["QH-V2-OPS-003"]
+    H008 --> WROB["QH-V2-WORKER-ROB-001<br/>closed unsuccessful; Evidence recorded"]
+    WROB --> L001["QH-V2-LIFECYCLE-001<br/>unsuccessful lifecycle hardening"]
+    L001 --> HumanSelect["HUMAN SELECTION REQUIRED"]
+    HumanSelect --> O003["QH-V2-OPS-003<br/>only if selected"]
     O003 --> O004["QH-V2-OPS-004"]
     O004 --> O005["QH-V2-OPS-005"]
     O005 --> O006["QH-V2-OPS-006"]
@@ -171,7 +175,13 @@ flowchart TD
   after Gate G1 to keep the trust-hardening wave deterministic and one-Task-at-a-time.
 - ADR-014 inserts HARD-008 and WORKER-ROB-001 after OPS-002 because GitHub Issue #1
   exposed runtime portability and Worker interaction failures during a real
-  cross-Repository trial. OPS-003 is deferred until both complete.
+  cross-Repository trial.
+- ADR-015 records WORKER-ROB-001 as `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED`
+  after Stable and Candidate both failed the promotion threshold. This state is not
+  successful completion Evidence. The one-time Human-authorized bootstrap inserts
+  QH-V2-LIFECYCLE-001 next so durable non-success lifecycle support can be implemented.
+  After LIFECYCLE-001 completes, Human selection is required before either a separate
+  Worker investigation or resumption of OPS-003; neither path auto-starts.
 - OPS-001 through OPS-004 otherwise retain ADR-010 priority. Several are technically
   independent; their edges are governance order, not claims of code dependency.
 - OPS-005 precedes OPS-006 so current-state presentation is stabilized before
@@ -185,10 +195,13 @@ new, audit-derived contracts supported by current code and Repository Evidence.
 ## Deterministic Nomination Procedure
 
 1. Read `STATUS.md` and stop if any Task is ACTIVE.
-2. Require the current Task to be `COMPLETE - VERIFIED`.
+2. Require the current Task to be a terminal state permitted by Accepted Architecture.
+   `COMPLETE - VERIFIED` is successful completion. ADR-015 additionally defines
+   `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` as terminal non-success; it never
+   satisfies a dependency that requires successful completion.
 3. Require `git status --short` to be empty.
 4. Read this queue in order and inspect each Task file's recorded status.
-5. Skip Tasks whose file says `COMPLETE - VERIFIED`.
+5. Skip Tasks whose file says `COMPLETE - VERIFIED` or `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED`. The unsuccessful terminal state is skipped as already concluded work, but it does not satisfy any dependency that explicitly requires successful completion.
 6. Require every declared dependency of the first remaining Task to be complete.
 7. Until an ARCH-008 policy is Human-Accepted and committed, nominate that Task at
    the ordinary Human Task Gate.
@@ -228,10 +241,11 @@ the queue inside an implementation Task.
 
 ## Current Nomination
 
-QH-V2-HARD-005 is COMPLETE - VERIFIED. The next queue candidate is
-`QH-V2-PERF-004`, whose contract has been Human-approved for baseline preparation.
-Activation still requires explicit `qh start` through the Human-invoked workflow.
-`AUTONOMOUS QUEUE = NOT AUTHORIZED`.
+QH-V2-WORKER-ROB-001 is `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` under ADR-015.
+QH-V2-LIFECYCLE-001 is the Human-approved ACTIVE Task created by the one-time
+ADR-015 bootstrap transition. After it becomes COMPLETE - VERIFIED, stop for Human
+selection before either separate Worker investigation or QH-V2-OPS-003. Neither path
+is automatically nominated or started. `AUTONOMOUS QUEUE = NOT AUTHORIZED`.
 
 ## Future Roadmap (Strategic Direction Only; Non-Executable)
 

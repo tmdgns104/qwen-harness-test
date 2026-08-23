@@ -1,11 +1,13 @@
-Current Task: QH-V2-WORKER-ROB-001 - ACTIVE
+Current Task: QH-V2-LIFECYCLE-001 - ACTIVE
 
-Previous Task: QH-V2-HARD-008 - COMPLETE - VERIFIED - commit ca085b98dccdc626d432e7c3c21f72ab77af1c59
+Previous Task: QH-V2-WORKER-ROB-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence docs/WORKER_ROB_001_EVIDENCE.md
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 49409a7ae4824fd85058440d52bd218653374236
+Task Baseline: 9f8c0da4d8fb8c59fb3f1da4a9f8dcb6624619b1
 
 Handoff:
+- QH-V2-WORKER-ROB-001 is CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED under ADR-015; Candidate promotion remains rejected and objective Evidence is preserved at docs/WORKER_ROB_001_EVIDENCE.md.
+- QH-V2-LIFECYCLE-001 is ACTIVE through the one-time Human-authorized ADR-015 bootstrap transition. Its pre-start baseline is 9f8c0da4d8fb8c59fb3f1da4a9f8dcb6624619b1. This bootstrap does not claim Final Gate PASS for QH-V2-WORKER-ROB-001 and must not be reused after durable lifecycle support is implemented.
 - QH-V2-HARD-007 is COMPLETE - VERIFIED; authoritative close used implementation commit 55fedc3282aa858a7ed68a3f52cfd0d64cbf46f1 and lifecycle commit 36e0357d44a9a3e1aba423b891811294e4ec9a71 is pushed to origin/main.
 - Post-HARD-007 performance baseline on 2026-08-22: selected 259-test regression 560.059s OK with one existing skip; tests.test_qh 48 tests in 470.073s; tests.test_harness_core 119 tests in 207.330s.
 - Human explicitly revoked the remaining G1 autonomous queue authorization after HARD-007 to insert QH-V2-PERF-005 before OPS-001; ADR-013 and the later BACKLOG override are authoritative for this change.
