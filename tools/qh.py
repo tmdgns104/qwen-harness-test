@@ -618,6 +618,98 @@ def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
     return 0 if passed else 1
 
 
+def _git_commit_is_ancestor(repo_root: Path, ancestor: str, descendant: str) -> bool:
+    """Return whether ancestor is in descendant history without mutating Git state."""
+    try:
+        merge_base = _run_git(
+            str(repo_root),
+            ("merge-base", ancestor, descendant),
+        ).stdout.strip()
+    except RuntimeError:
+        return False
+    return merge_base == ancestor
+
+
+def command_handoff_check(repo_root: Path, handoff_ref: str) -> int:
+    """Classify a fetched atomic handoff ref without modifying Repository or Git state."""
+    _require_git_top_level(str(repo_root))
+    if not handoff_ref or handoff_ref.strip() != handoff_ref:
+        raise ValueError("handoff-check requires a non-empty Git ref")
+
+    local_head = _run_git(str(repo_root), ("rev-parse", "HEAD")).stdout.strip()
+    handoff_commit = _run_git(
+        str(repo_root),
+        ("rev-parse", "--verify", f"{handoff_ref}^{{commit}}"),
+    ).stdout.strip()
+
+    parent_tokens = _run_git(
+        str(repo_root),
+        ("rev-list", "--parents", "-n", "1", handoff_commit),
+    ).stdout.strip().split()
+    parents = tuple(parent_tokens[1:])
+
+    changed_paths: tuple[str, ...] = ()
+    if len(parents) == 1:
+        changed_paths = tuple(
+            sorted(
+                {
+                    line.strip().replace("\\", "/")
+                    for line in _run_git(
+                        str(repo_root),
+                        (
+                            "diff",
+                            "--no-renames",
+                            "--name-only",
+                            parents[0],
+                            handoff_commit,
+                            "--",
+                        ),
+                    ).stdout.splitlines()
+                    if line.strip()
+                }
+            )
+        )
+
+    dirty = bool(
+        _run_git(str(repo_root), ("status", "--porcelain=v1")).stdout.strip()
+    )
+
+    if len(parents) == 1:
+        parent_display = parents[0]
+    elif not parents:
+        parent_display = "NONE"
+    else:
+        parent_display = "MULTIPLE " + " ".join(parents)
+
+    if dirty:
+        classification = "STOP_DIRTY"
+    elif len(parents) != 1 or not changed_paths:
+        classification = "STOP_NON_ATOMIC_OR_DIVERGED"
+    elif local_head == handoff_commit:
+        classification = "ALREADY_APPLIED_EXACT"
+    elif _git_commit_is_ancestor(repo_root, handoff_commit, local_head):
+        classification = "ALREADY_CONTAINED"
+    elif local_head == parents[0]:
+        classification = "FAST_FORWARD_SAFE"
+    else:
+        classification = "STOP_NON_ATOMIC_OR_DIVERGED"
+
+    print(f"Local HEAD: {local_head}")
+    print(f"Handoff Ref: {handoff_ref}")
+    print(f"Handoff Commit: {handoff_commit}")
+    print(f"Handoff Parent: {parent_display}")
+    print(f"Worktree: {'dirty' if dirty else 'clean'}")
+    print("Changed Paths:")
+    if changed_paths:
+        for path in changed_paths:
+            print(f"- {path}")
+    else:
+        print("- none")
+    print(f"Classification: {classification}")
+
+    return 1 if classification.startswith("STOP_") else 0
+
+
 def command_run(
     repo_root: Path,
     task_id: str,
@@ -663,7 +755,7 @@ def command_run(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic Qwen Harness workflow utility")
-    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close", "close-unsuccessful", "run", "task-new", "doctor"))
+    parser.add_argument("command", choices=("status", "preflight", "verify", "review", "start", "close", "close-unsuccessful", "run", "task-new", "doctor", "handoff-check"))
     parser.add_argument("task_id", nargs="?")
     args = parser.parse_args()
     repo_root = Path.cwd().resolve()
@@ -672,6 +764,10 @@ def main() -> int:
             if args.task_id is not None:
                 raise ValueError("doctor does not accept a Task ID")
             return command_doctor(repo_root)
+        if args.command == "handoff-check":
+            if args.task_id is None:
+                raise ValueError("handoff-check requires a Git ref")
+            return command_handoff_check(repo_root, args.task_id)
         if args.command == "task-new":
             if args.task_id is None:
                 raise ValueError("task-new requires a Task ID")

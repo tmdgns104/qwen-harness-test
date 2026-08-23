@@ -24,6 +24,7 @@
 | Worker가 한 step에 여러 ToolRequest를 반환 | [11. Multi-tool SAFETY](#11-worker가-한-step에서-여러-toolrequest를-반환) |
 | 짧은 prompt는 되는데 full Task는 30초 timeout | [12. Full Task timeout](#12-짧은-prompt는-되지만-full-task는-30초-timeout) |
 | Worker Candidate가 실험 실패했는데 Task를 어떻게 닫아야 하는지 애매함 | [13. Unsuccessful lifecycle](#13-실험은-끝났지만-candidate가-실패한-경우) |
+| range cherry-pick 뒤 일부 파일이 빠지거나 `--skip`을 반복함 | [14. 원격 handoff 누락](#14-multi-commit-range-cherry-pick에서-인계-누락) |
 
 ---
 
@@ -452,6 +453,64 @@ QH-V2-LIFECYCLE-001이 이를 durable lifecycle operation으로 구현했습니�
 QH-V2-WORKER-ROB-001.
 
 Source: [`ADR-015`](../DECISIONS.md), [`tasks/QH-V2-LIFECYCLE-001.md`](../tasks/QH-V2-LIFECYCLE-001.md)
+
+---
+
+## 14. Multi-commit range cherry-pick에서 인계 누락
+
+### 증상
+
+QH-V2-DOC-003에서 원격 작업 브랜치의 여러 commit을 범위 `cherry-pick`으로
+가져오는 도중 empty commit이 발생했고 `git cherry-pick --skip`을 반복한 뒤,
+최종적으로 `docs/PROJECT_TIMELINE.md`가 로컬에 없는 상태가 발견됐습니다.
+
+### 원인
+
+원격 작업 결과가 여러 commit으로 나뉜 상태에서 로컬에 이미 일부와 동일한
+변경이 섞이면서 cherry-pick sequence가 사람이 추적하기 어려운 상태가 됐습니다.
+`--skip` 자체가 파일 누락을 자동으로 검증하지 않기 때문에 sequence 종료만 보고
+완료로 판단하면 위험합니다.
+
+### 당시 처분
+
+Repository corruption은 발생하지 않았습니다. 최종 Verification 전에 expected
+path와 실제 diff를 deterministic하게 비교해 누락을 찾았고, 누락된 exact commit만
+별도로 확인해 적용한 뒤 다시 Verification했습니다.
+
+### 이후 표준 해결
+
+QH-V2-OPS-GIT-001은 일상 handoff를 다음 구조로 바꿉니다.
+
+```text
+exact local baseline
+  -> 그 SHA에서 remote branch 생성
+  -> one atomic handoff commit
+  -> git fetch
+  -> qh handoff-check <remote-ref>
+  -> FAST_FORWARD_SAFE
+  -> git merge --ff-only <remote-ref>
+```
+
+`qh handoff-check`는 read-only이며 현재 Local HEAD와 handoff commit의 direct-parent
+관계, commit parent shape, changed paths, dirty 상태를 검사합니다.
+
+### STOP해야 하는 경우
+
+- `STOP_DIRTY`
+- `STOP_NON_ATOMIC_OR_DIVERGED`
+- merge commit handoff
+- baseline에서 두 commit 이상 진행된 handoff
+- history divergence
+
+이 경우 자동 reset/rebase/merge/cherry-pick 복구를 하지 않습니다. exact baseline에서
+새 handoff를 만들거나 별도 Human-reviewed integration으로 처리합니다.
+
+### 예방
+
+정상 원격 인계에서 multi-commit range `cherry-pick`과 반복 `--skip`을 사용하지
+않습니다. 적용 전에 changed paths와 classification을 먼저 확인합니다.
+
+Source: `QH-V2-OPS-GIT-001`, `ADR-017A`
 
 ---
 

@@ -1391,3 +1391,45 @@ GLOBALIZATION = NOT AUTHORIZED remains unchanged.
 - qh close remains the authoritative Final Gate.
 - New Tasks, reprioritization, production Candidate promotion, Architecture changes, and unsafe or ambiguous states still stop for Human review.
 - After QH-V2-ARCH-017 completes, the already selected QH-V2-WORKER-ROB-002 experiment path may resume under this approval cadence.
+
+## ADR-017A - 안전한 원격 작업 인계 운영 정책
+
+### Status
+
+Accepted
+
+### Context
+
+QH-V2-DOC-003 문서 인계 과정에서 원격 작업 브랜치의 여러 커밋을 범위 `cherry-pick`으로 가져오다가 empty commit이 발생했고, 반복 `git cherry-pick --skip` 이후 `docs/PROJECT_TIMELINE.md`가 로컬에 누락된 상태가 확인됐다. 최종 Verification 전에 deterministic 파일·diff 검사가 누락을 발견했기 때문에 완료 Task의 무결성은 유지됐지만, 정상 인계 절차 자체는 사람이 실수하기 쉬웠다.
+
+ADR-003은 반복되거나 오류 가능성이 높은 수동 복구 절차를 별도 승인 Task를 통해 작은 deterministic utility로 승격할 수 있게 하고, ADR-017은 Git divergence·ambiguity·destructive recovery에서는 STOP하도록 요구한다.
+
+### Decision
+
+QH-V2-OPS-GIT-001부터 일상적인 원격→로컬 작업 인계의 정상 경로를 다음으로 고정한다.
+
+1. 로컬의 정확한 baseline commit SHA를 먼저 기록한다.
+2. 원격 작업 브랜치는 그 exact baseline SHA에서 시작한다.
+3. 한 번의 인계에는 정확히 하나의 `atomic handoff` commit만 둔다.
+4. 정상 인계에서는 multi-commit range `cherry-pick`을 사용하지 않는다.
+5. `git fetch` 이후 `qh handoff-check <remote-ref>`가 현재 Local HEAD, handoff commit, handoff parent, changed paths와 deterministic classification을 read-only로 보고한다.
+6. classification은 `FAST_FORWARD_SAFE`, `ALREADY_APPLIED_EXACT`, `ALREADY_CONTAINED`, `STOP_DIRTY`, `STOP_NON_ATOMIC_OR_DIVERGED`를 구분한다.
+7. `FAST_FORWARD_SAFE`일 때만 사람이 `git merge --ff-only <remote-ref>`를 실행하는 것을 정상 적용 경로로 사용한다. 이 merge는 handoff commit의 SHA를 그대로 보존한다.
+8. dirty, divergent, merge commit, multi-commit handoff 또는 다른 non-atomic 상태에서는 자동 복구하지 않고 STOP한다. 필요하면 현재 승인 baseline에서 handoff를 다시 만들거나 별도 Human-reviewed integration으로 처리한다.
+9. `qh handoff-check`는 fetch, merge, cherry-pick, reset, rebase, force-update, branch 삭제, push 등 어떤 Git mutation도 수행하지 않는다.
+10. 기존 `qh close`, Verification, lifecycle, Final Gate, Worker/Tool authority는 변경하지 않는다.
+
+Human이 선택한 현재 진행 순서는 다음과 같다.
+
+`QH-V2-OPS-GIT-001 -> QH-V2-DOC-KO-001 -> QH-V2-ARCH-018 -> QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003`
+
+그 이후 기존 Operations/M2 queue를 이어간다.
+
+`GLOBALIZATION = NOT AUTHORIZED`
+
+### Consequences
+
+- 정상 인계에서 반복 `cherry-pick --skip` 복구가 필요하지 않게 된다.
+- 적용 전 read-only 검사로 exact parent/commit 관계와 변경 경로를 사람이 확인할 수 있다.
+- 안전 조건이 맞지 않을 때 heuristic merge나 자동 history rewrite 대신 deterministic STOP을 사용한다.
+- 원격 작업 편의성이 좋아져도 Git mutation 권한이나 Harness lifecycle 권한은 확대되지 않는다.

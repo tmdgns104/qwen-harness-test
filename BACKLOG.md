@@ -486,3 +486,39 @@ the diagnostic disposition and explicitly resume QH-V2-OPS-003.
 No successor is automatically created or started. Worker, Runner, Retry, model,
 tool, lifecycle, Verification, Final Gate, Git, Globalization, and Trust Boundary
 authority remain unchanged.
+
+## OPS-GIT-001 이후 Human 선택 순서 - 2026-08-24
+
+QH-V2-WORKER-ROB-002와 QH-V2-DOC-003 완료 이후 Human이 Git handoff 안정화와
+GitHub 문서 한국어 최신화를 먼저 수행한 뒤 Candidate A production promotion
+경로로 진행하기로 선택했다. 이 섹션은 위의 과거 nomination 문구와 충돌하는
+경우에만 최신 순서로 해석하며, 기존 Operations/M2 후보를 취소하지 않는다.
+
+현재 선택된 순서:
+
+```text
+QH-V2-OPS-GIT-001
+  -> QH-V2-DOC-KO-001
+  -> QH-V2-ARCH-018
+  -> QH-V2-WORKER-ROB-003
+  -> QH-V2-OPS-003
+  -> QH-V2-OPS-004
+  -> UX-ARCH-001
+  -> UX-001
+  -> QH-V2-OPS-005
+  -> QH-V2-OPS-006
+  -> QH-V2-M2-SPEC-001
+  -> HUMAN ARCHITECTURE GATE
+```
+
+`QH-V2-OPS-GIT-001`은 exact baseline에서 만든 하나의 `atomic handoff` commit과
+read-only `qh handoff-check`를 사용해 `FAST_FORWARD_SAFE`일 때만 사람이
+`git merge --ff-only`로 적용하는 운영 경로를 구현한다. multi-commit range
+`cherry-pick`은 일상 handoff 정상 경로에서 사용하지 않는다.
+
+`QH-V2-DOC-KO-001`은 GitHub 사용자-facing 문서를 한국어로 통일하고 현재 상태로
+최신화하는 별도 문서 Task다. `QH-V2-ARCH-018`은 Candidate A production promotion
+결정을 기록하며, 실제 Worker production integration은 `QH-V2-WORKER-ROB-003`에서
+별도 수행한다.
+
+`GLOBALIZATION = NOT AUTHORIZED`

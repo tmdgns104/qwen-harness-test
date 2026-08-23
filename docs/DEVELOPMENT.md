@@ -302,3 +302,35 @@ Architecture를 편의상 현재 기능 Task에 섞어 수정하지 않습니다
 
 처음 사용하는 방법은 [Quick Start](QUICKSTART.md), 내부 역할과 신뢰 모델은
 [How It Works](HOW_IT_WORKS.md)를 참고하세요.
+
+## 원격 작업 인계 표준
+
+QH-V2-OPS-GIT-001부터 ChatGPT/GitHub에서 만든 변경을 로컬로 가져올 때는
+multi-commit range `cherry-pick`을 일상 정상 경로로 사용하지 않습니다.
+
+정상 절차는 다음과 같습니다.
+
+```text
+정확한 local HEAD baseline 기록
+  -> 그 SHA에서 원격 작업 브랜치 생성
+  -> 정확히 하나의 atomic handoff commit 생성
+  -> git fetch
+  -> python tools\qh.py handoff-check <remote-ref>
+  -> FAST_FORWARD_SAFE 확인
+  -> git merge --ff-only <remote-ref>
+```
+
+`handoff-check`는 read-only입니다. fetch, merge, cherry-pick, reset, rebase,
+push, branch 삭제 또는 conflict resolution을 실행하지 않습니다.
+
+다음 classification을 구분합니다.
+
+- `FAST_FORWARD_SAFE`: 현재 Local HEAD가 handoff commit의 정확한 parent입니다.
+- `ALREADY_APPLIED_EXACT`: 현재 HEAD가 handoff commit과 정확히 같습니다.
+- `ALREADY_CONTAINED`: handoff commit이 이미 현재 HEAD history에 포함됩니다.
+- `STOP_DIRTY`: worktree/index가 clean하지 않습니다.
+- `STOP_NON_ATOMIC_OR_DIVERGED`: direct-parent 단일 commit 계약과 맞지 않거나 history가 갈라졌습니다.
+
+`FAST_FORWARD_SAFE`가 아니면 임의 merge/rebase/reset으로 맞추지 않습니다.
+특히 반복 `git cherry-pick --skip`을 정상 복구 절차로 사용하지 않고 STOP한 뒤
+exact baseline에서 handoff를 다시 만들거나 별도 Human-reviewed integration을 선택합니다.
