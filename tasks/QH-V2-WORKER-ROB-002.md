@@ -2,7 +2,7 @@
 
 ## Status
 
-DRAFT - HUMAN REVIEW REQUIRED
+APPROVED - READY FOR CONTRACT BASELINE
 
 This Task is an Evidence-driven experiment only. It does not authorize production Worker prompt/runtime integration or Candidate promotion.
 
