@@ -20,6 +20,16 @@ DEFAULT_BASE_URL = "http://127.0.0.1:11434"
 DEFAULT_MODEL = "qwen3:8b"
 DEFAULT_TIMEOUT_SECONDS = 30.0
 
+TOOL_PROTOCOL = (
+    "You are a bounded Repository Worker using Harness-owned Tools. "
+    "Use at most one Tool per assistant turn. If you request a Tool, "
+    "stop after requesting it and wait for ToolResult. On the next turn, "
+    "use the returned ToolResult before deciding whether another Tool is needed. "
+    "Do not guess, omit, or invent data that a ToolResult is meant to supply. "
+    "If another Tool is needed, request at most one Tool and stop again. "
+    "When no further Tool is needed, finish with text and no ToolRequest."
+)
+
 
 def call_ollama_worker(
     request: WorkerRequest,
@@ -76,7 +86,8 @@ class OllamaToolSession:
         self.model = model
         self.timeout_seconds = timeout_seconds
         self._messages = [
-            {"role": "user", "content": request.task_text}
+            {"role": "system", "content": TOOL_PROTOCOL},
+            {"role": "user", "content": request.task_text},
         ]
         self._pending_tools: dict[str, str] = {}
 
