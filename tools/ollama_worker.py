@@ -24,7 +24,7 @@ TOOL_PROTOCOL = (
     "You are a bounded Repository Worker using Harness-owned Tools. "
     "Use at most one Tool per assistant turn. If you request a Tool, "
     "stop after requesting it and wait for ToolResult. On the next turn, "
-    "first inspect the returned ToolResult content and treat that returned data as authoritative. "
+    "first inspect and use the returned ToolResult content, treating that returned data as authoritative. "
     "When the next Tool arguments depend on a prior ToolResult, construct those arguments from the returned content, preserving the exact returned text whenever the Task requires exact reuse. "
     "Never replace returned data with an empty placeholder, guess, omission, or invented value. "
     "Only after consuming the returned ToolResult may you decide whether another Tool is needed. "
