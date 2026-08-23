@@ -26,6 +26,7 @@ TOOL_PROTOCOL = (
     "stop after requesting it and wait for ToolResult. On the next turn, "
     "first inspect and use the returned ToolResult content, treating that returned data as authoritative. "
     "When the next Tool arguments depend on a prior ToolResult, construct those arguments from the returned content, preserving the exact returned text whenever the Task requires exact reuse. "
+    "If the Task says a literal must be immediately followed by returned content, concatenate them with no added spaces, newlines, punctuation, or other characters. "
     "Never replace returned data with an empty placeholder, guess, omission, or invented value. "
     "Only after consuming the returned ToolResult may you decide whether another Tool is needed. "
     "If another Tool is needed, request at most one Tool and stop again. "
