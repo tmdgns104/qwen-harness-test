@@ -175,9 +175,11 @@ class OllamaWorkerTests(unittest.TestCase):
 
         self.assertEqual(captured["url"], "http://127.0.0.1:11434/api/chat")
         self.assertEqual(captured["payload"]["model"], "qwen3:8b")
+        messages = captured["payload"]["messages"]
+        self.assertEqual(messages[0]["role"], "system")
         self.assertEqual(
-            captured["payload"]["messages"],
-            [{"role": "user", "content": "inspect project"}],
+            messages[1],
+            {"role": "user", "content": "inspect project"},
         )
         self.assertIs(captured["payload"]["stream"], False)
         self.assertIs(captured["payload"]["think"], False)
@@ -324,8 +326,9 @@ class OllamaWorkerTests(unittest.TestCase):
             )
 
         self.assertEqual(first.tool_requests[0].call_id, "call-1")
+        self.assertEqual(payloads[1]["messages"][0]["role"], "system")
         self.assertEqual(
-            payloads[1]["messages"],
+            payloads[1]["messages"][1:],
             [
                 {"role": "user", "content": "inspect project"},
                 first_message,
@@ -514,6 +517,93 @@ class WorkerProtocolContractTests(unittest.TestCase):
             messages[1],
             {"role": "user", "content": "perform sequential repository work"},
         )
+
+    def test_tool_session_represents_sequential_read_write_and_text_completion(self):
+        from tools.harness_core import ToolRequest, ToolResult, ToolSpec, WorkerStep
+        from tools.ollama_worker import OllamaToolSession
+
+        payloads = []
+        read_message = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-read",
+                    "function": {
+                        "index": 0,
+                        "name": "read_repo_text",
+                        "arguments": {"relative_path": "source.txt"},
+                    },
+                }
+            ],
+        }
+        write_message = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-write",
+                    "function": {
+                        "index": 0,
+                        "name": "write_repo_text",
+                        "arguments": {
+                            "relative_path": "target.txt",
+                            "content": "COPIED:PROBE-CONTENT",
+                        },
+                    },
+                }
+            ],
+        }
+        responses = [
+            FakeResponse({"message": read_message}),
+            FakeResponse({"message": write_message}),
+            FakeResponse({"message": {"role": "assistant", "content": "done"}}),
+        ]
+
+        def fake_urlopen(request, timeout):
+            payloads.append(json.loads(request.data.decode("utf-8")))
+            return responses[len(payloads) - 1]
+
+        tools = (
+            ToolSpec("read_repo_text", "Read", {"type": "object"}),
+            ToolSpec("write_repo_text", "Write", {"type": "object"}),
+        )
+
+        with patch("tools.ollama_worker.urlopen", side_effect=fake_urlopen):
+            session = OllamaToolSession(
+                WorkerRequest("copy source into target"),
+                tools=tools,
+            )
+            first = session.start()
+            second = session.continue_with_tool_result(
+                ToolResult("call-read", True, "PROBE-CONTENT", None)
+            )
+            third = session.continue_with_tool_result(
+                ToolResult("call-write", True, "target.txt", None)
+            )
+
+        self.assertEqual(
+            first.tool_requests,
+            (ToolRequest("call-read", "read_repo_text", {"relative_path": "source.txt"}),),
+        )
+        self.assertEqual(
+            second.tool_requests,
+            (
+                ToolRequest(
+                    "call-write",
+                    "write_repo_text",
+                    {
+                        "relative_path": "target.txt",
+                        "content": "COPIED:PROBE-CONTENT",
+                    },
+                ),
+            ),
+        )
+        self.assertEqual(third, WorkerStep(True, "done", (), None))
+        self.assertEqual(payloads[1]["messages"][-1]["role"], "tool")
+        self.assertEqual(payloads[1]["messages"][-1]["content"], "PROBE-CONTENT")
+        self.assertEqual(payloads[2]["messages"][-1]["role"], "tool")
+        self.assertEqual(payloads[2]["messages"][-1]["content"], "target.txt")
 
 
 if __name__ == "__main__":
