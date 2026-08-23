@@ -1319,3 +1319,34 @@ The Human explicitly approved an Architecture change to add an Evidence-backed u
 - QH-V2-WORKER-ROB-001 can leave ACTIVE state without promoting its failed Candidate.
 - QH-V2-LIFECYCLE-001 becomes the next Human-approved implementation Task before further Worker investigation or OPS-003.
 - Future lifecycle code must support this state deterministically so another manual bootstrap is not needed.
+
+## ADR-016 - Post-Lifecycle Worker Diagnosis Before Operations Resume
+
+### Status
+
+Accepted
+
+### Context
+
+QH-V2-WORKER-ROB-001 closed as `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` under ADR-015 after Stable and Candidate both failed the promotion threshold. QH-V2-LIFECYCLE-001 then completed durable Evidence-backed unsuccessful closure support. During the LIFECYCLE-001 implementation attempt, short native Ollama requests remained responsive while the full Task prompt repeatedly reached the bounded 30-second Worker timeout. The existing QH-V2-OPS-003 contract still requires WORKER-ROB-001 to become `COMPLETE - VERIFIED`, which conflicts with its authoritative non-success terminal state.
+
+The Human reviewed this Evidence and selected a dedicated Worker diagnosis before resuming the Operations queue.
+
+### Decision
+
+1. Preserve QH-V2-WORKER-ROB-001 exactly as `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED`; it must never be rewritten as successful completion.
+2. After QH-V2-PLAN-001, nominate a separately defined QH-V2-WORKER-DIAG-001 investigation before QH-V2-OPS-003.
+3. WORKER-DIAG-001 must diagnose the observed long-prompt and timeout behavior from objective Evidence before proposing Worker policy or implementation changes.
+4. QH-V2-WORKER-ROB-002 is conditional. It may be created only after diagnostic Evidence and a Human review justify a specific repair Task. It is not automatically required, created, approved, or started.
+5. QH-V2-OPS-003 remains deferred until QH-V2-LIFECYCLE-001 is complete and the Worker diagnostic path reaches a Human-reviewed disposition. If ROB-002 is selected, its terminal outcome and the Human decision to resume Operations must be recorded first.
+6. After the Worker diagnostic path, the remaining Operations order stays QH-V2-OPS-003, QH-V2-OPS-004, QH-V2-OPS-005, QH-V2-OPS-006, QH-V2-M2-SPEC-001, then HUMAN ARCHITECTURE GATE.
+7. This decision changes sequencing and dependency interpretation only. Worker, Runner, Retry, tool, model, lifecycle, Verification, Final Gate, Git, and Trust Boundary authority remain unchanged.
+8. No successor is automatically created or started. Ordinary Human-controlled lifecycle gates remain authoritative.
+
+### Consequences
+
+- Repository dependency truth no longer requires an unsuccessful Task to become successful.
+- Worker reliability is investigated before additional usability work resumes.
+- A repair Task is Evidence-driven rather than assumed in advance.
+- OPS-003 and the remaining OPS/M2 work stay preserved and deferred, not cancelled.
+- `GLOBALIZATION = NOT AUTHORIZED` and `M3 = FUTURE / NOT AUTHORIZED` remain unchanged.

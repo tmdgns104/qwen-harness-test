@@ -241,11 +241,12 @@ the queue inside an implementation Task.
 
 ## Current Nomination
 
-QH-V2-WORKER-ROB-001 is `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` under ADR-015.
-QH-V2-LIFECYCLE-001 is the Human-approved ACTIVE Task created by the one-time
-ADR-015 bootstrap transition. After it becomes COMPLETE - VERIFIED, stop for Human
-selection before either separate Worker investigation or QH-V2-OPS-003. Neither path
-is automatically nominated or started. `AUTONOMOUS QUEUE = NOT AUTHORIZED`.
+QH-V2-PLAN-001 is the current Human-approved ACTIVE planning Task.
+After it becomes COMPLETE - VERIFIED, nominate QH-V2-WORKER-DIAG-001 for a separate
+Human-reviewed contract. QH-V2-WORKER-ROB-002 is conditional on diagnostic Evidence
+and is not automatically required, created, approved, or started. QH-V2-OPS-003 remains
+deferred until the Worker diagnostic path reaches a Human-reviewed disposition.
+`AUTONOMOUS QUEUE = NOT AUTHORIZED`.
 
 ## Future Roadmap (Strategic Direction Only; Non-Executable)
 
@@ -472,7 +473,40 @@ preserving the existing deterministic SAFETY boundary. Neither Task authorizes
 Globalization, automatic multi-tool execution, expanded Worker authority, or a new
 autonomous queue.
 
-### Current Nomination Override
+### Historical Nomination Override
 
-QH-V2-ARCH-014 is the current planning Task. After it is COMPLETE - VERIFIED, nominate
-QH-V2-HARD-008 as the next Human-controlled candidate. Do not auto-start it.
+QH-V2-ARCH-014 was the planning Task for the ADR-014 reprioritization and this record
+is historical context only. The later ADR-016 post-lifecycle override below is
+authoritative for the current nomination.
+
+## Post-Lifecycle Human Selection Override - ADR-016 - 2026-08-23
+
+ADR-016 records the Human-selected Evidence-first path after QH-V2-LIFECYCLE-001.
+It supersedes earlier post-ADR-014 queue wording only where that wording assumes
+QH-V2-WORKER-ROB-001 must become successfully complete before Operations resume.
+
+QH-V2-WORKER-ROB-001 remains `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED`.
+It is never treated as successful dependency Evidence.
+
+The Human-controlled sequence is now:
+
+```text
+QH-V2-PLAN-001
+  -> QH-V2-WORKER-DIAG-001
+  -> QH-V2-WORKER-ROB-002 only if diagnostic Evidence and Human review select a repair
+  -> QH-V2-OPS-003
+  -> QH-V2-OPS-004
+  -> QH-V2-OPS-005
+  -> QH-V2-OPS-006
+  -> QH-V2-M2-SPEC-001
+  -> HUMAN ARCHITECTURE GATE
+```
+
+QH-V2-WORKER-DIAG-001 is investigation-first and requires its own Human-approved
+contract. QH-V2-WORKER-ROB-002 is conditional and has no authorization merely from
+appearing in this queue. If diagnosis does not justify ROB-002, the Human may record
+the diagnostic disposition and explicitly resume QH-V2-OPS-003.
+
+No successor is automatically created or started. Worker, Runner, Retry, model,
+tool, lifecycle, Verification, Final Gate, Git, Globalization, and Trust Boundary
+authority remain unchanged.

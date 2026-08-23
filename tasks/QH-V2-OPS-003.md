@@ -26,12 +26,16 @@ path contains spaces.
 
 ## Dependencies
 
-- QH-V2-WORKER-ROB-001 must be COMPLETE - VERIFIED in the ADR-014 deterministic
-  queue; it follows QH-V2-HARD-008.
+- QH-V2-LIFECYCLE-001 must be COMPLETE - VERIFIED.
+- QH-V2-WORKER-ROB-001 remains `CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED` and is not
+  required or permitted to become successful dependency Evidence.
+- QH-V2-WORKER-DIAG-001 must reach a Human-reviewed disposition before this Task may
+  be activated. If QH-V2-WORKER-ROB-002 is selected from that diagnosis, its terminal
+  outcome and the Human decision to resume Operations must also be recorded first.
 - Doctor remains a separate diagnostic command; the launcher does not combine it
   with lifecycle steps.
 - The reprioritized queue uses the ordinary Human-controlled lifecycle. No autonomous
-  manifest covers this Task after ADR-014.
+  manifest covers this Task after ADR-016.
 
 ## Scope
 
