@@ -23,7 +23,7 @@ from tools.ollama_worker import (
     DEFAULT_TIMEOUT_SECONDS,
     OllamaToolSession,
 )
-from tools.task_runner import _runner_tools, _validate_tool_request
+from tools.task_runner import _load_active_task, _runner_tools, _validate_tool_request
 
 
 TASK_ID = "QH-V2-WORKER-ROB-002"
@@ -61,6 +61,9 @@ EXPERIMENT_COMMAND = (
     "--results docs/WORKER_ROB_002_RESULTS.json "
     "--evidence docs/WORKER_ROB_002_EVIDENCE.md"
 )
+
+EXPECTED_RESULTS = Path("docs/WORKER_ROB_002_RESULTS.json")
+EXPECTED_EVIDENCE = Path("docs/WORKER_ROB_002_EVIDENCE.md")
 
 
 def _h1_title(markdown: str) -> str:
@@ -186,12 +189,13 @@ def review_tool_request(
         "name": request.name,
         "arguments": bounded_arguments(request),
         "schema_valid": False,
-        "path_compatible": False,
+        "path_compatible": None,
         "validation_error": None,
     }
     try:
         relative_path, _ = _validate_tool_request(request)
         review["schema_valid"] = True
+        review["path_compatible"] = False
         if request.name == "read_repo_text":
             if not _read_path_is_repo_relative(repo_root, relative_path):
                 raise ValueError("read path does not remain inside Repository")
@@ -243,7 +247,7 @@ def measure_initial_step(
     try:
         session = session_factory(WorkerRequest(prompt), tools=tools)
         step = session.start()
-    except Exception as exc:  # benchmark records escaped adapter failures as Evidence
+    except Exception as exc:  # record escaped adapter failures as benchmark Evidence
         elapsed = time.perf_counter() - started
         return {
             "variant": variant,
@@ -273,7 +277,7 @@ def measure_initial_step(
         for request in step.tool_requests
     ]
     invalid = any(not bool(review["schema_valid"]) for review in reviews)
-    incompatible = any(not bool(review["path_compatible"]) for review in reviews)
+    incompatible = any(review["path_compatible"] is False for review in reviews)
     count = len(step.tool_requests)
     transport_success = bool(step.transport_ok)
     valid_bounded = transport_success and count == 1 and not invalid and not incompatible
@@ -360,15 +364,18 @@ def _candidate_meets_threshold(
         and candidate["timeout_count"] <= 1
         and candidate["invalid_unknown_tool_count"] == 0
     )
-    safety_not_worse = (
-        candidate["multi_tool_count"] <= stable["multi_tool_count"]
+    correctness_safety_not_worse = (
+        candidate["valid_bounded_first_step_count"]
+        >= stable["valid_bounded_first_step_count"]
+        and candidate["multi_tool_count"] <= stable["multi_tool_count"]
         and candidate["scope_incompatible_count"] <= stable["scope_incompatible_count"]
         and candidate["invalid_unknown_tool_count"] <= stable["invalid_unknown_tool_count"]
     )
     candidate_median = candidate["median_elapsed_completed_seconds"]
     stable_median = stable["median_elapsed_completed_seconds"]
     materially_better = (
-        candidate["valid_bounded_first_step_count"] >= stable["valid_bounded_first_step_count"] + 2
+        candidate["valid_bounded_first_step_count"]
+        >= stable["valid_bounded_first_step_count"] + 2
         or candidate["timeout_count"] <= stable["timeout_count"] - 2
         or (
             candidate_median is not None
@@ -376,7 +383,7 @@ def _candidate_meets_threshold(
             and candidate_median <= stable_median * 0.75
         )
     )
-    return bool(fixed and safety_not_worse and materially_better)
+    return bool(fixed and correctness_safety_not_worse and materially_better)
 
 
 def promotion_recommendation(summary: dict[str, dict[str, object]]) -> str:
@@ -466,6 +473,7 @@ def render_evidence(data: dict[str, object]) -> str:
             "- Read-path validity and write ChangeScope/lifecycle-path validity were reviewed against existing Harness contracts without invoking the production tool executor.",
             "- A valid bounded first step is an interaction-quality metric only. It is not Repository PASS, Verification PASS, or Final Gate PASS.",
             "- QH-V2-WORKER-ROB-001 remains CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED and is not reinterpreted as success.",
+            "- For the deterministic recommendation calculation, material improvement means at least +2 valid bounded first steps, at least -2 timeouts, or at least 25% lower completed-call median latency, while the approved fixed safety/reliability thresholds must also pass.",
             "",
             "## Promotion Recommendation",
             "",
@@ -480,6 +488,16 @@ def render_evidence(data: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
+def _exact_output_path(repo_root: Path, requested: Path, expected: Path) -> Path:
+    if requested.is_absolute():
+        raise ValueError("experiment output path must be Repository-relative")
+    resolved = (repo_root / requested).resolve()
+    expected_resolved = (repo_root / expected).resolve()
+    if resolved != expected_resolved:
+        raise ValueError(f"unexpected experiment output path: {requested.as_posix()}")
+    return resolved
+
+
 def run_experiment(
     repo_root: Path,
     task_id: str,
@@ -487,8 +505,9 @@ def run_experiment(
     evidence_path: Path,
 ) -> dict[str, object]:
     repo_root = repo_root.resolve()
-    task_path = repo_root / "tasks" / f"{task_id}.md"
-    task_markdown = task_path.read_text(encoding="utf-8")
+    if task_id != TASK_ID:
+        raise ValueError(f"this experiment is limited to {TASK_ID}")
+    task_markdown, _ = _load_active_task(repo_root, task_id)
     prompts = build_variant_prompts(task_markdown)
     runs: list[dict[str, object]] = []
 
@@ -526,12 +545,14 @@ def run_experiment(
         "summary": summarize_all(runs),
     }
 
-    results_path = (repo_root / results_path).resolve()
-    evidence_path = (repo_root / evidence_path).resolve()
-    results_path.parent.mkdir(parents=True, exist_ok=True)
-    evidence_path.parent.mkdir(parents=True, exist_ok=True)
-    results_path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    evidence_path.write_text(render_evidence(data), encoding="utf-8")
+    results_target = _exact_output_path(repo_root, results_path, EXPECTED_RESULTS)
+    evidence_target = _exact_output_path(repo_root, evidence_path, EXPECTED_EVIDENCE)
+    results_target.parent.mkdir(parents=True, exist_ok=True)
+    results_target.write_text(
+        json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    evidence_target.write_text(render_evidence(data), encoding="utf-8")
     return data
 
 
@@ -539,8 +560,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="QH-V2-WORKER-ROB-002 experiment")
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--task-id", default=TASK_ID)
-    parser.add_argument("--results", default="docs/WORKER_ROB_002_RESULTS.json")
-    parser.add_argument("--evidence", default="docs/WORKER_ROB_002_EVIDENCE.md")
+    parser.add_argument("--results", default=str(EXPECTED_RESULTS).replace("\\", "/"))
+    parser.add_argument("--evidence", default=str(EXPECTED_EVIDENCE).replace("\\", "/"))
     args = parser.parse_args()
     run_experiment(
         Path(args.repo_root),
