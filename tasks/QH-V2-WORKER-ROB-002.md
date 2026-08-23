@@ -4,8 +4,6 @@
 
 APPROVED - READY FOR CONTRACT BASELINE
 
-This Task is an Evidence-driven experiment only. It does not authorize production Worker prompt/runtime integration or Candidate promotion.
-
 ## Problem
 
 QH-V2-WORKER-DIAG-001 established that the current local Worker is responsive for short requests but unstable when asked to solve a full Repository Task.
