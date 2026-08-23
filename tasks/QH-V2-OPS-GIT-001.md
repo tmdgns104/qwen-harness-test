@@ -69,13 +69,14 @@ QH-V2-DOC-003 진행 중 실제로 다음 문제가 재현됐다.
 2. atomic handoff + fast-forward-only 정책과 QH-V2-DOC-003 재현 Evidence를 Accepted decision으로 기록한다.
 3. BACKLOG 순서를 다음과 같이 조정한다.
 
-   `QH-V2-OPS-GIT-001 -> QH-V2-ARCH-018 -> QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003`
+   `QH-V2-OPS-GIT-001 -> QH-V2-DOC-KO-001 -> QH-V2-ARCH-018 -> QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003`
 
    기존 Operations/M2 queue는 취소하지 않는다.
 4. 기존 deterministic Git helper를 재사용할 수 있으면 재사용하여 read-only `qh handoff-check <remote-ref>` workflow를 추가한다.
 5. 필수 classification과 zero-mutation 동작을 검증하는 focused tests를 추가한다.
 6. 검증된 안전 인계 절차를 관련 개발/트러블슈팅 문서에 한국어로 반영한다.
 7. 실제 production remote mutation을 테스트 수단으로 사용하지 않고 temporary/local Git fixture로 동작을 입증한다.
+8. Human이 요청한 한국어 문서 통일/최신화 방향을 별도 후속 Task `QH-V2-DOC-KO-001` 초안으로 기록한다. 이 Task에서는 번역/대규모 문서 최신화를 수행하지 않는다.
 
 ## Allowed Changes
 
@@ -83,6 +84,7 @@ QH-V2-DOC-003 진행 중 실제로 다음 문제가 재현됐다.
 - `BACKLOG.md`
 - `STATUS.md`
 - `tasks/QH-V2-OPS-GIT-001.md`
+- `tasks/QH-V2-DOC-KO-001.md`
 - `tools/qh.py`
 - 작은 재사용 read-only Git helper가 필요한 경우에만 `tools/harness_core.py`
 - `tests/test_qh.py`
@@ -103,12 +105,13 @@ QH-V2-DOC-003 진행 중 실제로 다음 문제가 재현됐다.
 - historical G1 manifest 수정/재활성화
 - Candidate A/B production integration
 - Globalization
+- QH-V2-DOC-KO-001의 실제 번역/대규모 문서 개편
 
 ## Acceptance Criteria
 
 1. QH-V2-DOC-003의 multi-commit cherry-pick 재현을 Repository corruption으로 과장하지 않고 객관적 동기로 기록한다.
 2. Accepted decision이 exact baseline, one atomic handoff commit, read-only deterministic check, safe일 때만 수동 `git merge --ff-only`를 사용하는 정상 handoff contract를 정의한다.
-3. BACKLOG에 `OPS-GIT-001 -> ARCH-018 -> WORKER-ROB-003 -> OPS-003` 순서가 기록되고 기존 후속 queue가 보존된다.
+3. BACKLOG에 `OPS-GIT-001 -> DOC-KO-001 -> ARCH-018 -> WORKER-ROB-003 -> OPS-003` 순서가 기록되고 기존 후속 queue가 보존된다.
 4. `qh handoff-check <remote-ref>`는 read-only이며 현재 HEAD, handoff commit, handoff parent, changed paths, deterministic classification 하나를 출력한다.
 5. `FAST_FORWARD_SAFE`는 Repository가 clean이고 현재 HEAD가 정확히 handoff commit의 parent일 때만 반환된다.
 6. exact already-applied/contained 상태를 safe-to-apply 상태와 구분한다.
@@ -121,6 +124,7 @@ QH-V2-DOC-003 진행 중 실제로 다음 문제가 재현됐다.
 13. Allowed Changes만 발생한다.
 14. `git diff --check`가 PASS한다.
 15. 사람이 읽는 새 GitHub 문서 서술은 한국어로 작성하고, command/status/API/file name 등 정확한 기술 literal만 원문 표기를 유지한다.
+16. `tasks/QH-V2-DOC-KO-001.md`가 존재하고 GitHub 문서 한국어 통일/최신화 방향을 기록한다.
 
 ## Verification
 
@@ -134,11 +138,15 @@ Run exactly:
 
 Run exactly:
 
-`python -c "from pathlib import Path; d=Path('DECISIONS.md').read_text(encoding='utf-8'); b=Path('BACKLOG.md').read_text(encoding='utf-8'); text=d+'\n'+b; required=['QH-V2-OPS-GIT-001','QH-V2-ARCH-018','QH-V2-WORKER-ROB-003','QH-V2-OPS-003','FAST_FORWARD_SAFE','GLOBALIZATION = NOT AUTHORIZED']; missing=[x for x in required if x not in text]; assert not missing, missing"`
+`python -c "from pathlib import Path; d=Path('DECISIONS.md').read_text(encoding='utf-8'); b=Path('BACKLOG.md').read_text(encoding='utf-8'); text=d+'\n'+b; required=['QH-V2-OPS-GIT-001','QH-V2-DOC-KO-001','QH-V2-ARCH-018','QH-V2-WORKER-ROB-003','QH-V2-OPS-003','FAST_FORWARD_SAFE','GLOBALIZATION = NOT AUTHORIZED']; missing=[x for x in required if x not in text]; assert not missing, missing"`
 
 Run exactly:
 
 `python -c "from pathlib import Path; t=Path('docs/TROUBLESHOOTING.md').read_text(encoding='utf-8')+'\n'+Path('docs/DEVELOPMENT.md').read_text(encoding='utf-8'); required=['merge --ff-only','atomic handoff','cherry-pick']; missing=[x for x in required if x not in t]; assert not missing, missing"`
+
+Run exactly:
+
+`python -c "from pathlib import Path; p=Path('tasks/QH-V2-DOC-KO-001.md'); assert p.is_file(); s=p.read_text(encoding='utf-8'); assert 'GitHub 문서 한국어 통일 및 최신화' in s"`
 
 Run exactly:
 
@@ -159,6 +167,7 @@ Run exactly:
 - 모든 read-only classification의 zero mutation
 - `tests.test_qh` regression PASS
 - exact changed paths와 scope classification
+- `QH-V2-DOC-KO-001` 후속 Task 초안
 - exact implementation HEAD를 사용한 authoritative `qh close` Final Gate PASS
 - Final Gate 이후 별도 lifecycle commit
 
@@ -172,15 +181,14 @@ Run exactly:
 - divergent/non-atomic remote state를 heuristic으로 수용
 - Architecture, Requirements, Trust Boundary, Worker, model, Retry, Tool authority, Globalization 변경
 - 정확한 remote/local handoff 문제를 넘어서는 범위 확장
+- QH-V2-DOC-KO-001의 실제 번역/대규모 문서 최신화를 이 Task에 섞는 것
 
 ## Next Task
 
-QH-V2-OPS-GIT-001이 `COMPLETE - VERIFIED`에 도달하면, 다음 방향은 Human이 이미 선택한 Candidate A 승격 경로다.
+QH-V2-OPS-GIT-001이 `COMPLETE - VERIFIED`에 도달하면 다음 Task는:
 
-`QH-V2-ARCH-018 - Deterministic Worker Brief Production Promotion Decision`
+`QH-V2-DOC-KO-001 - GitHub 문서 한국어 통일 및 최신화`
 
-단, Human이 2026-08-24에 요청한 GitHub 문서 한국어 통일/최신화 작업은 별도 문서 Task로 분리해 OPS-GIT-001 이후 Source of Truth에 추가한다. 이 문서 Task는 기존 historical Evidence의 의미를 바꾸지 않고, 현재/사용자-facing 문서를 한국어로 최신화하는 것을 목표로 한다.
+그 Task가 완료되면 Human이 이미 선택한 Candidate A 승격 경로로 진행한다.
 
-그 이후 계획은 다음 순서를 유지한다.
-
-`QH-V2-ARCH-018 -> QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003 -> QH-V2-OPS-004 -> QH-V2-OPS-005 -> QH-V2-OPS-006 -> QH-V2-M2-SPEC-001 -> HUMAN ARCHITECTURE GATE`.
+`QH-V2-ARCH-018 -> QH-V2-WORKER-ROB-003 -> QH-V2-OPS-003 -> QH-V2-OPS-004 -> UX-ARCH-001 -> UX-001 -> QH-V2-OPS-005 -> QH-V2-OPS-006 -> QH-V2-M2-SPEC-001 -> HUMAN ARCHITECTURE GATE`
