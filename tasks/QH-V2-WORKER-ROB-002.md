@@ -258,11 +258,21 @@ The experimental code must not be imported or invoked by the normal production q
 
 Run exactly these deterministic verification commands after the experiment artifacts are committed:
 
-1. `python -m unittest tests.test_worker_rob_002`
-2. `python -c "import json; from pathlib import Path; p=Path('docs/WORKER_ROB_002_RESULTS.json'); assert p.is_file(); d=json.loads(p.read_text(encoding='utf-8')); runs=d['runs']; assert len(runs)==30, len(runs); counts={v:sum(1 for r in runs if r['variant']==v) for v in ('stable_full_task','candidate_worker_brief','candidate_worker_brief_one_step')}; assert counts=={'stable_full_task':10,'candidate_worker_brief':10,'candidate_worker_brief_one_step':10}, counts; assert all(r.get('write_executed') is False for r in runs)"`
-3. `python -c "from pathlib import Path; s=Path('docs/WORKER_ROB_002_EVIDENCE.md').read_text(encoding='utf-8'); required=['Stable - Full Task','Candidate A - Deterministic Worker Brief','Candidate B - Deterministic Worker Brief + One-Step Instruction','transport-success rate','timeout rate','valid bounded first step','multi-tool','median','Promotion Recommendation','Repository PASS','Final Gate','GLOBALIZATION = NOT AUTHORIZED']; missing=[x for x in required if x not in s]; assert not missing, missing"`
-4. `git diff --check`
-5. `git status --short`
+Run exactly:
+
+`python -m unittest tests.test_worker_rob_002`
+Run exactly:
+
+`python -c "import json; from pathlib import Path; p=Path('docs/WORKER_ROB_002_RESULTS.json'); assert p.is_file(); d=json.loads(p.read_text(encoding='utf-8')); runs=d['runs']; assert len(runs)==30, len(runs); counts={v:sum(1 for r in runs if r['variant']==v) for v in ('stable_full_task','candidate_worker_brief','candidate_worker_brief_one_step')}; assert counts=={'stable_full_task':10,'candidate_worker_brief':10,'candidate_worker_brief_one_step':10}, counts; assert all(r.get('write_executed') is False for r in runs)"`
+Run exactly:
+
+`python -c "from pathlib import Path; s=Path('docs/WORKER_ROB_002_EVIDENCE.md').read_text(encoding='utf-8'); required=['Stable - Full Task','Candidate A - Deterministic Worker Brief','Candidate B - Deterministic Worker Brief + One-Step Instruction','transport-success rate','timeout rate','valid bounded first step','multi-tool','median','Promotion Recommendation','Repository PASS','Final Gate','GLOBALIZATION = NOT AUTHORIZED']; missing=[x for x in required if x not in s]; assert not missing, missing"`
+Run exactly:
+
+`git diff --check`
+Run exactly:
+
+`git status --short`
 
 The live 30-run benchmark is Evidence collection, not a nondeterministic command to be rerun automatically inside authoritative `qh close`.
 
