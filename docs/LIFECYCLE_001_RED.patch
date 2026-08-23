@@ -1,0 +1,102 @@
+diff --git a/tests/test_qh.py b/tests/test_qh.py
+--- a/tests/test_qh.py
++++ b/tests/test_qh.py
+@@ -1249,3 +1249,98 @@
+ 
+ if __name__ == "__main__":
+     unittest.main()
++
++
++class QhUnsuccessfulLifecycleTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        self.repo = Path(self.tmp.name)
++        (self.repo / "tasks").mkdir()
++        (self.repo / "docs").mkdir()
++        self._git("init")
++        self._git("config", "user.email", "test@example.com")
++        self._git("config", "user.name", "Test User")
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def _git(self, *args):
++        return subprocess.run(
++            ["git", *args],
++            cwd=self.repo,
++            capture_output=True,
++            text=True,
++            check=True,
++        )
++
++    def _run_qh(self, *args):
++        return subprocess.run(
++            [sys.executable, str(QH), *args],
++            cwd=self.repo,
++            capture_output=True,
++            text=True,
++            check=False,
++        )
++
++    def test_close_unsuccessful_records_terminal_state_and_evidence_without_final_gate_pass(self):
++        status_path = self.repo / "STATUS.md"
++        task_path = self.repo / "tasks" / "QH-V2-TEST-001.md"
++        evidence_path = self.repo / "docs" / "failure.md"
++        status_path.write_text(
++            "Current Task: QH-V2-TEST-001 - ACTIVE\n\n"
++            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
++            "Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED\n",
++            encoding="utf-8",
++        )
++        task_path.write_text(
++            "# Test Task\n\n## Status\n\nACTIVE\n",
++            encoding="utf-8",
++        )
++        evidence_path.write_text("objective failure evidence\n", encoding="utf-8")
++        self._git("add", ".")
++        self._git("commit", "-m", "unsuccessful close baseline")
++
++        result = self._run_qh("close-unsuccessful", "docs/failure.md")
++
++        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++        self.assertNotIn("Final Gate: PASS", result.stdout)
++        status = status_path.read_text(encoding="utf-8")
++        self.assertIn(
++            "Current Task: QH-V2-TEST-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence docs/failure.md",
++            status,
++        )
++        self.assertIn(
++            "## Status\n\nCLOSED - UNSUCCESSFUL - EVIDENCE RECORDED",
++            task_path.read_text(encoding="utf-8"),
++        )
++
++    def test_start_accepts_evidence_backed_unsuccessful_predecessor(self):
++        status_path = self.repo / "STATUS.md"
++        evidence_path = self.repo / "docs" / "failure.md"
++        status_path.write_text(
++            "Current Task: QH-V2-TEST-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence docs/failure.md\n\n"
++            "Previous Task: QH-V2-OLDER-001 - COMPLETE - VERIFIED - commit def5678\n\n"
++            "Next Planned Task: QH-V2-TEST-002 - NOT STARTED\n",
++            encoding="utf-8",
++        )
++        (self.repo / "tasks" / "QH-V2-TEST-001.md").write_text(
++            "# Test Task\n\n## Status\n\nCLOSED - UNSUCCESSFUL - EVIDENCE RECORDED\n",
++            encoding="utf-8",
++        )
++        (self.repo / "tasks" / "QH-V2-TEST-002.md").write_text(
++            "# Next Task\n\n## Status\n\nAPPROVED - READY FOR CONTRACT BASELINE\n",
++            encoding="utf-8",
++        )
++        evidence_path.write_text("objective failure evidence\n", encoding="utf-8")
++        self._git("add", ".")
++        self._git("commit", "-m", "unsuccessful predecessor baseline")
++
++        result = self._run_qh("start", "QH-V2-TEST-002")
++
++        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++        status = status_path.read_text(encoding="utf-8")
++        self.assertIn("Current Task: QH-V2-TEST-002 - ACTIVE", status)
++        self.assertIn(
++            "Previous Task: QH-V2-TEST-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence docs/failure.md",
++            status,
++        )
