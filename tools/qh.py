@@ -7,7 +7,12 @@ import sys
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-from harness_core import GitBaseline, VerificationContract, _require_git_top_level, _run_git, assemble_evidence, capture_git_baseline, evaluate_final_gate, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
+
+REPO_IMPORT_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_IMPORT_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_IMPORT_ROOT))
+
+from tools.harness_core import GitBaseline, VerificationContract, _require_git_top_level, _run_git, assemble_evidence, capture_git_baseline, evaluate_final_gate, get_changed_paths, parse_change_scope, parse_verification_commands, run_verification_commands
 
 
 TASK_ID_PATTERN = r"[A-Za-z0-9][A-Za-z0-9._-]*"
@@ -143,6 +148,12 @@ def command_task_new(repo_root: Path, task_id: str) -> int:
     return 0
 
 
+def _load_run_dependencies():
+    from tools.retry_runner import RetryOutcomeKind, run_with_retry
+
+    return RetryOutcomeKind, run_with_retry
+
+
 def command_doctor(repo_root: Path, *, ollama_opener=None) -> int:
     failures = 0
     warnings = 0
@@ -222,6 +233,21 @@ def command_doctor(repo_root: Path, *, ollama_opener=None) -> int:
         report("VERIFICATION_CONTRACT", "PASS", "Task Verification parses")
     except (OSError, RuntimeError, ValueError):
         report("VERIFICATION_CONTRACT", "FAIL", "Task Verification is invalid")
+        failures += 1
+
+    try:
+        _load_run_dependencies()
+        report(
+            "RUN_IMPORT_CHAIN",
+            "PASS",
+            "delayed Worker/run import chain is ready",
+        )
+    except Exception:
+        report(
+            "RUN_IMPORT_CHAIN",
+            "FAIL",
+            "delayed Worker/run import chain is not ready",
+        )
         failures += 1
 
     try:
@@ -414,7 +440,7 @@ def command_status(repo_root: Path) -> int:
     changed_paths = get_changed_paths(str(repo_root), GitBaseline(head=head))
     print(f"Current Task: {task_id}")
     print(f"Task File: {task_path.relative_to(repo_root).as_posix()}")
-    print(f"Git State: {"clean" if not changed_paths else "dirty"}")
+    print(f"Git State: {'clean' if not changed_paths else 'dirty'}")
     print("Changed Paths:")
     if changed_paths:
         for path in changed_paths:
@@ -437,7 +463,7 @@ def command_preflight(repo_root: Path) -> int:
     git_status = _run_git(str(repo_root), ("status", "--porcelain")).stdout
     print(f"Current Task: {task_id}")
     print(f"Task File: {task_path.relative_to(repo_root).as_posix()}")
-    print(f"Git State: {"clean" if not git_status.strip() else "dirty"}")
+    print(f"Git State: {'clean' if not git_status.strip() else 'dirty'}")
     print("Task Scope: valid")
     return 0
 
@@ -500,10 +526,10 @@ def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
     print(f"Diff Check: exit {diff_result.exit_code}")
     unexpected = any(not item.allowed for item in evidence.path_scope_results)
     final_gate = evaluate_final_gate(evidence)
-    print(f"Unexpected Changed Paths: {"yes" if unexpected else "no"}")
-    print(f"Final Gate: {"PASS" if final_gate.passed else "FAIL"}")
+    print(f"Unexpected Changed Paths: {'yes' if unexpected else 'no'}")
+    print(f"Final Gate: {'PASS' if final_gate.passed else 'FAIL'}")
     if final_gate.failures:
-        print(f"Final Gate Failures: {", ".join(final_gate.failures)}")
+        print(f"Final Gate Failures: {', '.join(final_gate.failures)}")
     passed = final_gate.passed and diff_result.exit_code == 0
     return 0 if passed else 1
 
@@ -519,7 +545,7 @@ def command_run(
     This reports Worker interaction state only.
     It does not perform Verification, Final Gate, Task completion, or commit.
     """
-    from tools.retry_runner import RetryOutcomeKind, run_with_retry
+    RetryOutcomeKind, run_with_retry = _load_run_dependencies()
 
     if retry_callable is None:
         retry_callable = run_with_retry
