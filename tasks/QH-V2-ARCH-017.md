@@ -4,8 +4,6 @@
 
 APPROVED - READY FOR CONTRACT BASELINE
 
-The Human explicitly approved replacing repeated per-step approval prompts with an exception-driven supervision model, while preserving deterministic Harness authority and Human control over Architecture, Trust Boundary, and new-direction decisions.
-
 ## Problem
 
 The current Repository policy requires repeated Human approval for normal lifecycle steps even when the Task contract is already approved and deterministic checks are available.
