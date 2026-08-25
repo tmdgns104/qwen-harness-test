@@ -521,4 +521,15 @@ read-only `qh handoff-check`를 사용해 `FAST_FORWARD_SAFE`일 때만 사람�
 결정을 기록하며, 실제 Worker production integration은 `QH-V2-WORKER-ROB-003`에서
 별도 수행한다.
 
+2026-08-25 Human Architecture Gate는 ADR-018로 Candidate A - Deterministic Worker
+Brief를 Accepted했다. original tracked Task가 유일한 Source of Truth이며 Brief는
+required section의 deterministic exact projection이다. Candidate B one-step
+instruction은 채택하지 않는다. `qwen3:8b`, `think:false`, timeout `30.0`, current
+Worker step budget, Retry policy, tool schema/authority, FR-004, Verification, Final
+Gate, lifecycle, Git authority는 그대로 유지한다.
+
+`QH-V2-WORKER-ROB-003`은 `QH-V2-ARCH-018`이 `COMPLETE - VERIFIED`에 도달한 뒤에만
+별도 contract로 시작할 수 있다. 이 Architecture 결정 자체는 production runtime을
+변경하거나 successor를 자동 시작하지 않는다.
+
 `GLOBALIZATION = NOT AUTHORIZED`

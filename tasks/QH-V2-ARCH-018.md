@@ -89,9 +89,23 @@ ChatGPT의 기술 추천은 Evidence가 현재 상태로 유지된다면 **1. AC
 
 Human의 명시적 선택 전에는 ADR-018을 Accepted로 확정하지 않는다.
 
-## Proposed Production Boundary if Accepted
+## Human Architecture Gate Result
 
-Human이 Candidate A를 승인하면 ADR-018은 최소한 다음을 고정한다.
+2026-08-25 Human은 **1. ACCEPT Candidate A**를 명시적으로 선택하고 Candidate A - Deterministic Worker Brief의 production promotion Architecture를 승인했다.
+
+이 승인은 다음 불변 조건을 유지한다.
+
+- original tracked Task가 유일한 Source of Truth다.
+- Candidate B one-step instruction은 채택하지 않는다.
+- `qwen3:8b`, `think:false`, timeout `30.0`초를 유지한다.
+- Worker step budget, Retry policy, tool schema와 tool authority를 유지한다.
+- FR-004 Worker successor 금지와 Verification, Final Gate, lifecycle, Git authority를 유지한다.
+- `GLOBALIZATION = NOT AUTHORIZED`를 유지한다.
+- QH-V2-ARCH-018이 `COMPLETE - VERIFIED`에 도달하기 전에는 QH-V2-WORKER-ROB-003을 시작하지 않는다.
+
+## Accepted Production Boundary
+
+ADR-018은 다음을 고정한다.
 
 1. production Worker initial request는 full Task text 대신 deterministic Worker Brief를 사용할 수 있다.
 2. original tracked Task가 유일한 Source of Truth다.

@@ -1433,3 +1433,41 @@ Human이 선택한 현재 진행 순서는 다음과 같다.
 - 적용 전 read-only 검사로 exact parent/commit 관계와 변경 경로를 사람이 확인할 수 있다.
 - 안전 조건이 맞지 않을 때 heuristic merge나 자동 history rewrite 대신 deterministic STOP을 사용한다.
 - 원격 작업 편의성이 좋아져도 Git mutation 권한이나 Harness lifecycle 권한은 확대되지 않는다.
+
+## ADR-018 - Deterministic Worker Brief Production Promotion
+
+### Status
+
+Accepted
+
+### Context
+
+QH-V2-WORKER-DIAG-001은 짧은 요청과 현재 tool schema 자체는 안정적이지만, full Repository Task를 해결하는 경로가 기존 `30.0`초 timeout 안에서 불안정하다는 Evidence를 기록했다. QH-V2-WORKER-ROB-002는 같은 `qwen3:8b`, `think:false`, timeout, tool schema 조건에서 Stable full Task input과 두 Candidate를 각각 10회 비교했다.
+
+- Stable - Full Task: transport success 60%, timeout 40%, valid bounded first step 6/10, median completed latency 약 10.529초
+- Candidate A - Deterministic Worker Brief: transport success 100%, timeout 0%, valid bounded first step 10/10, median completed latency 약 2.013초
+- Candidate B - Deterministic Worker Brief + One-Step Instruction: transport success 70%, timeout 30%, valid bounded first step 2/10, median completed latency 약 20.778초
+
+세 variant 모두 multi-tool SAFETY shape, scope-incompatible request, benchmark Worker write가 0이었다. Candidate A만 predefined promotion threshold를 충족했고, Candidate B의 추가 one-step instruction은 Candidate A보다 reliability와 latency가 모두 나빴다. Human은 2026-08-25 QH-V2-ARCH-018 Architecture Gate에서 `ACCEPT Candidate A`를 명시적으로 선택했다.
+
+### Decision
+
+1. Candidate A - Deterministic Worker Brief를 production Worker initial request input 방식으로 채택한다. 실제 production integration은 별도 `QH-V2-WORKER-ROB-003`에서만 구현하고 검증한다.
+2. original tracked Task가 유일한 Source of Truth다. Worker Brief는 원본 Task를 대체하거나 별도 권한을 부여하지 않는다.
+3. Deterministic Worker Brief는 LLM 요약이 아니라 original tracked Task의 exact section projection이다. Task identity/title과 `Goal`, `Architecture Basis`, `Dependencies`, `Scope`, `Allowed Changes`, `Forbidden Changes`, `Acceptance Criteria`, `Stop Conditions`를 원문 그대로 복사한다.
+4. required section이 없거나 중복되면 fail closed한다. LLM paraphrasing, semantic summarization, requirement ranking, omission, inference를 허용하지 않는다.
+5. Candidate B의 fixed one-step instruction은 production 경로에 채택하지 않는다.
+6. model은 `qwen3:8b`, reasoning mode는 `think:false`, timeout은 `30.0`초로 유지한다.
+7. current Worker step budget, Retry policy, tool schema, tool authority를 변경하지 않는다. multi-tool split, repair, continuation behavior를 추가하지 않는다.
+8. deterministic Harness가 Verification과 Final Gate를 계속 소유하며 lifecycle과 Git authority를 변경하지 않는다.
+9. FR-004를 유지한다. Worker는 명시적으로 할당된 current Task만 수행하며 successor를 선택하거나 시작하지 않는다.
+10. QH-V2-ARCH-018이 `COMPLETE - VERIFIED`에 도달하기 전에는 QH-V2-WORKER-ROB-003을 시작하지 않는다. QH-V2-WORKER-ROB-003은 별도 Task contract, scope, tests와 exact implementation HEAD 기반 authoritative `qh close`를 가져야 한다.
+11. `GLOBALIZATION = NOT AUTHORIZED`를 유지한다.
+
+### Consequences
+
+- production Worker input은 full Task text를 직접 전달하는 방식에서 deterministic exact-section Worker Brief 방식으로 전환될 수 있다.
+- 원본 Task의 요구사항과 권한 경계는 계속 authoritative하며, Brief 생성 실패는 축약이나 추론으로 복구하지 않고 fail closed한다.
+- Candidate B의 추가 prompt policy는 도입하지 않는다.
+- 이 ADR은 production code를 변경하지 않으며 production integration의 성공을 증명하지 않는다. 실제 동작과 regression은 QH-V2-WORKER-ROB-003에서 검증해야 한다.
+- model, think mode, timeout, Worker/Retry budget, tool/Verification/Final Gate/lifecycle/Git authority와 Trust Boundary는 확대되거나 변경되지 않는다.
