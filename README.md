@@ -12,44 +12,61 @@ exit code, scope 판정과 deterministic Final Gate가 완료 근거입니다.
 
 ## 현재 상태
 
-운영 상태의 최신 권위는 항상 [STATUS.md](STATUS.md)입니다. 이 README는
-`QH-V2-DOC-KO-001`에서 현재 Repository 상태와 사용자 흐름에 맞게 갱신했습니다.
+운영 상태의 최종 권위는 항상 [STATUS.md](STATUS.md)입니다.
 
-최근 완료된 주요 단계와 현재 방향은 다음과 같습니다.
+2026-08-25 기준 주요 상태:
 
 | 영역 | 상태 | 의미 |
 |---|---|---|
 | Harness Core | ✅ 구현/검증됨 | Git baseline, ChangeScope, Verification, Evidence, Final Gate |
-| Native Ollama Worker | ✅ 구현/검증됨 | 기본 `qwen3:8b`, native Ollama API 경로 |
+| Native Ollama Worker | ✅ 구현/검증됨 | 기본 `qwen3:8b`, native Ollama API |
 | Repository Tools | ✅ 구현/검증됨 | `read_repo_text`, scoped `write_repo_text` |
 | Single-Task Runner | ✅ 구현/검증됨 | 현재 ACTIVE Task 하나만 실행 |
-| Bounded Retry | ✅ 구현/검증됨 | 유한 retry, `FAIL` / `BLOCKED` 안전 종료 |
+| Bounded Retry | ✅ 구현/검증됨 | 유한 retry, 안전한 FAIL/BLOCKED 종료 |
 | `qh task-new` | ✅ QH-V2-OPS-001 | Human-review Task 초안 생성 |
 | `qh doctor` | ✅ QH-V2-OPS-002 | Python/Git/Repository/Ollama/model 진단 |
 | 안전한 원격 handoff | ✅ QH-V2-OPS-GIT-001 | `qh handoff-check` + `git merge --ff-only` |
-| 한국어 문서 최신화 | 🔄 QH-V2-DOC-KO-001 | GitHub 사용자-facing 문서 정리 |
-| Candidate A promotion 결정 | ⏳ QH-V2-ARCH-018 | Deterministic Worker Brief production 결정 |
-| Candidate A production integration | ⏳ QH-V2-WORKER-ROB-003 | Architecture 승인 후 별도 구현 |
-| Windows workflow 단순화 | ✅ QH-V2-OPS-003 | Repository-root `qh.cmd` thin launcher |
+| 한국어 문서 정리 | ✅ QH-V2-DOC-KO-001 | GitHub 사용자-facing 문서 한국어 우선 |
+| Candidate A 결정 | ✅ QH-V2-ARCH-018 | Deterministic Worker Brief Accepted |
+| Candidate A production integration | ✅ QH-V2-WORKER-ROB-003 | production initial Worker input에 최소 통합 |
+| Windows CMD launcher | ✅ QH-V2-OPS-003 | Repository-root `qh.cmd` thin launcher |
+| close observability | ✅ QH-V2-PERF-006 | START/HEARTBEAT/COMPLETE timing 출력 |
+| Git-heavy fixture 최적화 | ✅ QH-V2-PERF-007 | focused 14 tests 35.15% 개선 |
+| Verification runtime | ⚠ Architecture Review 필요 | routine close 300초 목표 미달 |
+| QH-V2-OPS-004 | ⏸ 보류 | Verification Strategy 결정 전 시작 금지 |
 
-현재 Human-selected 순서는 다음입니다.
+### 최신 성능 Evidence
+
+`QH-V2-PERF-007`은 `COMPLETE - VERIFIED`입니다.
+
+- implementation HEAD: `031dcae9beaef2db2730fbb81051fff7c3a40e79`
+- lifecycle commit: `7ea2f389b7bd03858325dc38d7c72e0615653847`
+- focused 14 tests: `551.646s -> 357.777s` (`35.15%` 개선)
+- Git process starts: `284 -> 203` (`28.52%` 감소)
+- final `tests.test_qh`: `1157.8s`
+- final review phase: `1613.8s`
+- Final Gate: `PASS`
+
+fixture 최적화 자체는 성공했지만 routine authoritative close가 practical target인
+`300s`를 크게 초과했습니다. 따라서 Repository 계약대로 다음 단계는
+**Verification Strategy / Regression Tiering Architecture Review**이며
+`QH-V2-OPS-004`를 아직 시작하지 않습니다.
+
+현재 검토 후보는 다음과 같습니다.
 
 ```text
-QH-V2-DOC-KO-001
-  -> QH-V2-ARCH-018
-  -> QH-V2-WORKER-ROB-003
-  -> QH-V2-OPS-003
-  -> QH-V2-OPS-004
-  -> UX-ARCH-001
-  -> UX-001
-  -> QH-V2-OPS-005
-  -> QH-V2-OPS-006
-  -> QH-V2-M2-SPEC-001
-  -> HUMAN ARCHITECTURE GATE
+Task close
+  -> Task에 직접 관련된 focused authoritative regression
+  -> 핵심 invariant suite
+  -> fresh exact HEAD Evidence
+
+Milestone / Release / Main Gate
+  -> repository-wide integration regression
+  -> fresh exact HEAD Evidence
 ```
 
-이 순서는 자동 queue가 아닙니다. 실제 Current Task와 lifecycle은 `STATUS.md`를
-우선하며, Worker는 다음 Task를 스스로 선택하거나 시작할 수 없습니다.
+이 구조는 아직 Accepted Architecture가 아닙니다. Human + ChatGPT Architecture Review
+전에는 임의 구현하지 않습니다.
 
 `GLOBALIZATION = NOT AUTHORIZED`
 
@@ -86,6 +103,7 @@ Deterministic Final Gate
 ```mermaid
 flowchart TD
     Human["Human: 목적·핵심 범위·예외 판단"]
+    ChatGPT["ChatGPT: 설계·기술 판단·Review"]
     Task["Task Contract\nGoal / Allowed / Forbidden / Verification"]
     Run["qh run TASK-ID"]
     Retry["Bounded Retry"]
@@ -99,10 +117,17 @@ flowchart TD
     Gate["Scope + Verification + Diff Check + Final Gate"]
     Done["COMPLETE - VERIFIED"]
 
-    Human --> Task --> Run --> Retry --> Runner --> Adapter --> Qwen
+    Human --> ChatGPT --> Task --> Run --> Retry --> Runner --> Adapter --> Qwen
     Qwen --> Adapter --> Runner --> Tools --> Repo
     Repo --> Human --> Commit --> Close --> Gate --> Done
 ```
+
+Codex CLI는 이 구조에서 편리한 외부 implementation/test/debug executor로 사용할 수
+있지만 **필수 구성요소는 아닙니다.** Codex를 사용하지 않을 때는 Human이 CMD/Git
+실행자 역할을 맡고 ChatGPT가 설계·Review를 계속 담당할 수 있습니다.
+
+자세한 수동 운영 방법은 [Codex 없이 계속하기](docs/MANUAL_OPERATOR_GUIDE.md)를
+참고하세요.
 
 `qh run`이 `NORMAL`로 끝났다는 사실은 Repository Task PASS가 아닙니다.
 최종 완료 판정은 `qh close <IMPLEMENTATION-HEAD>`가 수행하는 객관적 Evidence와
@@ -155,18 +180,20 @@ ollama list
 ### 4. 환경 진단
 
 ```powershell
-python tools\qh.py doctor
+qh.cmd doctor
 ```
 
-`doctor`는 Python, Git, Repository root, Source of Truth, lifecycle, current Task,
-working tree, remote, Ollama endpoint와 기본 모델 준비 상태를 읽기 전용으로
-확인합니다.
+또는 기존 direct Python 경로:
+
+```powershell
+python tools\qh.py doctor
+```
 
 ### 5. 현재 상태 확인
 
 ```powershell
-python tools\qh.py status
-python tools\qh.py preflight
+qh.cmd status
+qh.cmd preflight
 ```
 
 처음부터 실제 Task lifecycle을 따라 해보고 싶다면
@@ -176,99 +203,69 @@ python tools\qh.py preflight
 
 | 명령 | 목적 | 중요한 의미 |
 |---|---|---|
-| `python tools\qh.py doctor` | 환경 진단 | 읽기 전용. PASS/WARN/FAIL 구분 |
-| `python tools\qh.py task-new <TASK-ID>` | Task 초안 생성 | 자동 승인/start/commit/close 하지 않음 |
-| `python tools\qh.py status` | 현재 Task와 변경 경로 확인 | PASS 판정 명령이 아님 |
-| `python tools\qh.py preflight` | Repository/Task/scope 기본 점검 | 실행 전 진단 |
-| `python tools\qh.py verify` | 현재 Task Verification 실행 | 진단용, full Final Gate 아님 |
-| `python tools\qh.py review [BASELINE]` | scope + Verification + Final Gate 진단 | 정상 final path에서는 선택적 |
-| `python tools\qh.py start <TASK-ID>` | 승인된 Task를 ACTIVE로 전환 | clean baseline 필요 |
-| `python tools\qh.py run <TASK-ID>` | Qwen Worker 실행 | `NORMAL`은 Task PASS가 아님 |
-| `python tools\qh.py close <COMMIT>` | authoritative close | full Verification + scope + Final Gate |
-| `python tools\qh.py handoff-check <REMOTE-REF>` | 원격 handoff 안전성 검사 | read-only, Git mutation 없음 |
+| `qh.cmd doctor` | 환경 진단 | 읽기 전용. PASS/WARN/FAIL 구분 |
+| `qh.cmd task-new <TASK-ID>` | Task 초안 생성 | 자동 승인/start/commit/close 하지 않음 |
+| `qh.cmd status` | 현재 Task와 변경 경로 확인 | PASS 판정 명령이 아님 |
+| `qh.cmd preflight` | Repository/Task/scope 기본 점검 | 실행 전 진단 |
+| `qh.cmd verify` | 현재 Task Verification 실행 | 진단용, full Final Gate 아님 |
+| `qh.cmd review [BASELINE]` | scope + Verification + Final Gate 진단 | 정상 final path에서는 선택적 |
+| `qh.cmd start <TASK-ID>` | 승인된 Task를 ACTIVE로 전환 | clean baseline 필요 |
+| `qh.cmd run <TASK-ID>` | Qwen Worker 실행 | `NORMAL`은 Task PASS가 아님 |
+| `qh.cmd close <COMMIT>` | authoritative close | Task Verification + scope + Final Gate |
+| `qh.cmd handoff-check <REMOTE-REF>` | 원격 handoff 안전성 검사 | read-only, Git mutation 없음 |
 
-### Windows CMD용 `qh.cmd`
-
-Repository root의 Windows CMD에서는 긴 Python 경로 대신 다음처럼 실행할 수 있습니다.
-
-```bat
-qh.cmd doctor
-qh.cmd status
-qh.cmd start QH-LOCAL-001
-qh.cmd close <IMPLEMENTATION-COMMIT>
-```
-
-각 명령은 같은 인자를 기존 `python tools\qh.py ...` CLI에 그대로 전달하며 Python
-process의 exit code를 그대로 반환합니다. `qh.cmd`는 명령을 조합하거나 lifecycle,
-Verification, Final Gate, Git 또는 Worker authority를 추가하지 않습니다. 기존 direct
-Python 사용법도 계속 지원됩니다.
+`qh.cmd`는 기존 Python CLI에 전체 argument를 그대로 전달하고 child exit code를
+그대로 반환하는 thin launcher입니다. lifecycle, Git 또는 PASS authority를 추가하지
+않습니다.
 
 ## 표준 Task lifecycle
 
 ```text
 1. Problem / Goal 정의
-2. Task 계약 작성 및 Human 승인
-3. Task contract commit
-4. clean working tree 확인
-5. qh start TASK-ID
-6. start lifecycle commit
-7. 구현
-8. focused test / diff 검토
-9. implementation commit
-10. qh close IMPLEMENTATION_HEAD
-11. Final Gate PASS 확인
-12. lifecycle completion commit
-13. 필요 시 safe push
+2. Requirements / Architecture 확인
+3. Task 계약 작성 및 Human 승인
+4. Task contract commit
+5. clean working tree 확인
+6. qh start TASK-ID
+7. start lifecycle commit
+8. 구현 또는 qh run
+9. focused test / diff 검토
+10. implementation commit
+11. qh close IMPLEMENTATION_HEAD
+12. Final Gate PASS 확인
+13. lifecycle completion commit
+14. safe push
 ```
 
 개발 중 전체 regression을 습관적으로 반복하지 않습니다. 변경한 기능의 focused
-검사를 사용하고, 정상 final path에서는 `qh close`가 Task에 정의된 authoritative
-Verification을 한 번 수행합니다.
+검사를 우선하며 최종 Verification 정책은 현재 Task 계약과 Accepted Architecture를
+따릅니다.
 
 ## 안전한 원격 작업 handoff
 
-`QH-V2-OPS-GIT-001`부터 ChatGPT/GitHub 등 원격 작업에서 만든 변경을 로컬로
-가져오는 정상 경로는 **exact baseline + one atomic handoff commit + read-only check +
-fast-forward merge**입니다.
-
-```text
-exact local HEAD 기록
-  -> 그 SHA에서 remote work branch 생성
-  -> 정확히 하나의 atomic handoff commit 생성
-  -> git fetch
-  -> qh handoff-check
-  -> FAST_FORWARD_SAFE
-  -> git merge --ff-only
-```
-
-CMD/PowerShell 예:
+ChatGPT/GitHub 등 원격 작업에서 만든 변경을 로컬로 가져오는 정상 경로는
+**exact baseline + atomic handoff + read-only check + fast-forward merge**입니다.
 
 ```powershell
 git fetch origin
-python tools\qh.py handoff-check origin/work/<handoff-branch>
+qh.cmd handoff-check origin/work/<handoff-branch>
 git merge --ff-only origin/work/<handoff-branch>
 ```
 
-`qh handoff-check`의 분류는 다음과 같습니다.
+주요 classification:
 
 - `FAST_FORWARD_SAFE`: local HEAD가 handoff commit의 정확한 parent
 - `ALREADY_APPLIED_EXACT`: exact handoff commit이 현재 HEAD
 - `ALREADY_CONTAINED`: handoff commit이 이미 현재 history에 포함
 - `STOP_DIRTY`: worktree/index가 clean하지 않음
-- `STOP_NON_ATOMIC_OR_DIVERGED`: direct-parent 단일 commit 계약 불일치 또는 divergence
+- `STOP_NON_ATOMIC_OR_DIVERGED`: direct-parent 계약 불일치 또는 divergence
 
-`FAST_FORWARD_SAFE`가 아니면 임의 `reset`, `rebase`, 반복 `cherry-pick --skip`으로
-맞추지 않습니다. STOP 후 exact baseline handoff를 다시 만들거나 Human-reviewed
-integration을 선택합니다.
-
-자세한 개발 규칙은 [Development Guide](docs/DEVELOPMENT.md), 사고 사례는
-[Troubleshooting](docs/TROUBLESHOOTING.md)을 참고하세요.
+`FAST_FORWARD_SAFE`가 아니면 임의 `reset`, `rebase`, force push로 맞추지 않습니다.
 
 ## Safety / Trust Model
 
 - Qwen에게 최종 PASS 권한이 없습니다.
 - Qwen에게 일반 shell 또는 Git 권한을 주지 않습니다.
-- LLM 요청 자체는 Tool 실행 권한이 아닙니다.
 - Worker write는 Task Allowed/Forbidden ChangeScope를 통과해야 합니다.
 - Forbidden이 Allowed보다 우선하고 기본값은 deny입니다.
 - Repository root 탈출과 절대 경로는 거부합니다.
@@ -276,7 +273,7 @@ integration을 선택합니다.
 - Retry는 유한하며 write 이후 위험한 재시도는 `BLOCKED`로 멈춥니다.
 - `qh close`의 deterministic FAIL은 LLM이 뒤집을 수 없습니다.
 - Worker는 다음 Task를 자동 선택하거나 시작하지 않습니다. 이는 `FR-004`의 핵심 경계입니다.
-- Architecture, Requirements, Trust Boundary, Globalization 변경은 별도 Human Gate 대상입니다.
+- Architecture, Requirements, Trust Boundary, Globalization 변경은 Human Gate 대상입니다.
 
 ## 문서 안내
 
@@ -288,8 +285,9 @@ integration을 선택합니다.
 | [STATUS.md](STATUS.md) | 현재 lifecycle과 baseline |
 | [BACKLOG.md](BACKLOG.md) | 후보 Task와 Human-selected 순서 |
 | [Quick Start](docs/QUICKSTART.md) | 처음 실행하는 방법 |
+| [Codex 없이 계속하기](docs/MANUAL_OPERATOR_GUIDE.md) | Human이 직접 CMD/Git를 실행하는 절차 |
 | [How It Works](docs/HOW_IT_WORKS.md) | 내부 구조와 신뢰 모델 |
-| [Development Guide](docs/DEVELOPMENT.md) | Harness 개발 규칙 |
+| [Development Guide](docs/DEVELOPMENT.md) | Harness 개발 규칙과 성능 Evidence |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | 실패 사례와 복구 원칙 |
 | [Project Timeline](docs/PROJECT_TIMELINE.md) | 프로젝트 진행 역사 |
 | [Development Log](docs/DEVELOPMENT_LOG.md) | 개발 기록 |
@@ -297,13 +295,22 @@ integration을 선택합니다.
 
 ## 앞으로의 방향
 
-가까운 다음 단계는 Candidate A의 deterministic Worker Brief를 production에
-승격할지 `QH-V2-ARCH-018`에서 Architecture 결정으로 확정하고, 승인된 경우
-`QH-V2-WORKER-ROB-003`에서 별도 구현하는 것입니다. 이후 Windows workflow,
-Worker smoke/E2E 표준화, 자연어 UX, status/handoff 정리와 Milestone 2 설계 검토로
-진행합니다.
+현재 바로 다음 구현 Task는 정해져 있지 않습니다.
 
-LangGraph, Subtask Queue, expanded tools, shell authority, model routing, multi-agent,
+PERF-007의 300초 practical runtime trigger가 초과되었으므로 다음 단계는
+**Human + ChatGPT Verification Strategy / Regression Tiering Architecture Review**입니다.
+
+핵심 질문은 다음과 같습니다.
+
+- routine Task close에서 어느 regression을 authoritative하게 요구할 것인가?
+- repository-wide integration regression은 어떤 gate에서 수행할 것인가?
+- 두 계층 모두 fresh exact HEAD Evidence를 어떻게 유지할 것인가?
+- test 삭제/skip/cached PASS 없이 실사용 가능한 runtime을 만들 수 있는가?
+
+이 결정이 Repository의 Accepted Architecture와 새 Task 계약으로 반영되기 전에는
+`QH-V2-OPS-004`를 시작하지 않습니다.
+
+LangGraph, Subtask Queue, expanded shell authority, model routing, multi-agent,
 larger autonomous tasks는 현재 자동으로 허가된 기능이 아닙니다.
 
 `GLOBALIZATION = NOT AUTHORIZED`
