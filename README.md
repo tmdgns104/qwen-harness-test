@@ -12,7 +12,8 @@ exit code, scope 판정과 deterministic Final Gate가 완료 근거입니다.
 
 ## 현재 상태
 
-운영 상태의 최종 권위는 항상 [STATUS.md](STATUS.md)입니다.
+운영 상태의 최종 권위는 항상 [STATUS.md](STATUS.md)입니다. 사람이 빠르게 최신 상태만
+확인하려면 [Current State](docs/CURRENT_STATE.md)를 먼저 보면 됩니다.
 
 2026-08-25 기준 주요 상태:
 
@@ -279,11 +280,12 @@ git merge --ff-only origin/work/<handoff-branch>
 
 | 문서 | 용도 |
 |---|---|
+| [Current State](docs/CURRENT_STATE.md) | 2026-08-25 최신 프로젝트 스냅샷과 다음 Architecture Review |
 | [PROJECT.md](PROJECT.md) | 프로젝트 목적과 큰 경계 |
 | [REQUIREMENTS.md](REQUIREMENTS.md) | 기능/검증 요구사항 |
 | [DECISIONS.md](DECISIONS.md) | Accepted ADR와 주요 결정 |
 | [STATUS.md](STATUS.md) | 현재 lifecycle과 baseline |
-| [BACKLOG.md](BACKLOG.md) | 후보 Task와 Human-selected 순서 |
+| [BACKLOG.md](BACKLOG.md) | 후보 Task와 historical queue/override 기록 |
 | [Quick Start](docs/QUICKSTART.md) | 처음 실행하는 방법 |
 | [Codex 없이 계속하기](docs/MANUAL_OPERATOR_GUIDE.md) | Human이 직접 CMD/Git를 실행하는 절차 |
 | [How It Works](docs/HOW_IT_WORKS.md) | 내부 구조와 신뢰 모델 |
@@ -292,6 +294,10 @@ git merge --ff-only origin/work/<handoff-branch>
 | [Project Timeline](docs/PROJECT_TIMELINE.md) | 프로젝트 진행 역사 |
 | [Development Log](docs/DEVELOPMENT_LOG.md) | 개발 기록 |
 | [Research Log](docs/RESEARCH_LOG.md) | Worker/실험 연구 기록 |
+
+과거 Timeline/Development Log/Research Log와 `BACKLOG.md`에는 당시에는 맞았지만
+후속 ADR/Task로 override된 상태 문구가 남아 있을 수 있습니다. 현재 상태 판정은
+`STATUS.md`와 최신 Task Evidence를 우선하고, 빠른 요약은 `CURRENT_STATE.md`를 사용합니다.
 
 ## 앞으로의 방향
 
