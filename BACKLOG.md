@@ -123,11 +123,12 @@ is readable; its authoritative completion record remains STATUS, its Task file, 
 | 12 | QH-V2-WORKER-ROB-001 | ADR-014 Level B Worker protocol robustness | QH-V2-HARD-008 | QH-V2-LIFECYCLE-001 |
 | 13 | QH-V2-LIFECYCLE-001 | ADR-015 Evidence-backed unsuccessful lifecycle hardening | QH-V2-WORKER-ROB-001 non-success Evidence | HUMAN SELECTION REQUIRED |
 | 14 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | Human selection after QH-V2-LIFECYCLE-001 | QH-V2-PERF-006 |
-| 15 | QH-V2-PERF-006 | Human-selected close runtime/observability optimization | QH-V2-OPS-003 | QH-V2-OPS-004 |
-| 16 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-PERF-006 | QH-V2-OPS-005 |
-| 17 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
-| 18 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
-| 19 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
+| 15 | QH-V2-PERF-006 | Human-selected close runtime/observability optimization | QH-V2-OPS-003 | QH-V2-PERF-007 |
+| 16 | QH-V2-PERF-007 | Human-selected new Git-heavy fixture optimization | QH-V2-PERF-006 | QH-V2-OPS-004 or Architecture review at runtime trigger |
+| 17 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-PERF-007 practical-runtime disposition | QH-V2-OPS-005 |
+| 18 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
+| 19 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
+| 20 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
 
 ## Dependency Graph
 
@@ -149,7 +150,8 @@ flowchart TD
     L001 --> HumanSelect["HUMAN SELECTION REQUIRED"]
     HumanSelect --> O003["QH-V2-OPS-003<br/>only if selected"]
     O003 --> P006["QH-V2-PERF-006<br/>close observability"]
-    P006 --> O004["QH-V2-OPS-004"]
+    P006 --> P007["QH-V2-PERF-007<br/>Git-heavy fixture optimization"]
+    P007 --> O004["QH-V2-OPS-004"]
     O004 --> O005["QH-V2-OPS-005"]
     O005 --> O006["QH-V2-OPS-006"]
     O006 --> M2["QH-V2-M2-SPEC-001"]
@@ -533,6 +535,25 @@ Gate, lifecycle, Git authority는 그대로 유지한다.
 `QH-V2-WORKER-ROB-003`은 `QH-V2-ARCH-018`이 `COMPLETE - VERIFIED`에 도달한 뒤에만
 별도 contract로 시작할 수 있다. 이 Architecture 결정 자체는 production runtime을
 변경하거나 successor를 자동 시작하지 않는다.
+
+`GLOBALIZATION = NOT AUTHORIZED`
+
+## Post-PERF-006 Human Performance Selection - 2026-08-25
+
+PERF-006의 exact close timing과 후속 read-only 병목 분석에 따라 신규 Git-heavy
+fixture 최적화를 OPS-004보다 먼저 수행한다.
+
+```text
+QH-V2-PERF-006 - COMPLETE - VERIFIED
+  -> QH-V2-PERF-007
+  -> QH-V2-OPS-004 only if the practical-runtime disposition permits
+```
+
+QH-V2-PERF-007은 `QhUnsuccessfulLifecycleTests`와 `HandoffCheckTests`의 independent
+seed/scenario-copy fixture만 최적화한다. production qh/Harness, real Git/qh semantics,
+Verification coverage와 Final Gate는 변경하지 않는다. 최종 `tests.test_qh` 또는
+authoritative close가 300초를 넘으면 OPS-004를 시작하지 않고 Verification Strategy
+Architecture review를 요청한다.
 
 `GLOBALIZATION = NOT AUTHORIZED`
 

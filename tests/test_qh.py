@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.git_fixture_utils import GitSeedRepository
+from tests.git_fixture_utils import GitSeedRepository, run_git
 
 
 QH = Path(__file__).resolve().parents[1] / "tools" / "qh.py"
@@ -1252,17 +1252,26 @@ if __name__ == "__main__":
 
 
 class QhUnsuccessfulLifecycleTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.seed = GitSeedRepository(
+            {},
+            user_email="test@example.com",
+            user_name="Test User",
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.seed.cleanup()
+
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.repo = Path(self.tmp.name)
+        self._repo_copy = self.seed.new_copy()
+        self.repo = self._repo_copy.path
         (self.repo / "tasks").mkdir()
         (self.repo / "docs").mkdir()
-        self._git("init")
-        self._git("config", "user.email", "test@example.com")
-        self._git("config", "user.name", "Test User")
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self._repo_copy.cleanup()
 
     def _git(self, *args):
         return subprocess.run(
@@ -1492,20 +1501,68 @@ class QhUnsuccessfulLifecycleTests(unittest.TestCase):
 
 class HandoffCheckTests(unittest.TestCase):
     HANDOFF_REF = "refs/remotes/origin/handoff"
+    MULTI_HANDOFF_REF = "refs/remotes/origin/handoff-multi"
+    MERGE_HANDOFF_REF = "refs/remotes/origin/handoff-merge"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.seed = GitSeedRepository(
+            {"seed.txt": "seed\n"},
+            user_email="test@example.com",
+            user_name="Test User",
+        )
+        repo = cls.seed.path
+        cls.baseline = run_git(repo, "rev-parse", "HEAD")
+
+        (repo / "handoff.txt").write_text("handoff\n", encoding="utf-8")
+        run_git(repo, "add", "handoff.txt")
+        run_git(repo, "commit", "-m", "atomic handoff")
+        cls.single_handoff = run_git(repo, "rev-parse", "HEAD")
+        run_git(repo, "update-ref", cls.HANDOFF_REF, cls.single_handoff)
+        run_git(repo, "reset", "--hard", cls.baseline)
+
+        (repo / "one.txt").write_text("one\n", encoding="utf-8")
+        run_git(repo, "add", "one.txt")
+        run_git(repo, "commit", "-m", "handoff part one")
+        (repo / "two.txt").write_text("two\n", encoding="utf-8")
+        run_git(repo, "add", "two.txt")
+        run_git(repo, "commit", "-m", "handoff part two")
+        cls.multi_handoff = run_git(repo, "rev-parse", "HEAD")
+        run_git(repo, "update-ref", cls.MULTI_HANDOFF_REF, cls.multi_handoff)
+        run_git(repo, "reset", "--hard", cls.baseline)
+
+        run_git(repo, "checkout", "-b", "left", cls.baseline)
+        (repo / "left.txt").write_text("left\n", encoding="utf-8")
+        run_git(repo, "add", "left.txt")
+        run_git(repo, "commit", "-m", "left")
+        run_git(repo, "checkout", "-b", "right", cls.baseline)
+        (repo / "right.txt").write_text("right\n", encoding="utf-8")
+        run_git(repo, "add", "right.txt")
+        run_git(repo, "commit", "-m", "right")
+        run_git(repo, "merge", "--no-ff", "left", "-m", "merge handoff")
+        cls.merge_handoff = run_git(repo, "rev-parse", "HEAD")
+        run_git(repo, "update-ref", cls.MERGE_HANDOFF_REF, cls.merge_handoff)
+        run_git(repo, "reset", "--hard", cls.baseline)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.seed.cleanup()
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.repo = Path(self.tmp.name)
-        self._git("init")
-        self._git("config", "user.email", "test@example.com")
-        self._git("config", "user.name", "Test User")
-        (self.repo / "seed.txt").write_text("seed\n", encoding="utf-8")
-        self._git("add", "seed.txt")
-        self._git("commit", "-m", "baseline")
-        self.baseline = self._git("rev-parse", "HEAD").stdout.strip()
+        self._repo_copy = self.seed.new_copy()
+        self.repo = self._repo_copy.path
+        if self._testMethodName == "test_multi_commit_handoff_stops_without_mutation":
+            self.handoff_ref = self.MULTI_HANDOFF_REF
+            self.handoff = self.multi_handoff
+        elif self._testMethodName == "test_merge_commit_handoff_stops_without_mutation":
+            self.handoff_ref = self.MERGE_HANDOFF_REF
+            self.handoff = self.merge_handoff
+        else:
+            self.handoff_ref = self.HANDOFF_REF
+            self.handoff = self.single_handoff
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self._repo_copy.cleanup()
 
     def _git(self, *args):
         return subprocess.run(
@@ -1517,8 +1574,9 @@ class HandoffCheckTests(unittest.TestCase):
         )
 
     def _run_check(self):
+        handoff_arg = self.handoff_ref.removeprefix("refs/remotes/")
         return subprocess.run(
-            [sys.executable, str(QH), "handoff-check", "origin/handoff"],
+            [sys.executable, str(QH), "handoff-check", handoff_arg],
             cwd=self.repo,
             capture_output=True,
             text=True,
@@ -1541,17 +1599,11 @@ class HandoffCheckTests(unittest.TestCase):
             self.assertEqual(result.returncode, expected_code, result.stdout + result.stderr)
         return result
 
-    def _prepare_single_handoff(self):
-        (self.repo / "handoff.txt").write_text("handoff\n", encoding="utf-8")
-        self._git("add", "handoff.txt")
-        self._git("commit", "-m", "atomic handoff")
-        handoff = self._git("rev-parse", "HEAD").stdout.strip()
-        self._git("update-ref", self.HANDOFF_REF, handoff)
-        self._git("reset", "--hard", self.baseline)
-        return handoff
+    def _single_handoff_commit(self):
+        return self.handoff
 
     def test_fast_forward_safe_reports_exact_parent_and_changed_path_without_mutation(self):
-        handoff = self._prepare_single_handoff()
+        handoff = self._single_handoff_commit()
 
         result = self._assert_read_only(expected_code=0)
 
@@ -1562,7 +1614,7 @@ class HandoffCheckTests(unittest.TestCase):
         self.assertIn("Classification: FAST_FORWARD_SAFE", result.stdout)
 
     def test_already_applied_exact_is_distinct_and_read_only(self):
-        handoff = self._prepare_single_handoff()
+        handoff = self._single_handoff_commit()
         self._git("reset", "--hard", handoff)
 
         result = self._assert_read_only(expected_code=0)
@@ -1570,7 +1622,7 @@ class HandoffCheckTests(unittest.TestCase):
         self.assertIn("Classification: ALREADY_APPLIED_EXACT", result.stdout)
 
     def test_already_contained_is_distinct_and_read_only(self):
-        handoff = self._prepare_single_handoff()
+        handoff = self._single_handoff_commit()
         self._git("reset", "--hard", handoff)
         (self.repo / "later.txt").write_text("later\n", encoding="utf-8")
         self._git("add", "later.txt")
@@ -1581,7 +1633,7 @@ class HandoffCheckTests(unittest.TestCase):
         self.assertIn("Classification: ALREADY_CONTAINED", result.stdout)
 
     def test_dirty_worktree_stops_without_mutation(self):
-        self._prepare_single_handoff()
+        self._single_handoff_commit()
         (self.repo / "seed.txt").write_text("dirty\n", encoding="utf-8")
 
         result = self._assert_read_only(expected_code=1)
@@ -1590,7 +1642,7 @@ class HandoffCheckTests(unittest.TestCase):
         self.assertIn("Classification: STOP_DIRTY", result.stdout)
 
     def test_diverged_history_stops_without_mutation(self):
-        self._prepare_single_handoff()
+        self._single_handoff_commit()
         (self.repo / "local.txt").write_text("local\n", encoding="utf-8")
         self._git("add", "local.txt")
         self._git("commit", "-m", "diverged local commit")
@@ -1600,34 +1652,11 @@ class HandoffCheckTests(unittest.TestCase):
         self.assertIn("Classification: STOP_NON_ATOMIC_OR_DIVERGED", result.stdout)
 
     def test_multi_commit_handoff_stops_without_mutation(self):
-        (self.repo / "one.txt").write_text("one\n", encoding="utf-8")
-        self._git("add", "one.txt")
-        self._git("commit", "-m", "handoff part one")
-        (self.repo / "two.txt").write_text("two\n", encoding="utf-8")
-        self._git("add", "two.txt")
-        self._git("commit", "-m", "handoff part two")
-        handoff = self._git("rev-parse", "HEAD").stdout.strip()
-        self._git("update-ref", self.HANDOFF_REF, handoff)
-        self._git("reset", "--hard", self.baseline)
-
         result = self._assert_read_only(expected_code=1)
 
         self.assertIn("Classification: STOP_NON_ATOMIC_OR_DIVERGED", result.stdout)
 
     def test_merge_commit_handoff_stops_without_mutation(self):
-        self._git("checkout", "-b", "left", self.baseline)
-        (self.repo / "left.txt").write_text("left\n", encoding="utf-8")
-        self._git("add", "left.txt")
-        self._git("commit", "-m", "left")
-        self._git("checkout", "-b", "right", self.baseline)
-        (self.repo / "right.txt").write_text("right\n", encoding="utf-8")
-        self._git("add", "right.txt")
-        self._git("commit", "-m", "right")
-        self._git("merge", "--no-ff", "left", "-m", "merge handoff")
-        merge_commit = self._git("rev-parse", "HEAD").stdout.strip()
-        self._git("update-ref", self.HANDOFF_REF, merge_commit)
-        self._git("reset", "--hard", self.baseline)
-
         result = self._assert_read_only(expected_code=1)
 
         self.assertIn("Handoff Parent: MULTIPLE ", result.stdout)

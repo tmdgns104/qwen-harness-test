@@ -281,6 +281,31 @@ clean, HEAD probe도 서로 다른 lifecycle 시점의 fail-closed Evidence를 �
 따라서 이번 Task에서는 미미한 subprocess 절약을 위해 freshness 경계를 합치지 않고,
 실제 phase timing과 진행 관측성을 제공하는 변경만 유지합니다.
 
+### 신규 Git-heavy test scenario seed
+
+QH-V2-PERF-007은 production qh를 변경하지 않고 PERF-005의 independent Repository
+copy 방식을 신규 `QhUnsuccessfulLifecycleTests`와 `HandoffCheckTests`에 적용합니다.
+Unsuccessful lifecycle test는 immutable empty seed의 독립 copy에서 실제 lifecycle
+fixture를 commit합니다. Handoff test는 single, multi-commit, merge histories와 remote
+refs를 class-level immutable seed에 실제 Git으로 한 번 만들고, 각 test가 독립
+worktree/index/HEAD/ref copy를 받습니다. qh CLI, Git graph classification과 전후
+read-only snapshot assertions는 그대로 실제 실행됩니다.
+
+동일 host/command/Trace2 조건의 focused benchmark 결과:
+
+| 측정 | Before | After | 변화 |
+|---|---:|---:|---:|
+| 두 class test | 14, skip 0 | 14, skip 0 | 불변 |
+| Wall clock | 551.646s | 357.777s | -193.869s (-35.15%) |
+| Git Trace2 process start | 284 | 203 | -81 (-28.52%) |
+| Python/qh child source count | 19 | 19 | 불변 |
+
+3-sample host probe의 Git 평균은 before `1.651/1.672/1.869s`, after
+`1.630/1.818/1.820s`였고 Python 평균은 before `0.092/0.088/0.101s`, after
+`0.090/0.110/0.100s`였습니다. after host probe가 더 빨라지지 않았으므로 focused
+개선은 host-latency 하락으로 설명되지 않습니다. antivirus, disk, CPU, thermal과
+power 상태의 물리적 원인은 별도 telemetry가 없어 계속 UNVERIFIED입니다.
+
 ## qh 명령의 책임 경계
 
 | 명령 | 하는 일 | 하지 않는 일 |

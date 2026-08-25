@@ -247,6 +247,35 @@ Then run:
 - separate lifecycle commit
 - safe fast-forward push and final clean working tree
 
+## Implementation Evidence
+
+- Exact contract baseline: `d6dffd6948c9806da5a45eede837f772178bfee3`.
+- PERF-006 exact timing basis `tests.test_qh 1232.5s`, review `1457.5s`를 재확인했다.
+- Focused performance RED: 14 tests, skip 0, `551.646s`, Git Trace2 start `284`.
+  가장 느린 cases는 merge handoff `62.318s`, invalid Evidence paths `59.734s`,
+  already-contained `59.096s`, multi-commit handoff `59.018s`였다.
+- Pre-change three-sample host probe는 동일 3회 반복 기준 Git 평균
+  `1.651/1.672/1.869s`, Python 평균 `0.092/0.088/0.101s`였다.
+- Source accounting은 두 class의 Python/qh child invocation을 before/after 모두
+  `19`로 유지한다. 실제 qh CLI subprocess를 mock이나 in-process replacement로
+  바꾸지 않았다.
+- Unsuccessful lifecycle class는 PERF-005 empty seed의 independent copy를 사용한다.
+  Handoff class는 real Git으로 single/multi/merge history와 remote refs를 한 immutable
+  scenario seed에 prebuild하고 각 test에 독립 copy를 제공한다.
+- Isolation GREEN: `tests.test_git_fixture_utils` 5 tests PASS. worktree/index/untracked/
+  ignored/delete/rename/HEAD뿐 아니라 branch/ref/merge history mutation도 다른 copy에
+  누출되지 않는다.
+- Focused GREEN/after benchmark: 14 tests, skip 0, `357.777s`, Git Trace2 start `203`.
+  Before 대비 `193.869s`와 `35.15%`를 절감했고 Git process start는 `81`, `28.52%`
+  감소했다. test count, assertions, classifications와 qh child count는 유지됐다.
+- Post-change identical host probe는 Git 평균 `1.630/1.818/1.820s`, Python 평균
+  `0.090/0.110/0.100s`였다. 평균 host latency는 감소하지 않았으므로 raw focused
+  개선을 host speedup으로 재해석하지 않는다.
+- production `tools/**`와 `ops/**`는 변경하지 않았고 Verification concurrency,
+  skip, cached PASS, assertion weakening과 Globalization은 도입하지 않았다.
+- Final full `tests.test_qh`와 practical-runtime disposition은 exact implementation
+  HEAD의 authoritative `qh close` 1회에서 결정한다.
+
 ## Stop Conditions
 
 STOP and request Human/ChatGPT review if completion requires:

@@ -103,6 +103,57 @@ class GitSeedRepositoryTests(unittest.TestCase):
             mutated.cleanup()
             fresh.cleanup()
 
+    def test_branch_ref_and_merge_history_do_not_leak_between_scenario_copies(self) -> None:
+        scenario = GitSeedRepository(
+            {"base.txt": "base\n"},
+            user_email="perf007@example.test",
+            user_name="PERF-007 Test",
+        )
+        try:
+            baseline = run_git(scenario.path, "rev-parse", "HEAD")
+            run_git(scenario.path, "checkout", "-b", "left", baseline)
+            (scenario.path / "left.txt").write_text("left\n", encoding="utf-8")
+            run_git(scenario.path, "add", "left.txt")
+            run_git(scenario.path, "commit", "-q", "-m", "left")
+            run_git(scenario.path, "checkout", "-b", "right", baseline)
+            (scenario.path / "right.txt").write_text("right\n", encoding="utf-8")
+            run_git(scenario.path, "add", "right.txt")
+            run_git(scenario.path, "commit", "-q", "-m", "right")
+            run_git(scenario.path, "merge", "--no-ff", "left", "-m", "merge")
+            merge_head = run_git(scenario.path, "rev-parse", "HEAD")
+            handoff_ref = "refs/remotes/origin/handoff-merge"
+            run_git(scenario.path, "update-ref", handoff_ref, merge_head)
+            run_git(scenario.path, "reset", "--hard", baseline)
+
+            mutated = scenario.new_copy()
+            fresh = scenario.new_copy()
+            try:
+                run_git(mutated.path, "reset", "--hard", merge_head)
+                run_git(mutated.path, "update-ref", handoff_ref, baseline)
+                run_git(mutated.path, "checkout", "-b", "local-only", baseline)
+
+                self.assertEqual(run_git(fresh.path, "rev-parse", "HEAD"), baseline)
+                self.assertEqual(
+                    run_git(fresh.path, "rev-parse", handoff_ref),
+                    merge_head,
+                )
+                self.assertEqual(run_git(fresh.path, "branch", "--list", "local-only"), "")
+                merge_parents = run_git(
+                    fresh.path,
+                    "rev-list",
+                    "--parents",
+                    "-n",
+                    "1",
+                    merge_head,
+                ).split()
+                self.assertEqual(len(merge_parents), 3)
+                self.assertEqual(run_git(fresh.path, "status", "--porcelain"), "")
+            finally:
+                mutated.cleanup()
+                fresh.cleanup()
+        finally:
+            scenario.cleanup()
+
 
 if __name__ == "__main__":
     unittest.main()
