@@ -20,6 +20,7 @@ from tools.harness_core import (
 )
 from tools.ollama_worker import OllamaToolSession
 from tools.repo_tools import read_repo_text, write_repo_text
+from tools.worker_brief import build_worker_brief
 
 
 MAX_WORKER_STEPS = 8
@@ -262,6 +263,7 @@ def run_single_task(
             root,
             task_id,
         )
+        worker_brief = build_worker_brief(task_markdown)
     except (OSError, ValueError) as exc:
         return RunnerResult(
             interaction_ok=False,
@@ -272,7 +274,7 @@ def run_single_task(
             write_attempted=False,
         )
 
-    request = WorkerRequest(task_text=task_markdown)
+    request = WorkerRequest(task_text=worker_brief)
     tools = _runner_tools()
 
     try:

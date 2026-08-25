@@ -57,10 +57,22 @@ class TaskRunnerTests(unittest.TestCase):
         )
         task_markdown = (
             "# TASK-001\n\n"
+            "## Goal\n\n"
+            "Complete the current Task.\n\n"
+            "## Architecture Basis\n\n"
+            "Preserve deterministic Harness authority.\n\n"
+            "## Dependencies\n\n"
+            "None.\n\n"
+            "## Scope\n\n"
+            "Change only the allowed target.\n\n"
             "## Allowed Changes\n\n"
             "- target.txt\n\n"
             "## Forbidden Changes\n\n"
-            "- protected.txt\n"
+            "- protected.txt\n\n"
+            "## Acceptance Criteria\n\n"
+            "1. Preserve scope enforcement.\n\n"
+            "## Stop Conditions\n\n"
+            "STOP on unauthorized changes.\n"
         )
         (root / "tasks" / f"{task_id}.md").write_text(
             task_markdown,
@@ -68,7 +80,8 @@ class TaskRunnerTests(unittest.TestCase):
         )
         return temp, root, task_markdown
 
-    def test_matching_active_task_starts_worker_with_full_task_and_two_tools(self):
+    def test_matching_active_task_starts_worker_with_brief_and_two_tools(self):
+        from tools.worker_brief import build_worker_brief
         from tools.task_runner import run_single_task
 
         temp, root, task_markdown = self.make_repo()
@@ -93,7 +106,11 @@ class TaskRunnerTests(unittest.TestCase):
             session_factory=session_factory,
         )
 
-        self.assertIn(task_markdown, captured["request"].task_text)
+        self.assertEqual(
+            captured["request"].task_text,
+            build_worker_brief(task_markdown),
+        )
+        self.assertNotEqual(captured["request"].task_text, task_markdown)
         self.assertEqual(
             tuple(tool.name for tool in captured["tools"]),
             ("read_repo_text", "write_repo_text"),
@@ -125,6 +142,36 @@ class TaskRunnerTests(unittest.TestCase):
 
         self.assertFalse(called)
         self.assertFalse(result.interaction_ok)
+        self.assertEqual(result.steps_consumed, 0)
+        self.assertIsNotNone(result.error)
+
+    def test_missing_brief_section_fails_before_worker_creation(self):
+        from tools.task_runner import RunnerFailureKind, run_single_task
+
+        temp, root, task_markdown = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        task_path = root / "tasks" / "TASK-001.md"
+        task_path.write_text(
+            task_markdown.replace("## Goal\n", "## Removed Goal\n", 1),
+            encoding="utf-8",
+        )
+        worker_created = False
+
+        def session_factory(request, *, tools):
+            nonlocal worker_created
+            worker_created = True
+            raise AssertionError("worker must not be created")
+
+        result = run_single_task(
+            root,
+            "TASK-001",
+            session_factory=session_factory,
+        )
+
+        self.assertFalse(result.interaction_ok)
+        self.assertEqual(result.failure_kind, RunnerFailureKind.SAFETY)
+        self.assertIn("missing required Worker Brief sections", result.error)
+        self.assertFalse(worker_created)
         self.assertEqual(result.steps_consumed, 0)
         self.assertIsNotNone(result.error)
 
@@ -430,17 +477,15 @@ class TaskRunnerTests(unittest.TestCase):
         from tools.harness_core import ToolRequest
         from tools.task_runner import run_single_task
 
-        temp, root, _ = self.make_repo()
+        temp, root, task_markdown = self.make_repo()
         self.addCleanup(temp.cleanup)
 
         task_path = root / "tasks" / "TASK-001.md"
         task_path.write_text(
-            "# TASK-001\n\n"
-            "## Allowed Changes\n\n"
-            "- STATUS.md\n"
-            "- target.txt\n\n"
-            "## Forbidden Changes\n\n"
-            "- protected.txt\n",
+            task_markdown.replace(
+                "- target.txt",
+                "- STATUS.md\n- target.txt",
+            ),
             encoding="utf-8",
         )
 
@@ -855,16 +900,12 @@ class TaskRunnerTests(unittest.TestCase):
         from tools.harness_core import ToolRequest
         from tools.task_runner import run_single_task
 
-        temp, root, _ = self.make_repo()
+        temp, root, task_markdown = self.make_repo()
         self.addCleanup(temp.cleanup)
 
         task_path = root / "tasks" / "TASK-001.md"
         task_path.write_text(
-            "# TASK-001\n\n"
-            "## Allowed Changes\n\n"
-            "- status.md\n\n"
-            "## Forbidden Changes\n\n"
-            "- protected.txt\n",
+            task_markdown.replace("- target.txt", "- status.md"),
             encoding="utf-8",
         )
 
@@ -907,16 +948,12 @@ class TaskRunnerTests(unittest.TestCase):
         from tools.harness_core import ToolRequest
         from tools.task_runner import run_single_task
 
-        temp, root, _ = self.make_repo()
+        temp, root, task_markdown = self.make_repo()
         self.addCleanup(temp.cleanup)
 
         task_path = root / "tasks" / "TASK-001.md"
         task_path.write_text(
-            "# TASK-001\n\n"
-            "## Allowed Changes\n\n"
-            "- tasks/task-001.md\n\n"
-            "## Forbidden Changes\n\n"
-            "- protected.txt\n",
+            task_markdown.replace("- target.txt", "- tasks/task-001.md"),
             encoding="utf-8",
         )
         original = task_path.read_text(encoding="utf-8")
