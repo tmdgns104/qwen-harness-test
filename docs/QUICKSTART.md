@@ -33,6 +33,30 @@ QH-V2-DOC-KO-001
 
 `GLOBALIZATION = NOT AUTHORIZED`
 
+## Windows CMD 단축 launcher
+
+Repository root에서 Windows CMD를 사용하는 경우 다음 두 명령은 동일한 Python qh
+CLI를 실행합니다.
+
+```bat
+python tools\qh.py status
+qh.cmd status
+```
+
+Task ID나 commit 인자도 그대로 전달합니다.
+
+```bat
+qh.cmd task-new QH-LOCAL-001
+qh.cmd start QH-LOCAL-001
+qh.cmd run QH-LOCAL-001
+qh.cmd close <IMPLEMENTATION-COMMIT>
+```
+
+`qh.cmd`는 launcher가 있는 Repository 경로를 안전하게 인용하고 child Python process의
+exit code를 그대로 반환하는 thin wrapper입니다. 명령을 순서대로 묶거나 PASS를
+추론하지 않으며 Git, lifecycle, Verification 또는 Final Gate 권한을 추가하지 않습니다.
+아래의 direct `python tools\qh.py ...` 예시는 계속 유효합니다.
+
 ## 시작 전에 필요한 것
 
 - Windows

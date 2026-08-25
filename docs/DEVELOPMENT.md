@@ -265,6 +265,12 @@ ADR-007의 표준 final path는 standalone verify/review를 필수로 반복하�
 | `run` | Runner와 bounded Retry 실행 | verify·review·commit·close |
 | `close` | review 후 인자 commit이 현재 HEAD인지 확인하고 lifecycle 변경 | lifecycle commit 생성 |
 
+Windows CMD의 Repository-root `qh.cmd`는 위 Python CLI의 별도 구현이 아닙니다.
+`python "%~dp0tools\qh.py" %*`에 전체 인자를 전달하고 child exit code를 반환하는 thin
+launcher입니다. 따라서 `qh.cmd status`와 `python tools\qh.py status`는 같은 parser와
+command semantics를 사용합니다. launcher에 lifecycle sequencing, Git 호출, PATH 변경,
+PASS 판정 또는 별도 authority를 추가하지 않습니다.
+
 ## Architecture 변경 절차
 
 현재 Task가 승인된 Architecture 안에서 해결되지 않으면 구현을 넓히지 않습니다.

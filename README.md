@@ -30,7 +30,7 @@ exit code, scope 판정과 deterministic Final Gate가 완료 근거입니다.
 | 한국어 문서 최신화 | 🔄 QH-V2-DOC-KO-001 | GitHub 사용자-facing 문서 정리 |
 | Candidate A promotion 결정 | ⏳ QH-V2-ARCH-018 | Deterministic Worker Brief production 결정 |
 | Candidate A production integration | ⏳ QH-V2-WORKER-ROB-003 | Architecture 승인 후 별도 구현 |
-| Windows workflow 단순화 | ⏳ QH-V2-OPS-003 | 긴 CLI 사용성 개선 |
+| Windows workflow 단순화 | ✅ QH-V2-OPS-003 | Repository-root `qh.cmd` thin launcher |
 
 현재 Human-selected 순서는 다음입니다.
 
@@ -186,6 +186,22 @@ python tools\qh.py preflight
 | `python tools\qh.py run <TASK-ID>` | Qwen Worker 실행 | `NORMAL`은 Task PASS가 아님 |
 | `python tools\qh.py close <COMMIT>` | authoritative close | full Verification + scope + Final Gate |
 | `python tools\qh.py handoff-check <REMOTE-REF>` | 원격 handoff 안전성 검사 | read-only, Git mutation 없음 |
+
+### Windows CMD용 `qh.cmd`
+
+Repository root의 Windows CMD에서는 긴 Python 경로 대신 다음처럼 실행할 수 있습니다.
+
+```bat
+qh.cmd doctor
+qh.cmd status
+qh.cmd start QH-LOCAL-001
+qh.cmd close <IMPLEMENTATION-COMMIT>
+```
+
+각 명령은 같은 인자를 기존 `python tools\qh.py ...` CLI에 그대로 전달하며 Python
+process의 exit code를 그대로 반환합니다. `qh.cmd`는 명령을 조합하거나 lifecycle,
+Verification, Final Gate, Git 또는 Worker authority를 추가하지 않습니다. 기존 direct
+Python 사용법도 계속 지원됩니다.
 
 ## 표준 Task lifecycle
 
