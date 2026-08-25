@@ -173,11 +173,12 @@ Then run:
 
 ## Verification Budget
 
-- 개발 중에는 `tests.test_qh_progress`와 변경 지점의 focused tests를 우선 사용한다.
-- full `tests.test_harness_core` / `tests.test_qh`는 implementation stabilization 이후 한 번씩 실행한다.
-- 최종 authoritative full Verification은 `qh close <exact implementation HEAD>`에서 한 번 실행한다.
-- 같은 full regression을 단순 확인 목적으로 반복하지 않는다.
-- 이 Task의 final `qh close` 자체가 새 progress/timing behavior의 real operational Evidence가 되어야 한다.
+- 개발 중에는 `tests.test_qh_progress`와 변경 지점의 focused RED/GREEN tests만 사용한다.
+- implementation commit 전에 full `tests.test_harness_core` 또는 full `tests.test_qh`를 별도로 반복 실행하지 않는다.
+- implementation이 focused Evidence로 안정화되면 commit을 만들고, authoritative `qh close <exact implementation HEAD>`가 위 Verification contract 전체를 최종적으로 **한 번** 실행한다.
+- `qh close` PASS 후에는 같은 full regression을 단순 확인 목적으로 다시 실행하지 않는다.
+- deterministic FAIL이 발생하면 원인을 수정하고 focused test로 확인한 뒤 새 exact implementation HEAD에서 `qh close`를 다시 수행한다. 실패한 Final Gate를 우회하거나 이전 PASS를 재사용하지 않는다.
+- 이 Task의 successful final `qh close` 자체가 새 progress/timing behavior의 real operational Evidence가 되어야 한다.
 
 ## Evidence Requirements
 
