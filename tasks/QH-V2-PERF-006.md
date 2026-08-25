@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED - READY FOR CONTRACT BASELINE
+COMPLETE - VERIFIED
 
 ## Problem
 
@@ -216,6 +216,14 @@ Then run:
 - Verification concurrency, coverage 축소, cached PASS, skip 또는 authority 변경은 없다.
 - authoritative close 전체 Verification과 Final Gate Evidence는 exact implementation
   HEAD에서 lifecycle 변경 전에 한 번만 실행한다.
+- Authoritative close는 exact implementation HEAD
+  `d4befcb41dabf230ded83938c83546db1b716700`에서 한 번 실행되어 Final Gate PASS했다.
+  실제 command completion timing은 progress tests `41.6s`, Harness Core `166.6s`,
+  qh regression `1232.5s`, Backlog order `0.1s`, contract diff check `1.6s`, status
+  check `1.6s`였고 모두 exit `0`이었다.
+- 실제 close phase timing은 review `1457.5s`, post-Verification integrity `5.2s`,
+  lifecycle transition `0.0s`였다. review 동안 30초 heartbeat가 반복 노출되었고
+  post-Verification HEAD는 exact implementation HEAD와 일치했다.
 
 ## Stop Conditions
 
