@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED - READY FOR CONTRACT BASELINE
+COMPLETE - VERIFIED
 
 ## Problem
 
@@ -132,6 +132,14 @@ STOP if completion requires:
 - general shell/Git authority or Architecture changes.
 - `cmd.exe` is unavailable in the execution environment; report BLOCKED and do not
   delete, skip, or weaken the real Windows launcher Verification.
+
+## Follow-up Observation
+
+- The authoritative `qh close` run was long-running and emitted no incremental
+  visible progress while child output was buffered.
+- Treat close-phase timing and observable progress as a candidate for a separately
+  approved performance/operations Task. This Task does not change buffering,
+  Verification coverage, Final Gate behavior, or qh authority.
 
 ## Next Task
 
