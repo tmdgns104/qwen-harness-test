@@ -253,6 +253,34 @@ git status --short
 ADR-007의 표준 final path는 standalone verify/review를 필수로 반복하지 않고
 `qh close`가 authoritative full Verification과 review를 한 번 실행하게 합니다.
 
+### 장시간 Verification 진행 상태
+
+`qh verify`, `qh review`, `qh close`는 각 Verification command를 시작하기 전에
+`Verification [현재/전체] START`를 즉시 flush합니다. 실행이 길어지면 30초 간격의
+`HEARTBEAT`에 elapsed wall-clock time을 표시하고, 종료 시 exact exit code와 elapsed
+duration을 `COMPLETE`로 표시합니다. heartbeat thread는 reporting만 담당하며 child
+process를 소유하지 않습니다. command는 기존 contract 순서대로 한 번씩 순차 실행되고,
+heartbeat는 command 종료 때 stop/join되므로 background process를 남기지 않습니다.
+
+child stdout/stderr는 계속 capture되어 `VerificationCommandResult` Evidence로 보존됩니다.
+progress stream의 `OSError`는 child failure를 success로 바꾸지 않으며 exact child exit
+code가 Final Gate 입력으로 유지됩니다. `qh close`는 review,
+post-verification-integrity, final-gate-lifecycle phase의 시작과 완료 시간도 표시합니다.
+
+QH-V2-PERF-006의 deterministic focused profile은 `_run_git` 호출을 다음과 같이
+측정했습니다. Verification contract 내부 command는 별도이며 이 표의 count에 포함하지
+않습니다.
+
+| 경로 | RED baseline | GREEN | 결정 |
+|---|---:|---:|---|
+| `qh close` 전체 | 15 | 15 | `NO MATERIAL RUNTIME DEDUP RETAINED` |
+
+15회는 close entry guard 6회, review의 baseline/scope Evidence 6회,
+post-Verification clean/HEAD freshness 3회로 구성됩니다. 동일 실행처럼 보이는 root,
+clean, HEAD probe도 서로 다른 lifecycle 시점의 fail-closed Evidence를 담당합니다.
+따라서 이번 Task에서는 미미한 subprocess 절약을 위해 freshness 경계를 합치지 않고,
+실제 phase timing과 진행 관측성을 제공하는 변경만 유지합니다.
+
 ## qh 명령의 책임 경계
 
 | 명령 | 하는 일 | 하지 않는 일 |

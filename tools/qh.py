@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 import sys
+import time
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -430,6 +431,28 @@ def _completed_task_markdown(markdown: str) -> str:
     return _task_markdown_with_status(markdown, "COMPLETE - VERIFIED")
 
 
+def _start_phase(command: str, phase: str) -> float:
+    """Print and timestamp the start of a visible qh operation phase."""
+    print(f"[qh {command}] phase={phase} status=START", flush=True)
+    return time.monotonic()
+
+
+def _complete_phase(
+    command: str,
+    phase: str,
+    started_at: float,
+    **details: object,
+) -> None:
+    """Print phase completion with elapsed time and deterministic details."""
+    suffix = "".join(f" {key}={value}" for key, value in details.items())
+    elapsed = time.monotonic() - started_at
+    print(
+        f"[qh {command}] phase={phase} status=COMPLETE"
+        f" elapsed={elapsed:.1f}s{suffix}",
+        flush=True,
+    )
+
+
 def command_close_unsuccessful(repo_root: Path, evidence_arg: str) -> int:
     _require_git_top_level(str(repo_root))
     capture_git_baseline(str(repo_root))
@@ -483,16 +506,32 @@ def command_close(repo_root: Path, commit: str) -> int:
             f"Completion commit must match current HEAD: {entry_baseline.head}"
         )
 
-    if command_review(repo_root) != 0:
+    review_started = _start_phase("close", "review")
+    review_exit_code = command_review(repo_root)
+    _complete_phase(
+        "close",
+        "review",
+        review_started,
+        exit=review_exit_code,
+    )
+    if review_exit_code != 0:
         return 1
 
+    integrity_started = _start_phase("close", "post-verification-integrity")
     post_verification_baseline = capture_git_baseline(str(repo_root))
     if post_verification_baseline.head != resolved_commit:
         raise ValueError(
             "Repository HEAD changed during Verification: "
             f"{post_verification_baseline.head}"
         )
+    _complete_phase(
+        "close",
+        "post-verification-integrity",
+        integrity_started,
+        head=post_verification_baseline.head,
+    )
 
+    lifecycle_started = _start_phase("close", "final-gate-lifecycle")
     task_id, task_path, task_markdown = _load_current_task(repo_root)
     status_path = repo_root / "STATUS.md"
     markdown = status_path.read_text(encoding="utf-8")
@@ -513,6 +552,7 @@ def command_close(repo_root: Path, commit: str) -> int:
     task_path.write_text(updated_task, encoding="utf-8")
     print(f"Closed Task: {task_id}")
     print(f"Completion Commit: {commit}")
+    _complete_phase("close", "final-gate-lifecycle", lifecycle_started)
     return 0
 
 
@@ -591,7 +631,11 @@ def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
         raise ValueError("review baseline must resolve to a commit")
     baseline = GitBaseline(head=baseline_head)
     verification_contract = parse_verification_commands(task_markdown)
+    verification_started = _start_phase("review", "verification")
     verification_results = run_verification_commands(verification_contract, str(repo_root))
+    _complete_phase("review", "verification", verification_started)
+
+    evidence_started = _start_phase("review", "scope-evidence-final-gate")
     changed_paths = get_changed_paths(str(repo_root), baseline)
     evidence = assemble_evidence(scope, baseline, changed_paths, verification_results)
     diff_result = run_verification_commands(VerificationContract(commands=("git diff --check",)), str(repo_root))[0]
@@ -615,6 +659,12 @@ def command_review(repo_root: Path, baseline_commit: str | None = None) -> int:
     if final_gate.failures:
         print(f"Final Gate Failures: {', '.join(final_gate.failures)}")
     passed = final_gate.passed and diff_result.exit_code == 0
+    _complete_phase(
+        "review",
+        "scope-evidence-final-gate",
+        evidence_started,
+        result="PASS" if passed else "FAIL",
+    )
     return 0 if passed else 1
 
 

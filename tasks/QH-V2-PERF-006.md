@@ -199,6 +199,24 @@ Then run:
 - Final Gate 이후 별도 lifecycle commit
 - safe fast-forward push 후 final working tree clean
 
+## Implementation Evidence
+
+- Exact contract baseline: `6342a80ad1c7cecd4a20a5f6eeaec59aa1da73c5`.
+- OPS-003의 tracked Follow-up Observation과 PERF-004/PERF-005 historical basis를
+  구현 전에 재확인했다.
+- Focused RED `python -m unittest tests.test_qh_progress`는 start visibility,
+  heartbeat, completion timing, close phase 부재를 4개 assertion failure로 재현했다.
+- Focused GREEN은 6 tests PASS이며 command start-before-completion, elapsed heartbeat,
+  exact exit/stdout/stderr 보존, reporting-only monitoring, 순차 1회 실행을 입증한다.
+- 기존 변경 지점 focused regression은 Harness execution 12 tests PASS와 qh
+  verify/review/close 5 tests PASS다.
+- Stage B deterministic profile은 RED/GREEN 모두 `qh close` `_run_git` 15 calls를
+  기록했다. freshness boundary를 합치는 최적화는 유지하지 않았다:
+  `NO MATERIAL RUNTIME DEDUP RETAINED`.
+- Verification concurrency, coverage 축소, cached PASS, skip 또는 authority 변경은 없다.
+- authoritative close 전체 Verification과 Final Gate Evidence는 exact implementation
+  HEAD에서 lifecycle 변경 전에 한 번만 실행한다.
+
 ## Stop Conditions
 
 STOP하고 Human/ChatGPT review를 요청한다 if completion requires:

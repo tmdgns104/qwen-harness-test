@@ -5,6 +5,8 @@ import hashlib
 import re
 import subprocess
 import shlex
+import threading
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -453,6 +455,33 @@ class VerificationCommandResult:
     stderr: str
 
 
+VERIFICATION_HEARTBEAT_SECONDS = 30.0
+
+
+def _emit_verification_progress(message: str) -> None:
+    """Write best-effort progress without changing child process Evidence."""
+    try:
+        print(message, flush=True)
+    except OSError:
+        # A closed observer stream must not reinterpret the child exit result.
+        pass
+
+
+def _report_verification_heartbeats(
+    stop: threading.Event,
+    command_number: int,
+    command_total: int,
+    started_at: float,
+) -> None:
+    """Report elapsed time while the single foreground command is running."""
+    while not stop.wait(VERIFICATION_HEARTBEAT_SECONDS):
+        elapsed = time.monotonic() - started_at
+        _emit_verification_progress(
+            f"Verification [{command_number}/{command_total}] HEARTBEAT: "
+            f"elapsed={elapsed:.1f}s"
+        )
+
+
 def run_verification_commands(contract: VerificationContract, cwd: str) -> tuple[VerificationCommandResult, ...]:
     if not contract.commands:
         raise ValueError("VerificationContract must contain at least one command")
@@ -468,19 +497,48 @@ def run_verification_commands(contract: VerificationContract, cwd: str) -> tuple
             raise ValueError("Unsupported shell control operator in command")
         prepared.append((command, tokens))
     results = []
-    for command, tokens in prepared:
+    command_total = len(prepared)
+    for command_number, (command, tokens) in enumerate(prepared, start=1):
+        started_at = time.monotonic()
+        _emit_verification_progress(
+            f"Verification [{command_number}/{command_total}] START: {command}"
+        )
+        heartbeat_stop = threading.Event()
+        heartbeat_thread = threading.Thread(
+            target=_report_verification_heartbeats,
+            args=(heartbeat_stop, command_number, command_total, started_at),
+            name=f"verification-heartbeat-{command_number}",
+        )
+        heartbeat_thread.start()
         try:
-            result = subprocess.run(
-                tokens,
-                cwd=cwd,
-                shell=False,
-                capture_output=True,
-                text=True,
-                check=False
+            try:
+                result = subprocess.run(
+                    tokens,
+                    cwd=cwd,
+                    shell=False,
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
+            except OSError as e:
+                raise RuntimeError(f"Failed to start process: {e}") from e
+        finally:
+            heartbeat_stop.set()
+            heartbeat_thread.join()
+
+        elapsed = time.monotonic() - started_at
+        _emit_verification_progress(
+            f"Verification [{command_number}/{command_total}] COMPLETE: "
+            f"exit={result.returncode} elapsed={elapsed:.1f}s"
+        )
+        results.append(
+            VerificationCommandResult(
+                command,
+                result.returncode,
+                result.stdout,
+                result.stderr,
             )
-            results.append(VerificationCommandResult(command, result.returncode, result.stdout, result.stderr))
-        except OSError as e:
-            raise RuntimeError(f"Failed to start process: {e}") from e
+        )
     return tuple(results)
 
 

@@ -122,11 +122,12 @@ is readable; its authoritative completion record remains STATUS, its Task file, 
 | 11 | QH-V2-HARD-008 | ADR-014 cross-Repository runtime portability hardening | QH-V2-OPS-002 | QH-V2-WORKER-ROB-001 |
 | 12 | QH-V2-WORKER-ROB-001 | ADR-014 Level B Worker protocol robustness | QH-V2-HARD-008 | QH-V2-LIFECYCLE-001 |
 | 13 | QH-V2-LIFECYCLE-001 | ADR-015 Evidence-backed unsuccessful lifecycle hardening | QH-V2-WORKER-ROB-001 non-success Evidence | HUMAN SELECTION REQUIRED |
-| 14 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | Human selection after QH-V2-LIFECYCLE-001 | QH-V2-OPS-004 |
-| 15 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-OPS-003 | QH-V2-OPS-005 |
-| 16 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
-| 17 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
-| 18 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
+| 14 | QH-V2-OPS-003 | ADR-010 NEXT-HARDENING | Human selection after QH-V2-LIFECYCLE-001 | QH-V2-PERF-006 |
+| 15 | QH-V2-PERF-006 | Human-selected close runtime/observability optimization | QH-V2-OPS-003 | QH-V2-OPS-004 |
+| 16 | QH-V2-OPS-004 | ADR-010 NEXT-HARDENING | QH-V2-PERF-006 | QH-V2-OPS-005 |
+| 17 | QH-V2-OPS-005 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-004 | QH-V2-OPS-006 |
+| 18 | QH-V2-OPS-006 | ADR-010 SAFE-TO-DEFER | QH-V2-OPS-005 | QH-V2-M2-SPEC-001 |
+| 19 | QH-V2-M2-SPEC-001 | Milestone 2 review only | QH-V2-OPS-006 | HUMAN ARCHITECTURE GATE |
 
 ## Dependency Graph
 
@@ -147,7 +148,8 @@ flowchart TD
     WROB --> L001["QH-V2-LIFECYCLE-001<br/>unsuccessful lifecycle hardening"]
     L001 --> HumanSelect["HUMAN SELECTION REQUIRED"]
     HumanSelect --> O003["QH-V2-OPS-003<br/>only if selected"]
-    O003 --> O004["QH-V2-OPS-004"]
+    O003 --> P006["QH-V2-PERF-006<br/>close observability"]
+    P006 --> O004["QH-V2-OPS-004"]
     O004 --> O005["QH-V2-OPS-005"]
     O005 --> O006["QH-V2-OPS-006"]
     O006 --> M2["QH-V2-M2-SPEC-001"]
@@ -531,5 +533,24 @@ Gate, lifecycle, Git authority는 그대로 유지한다.
 `QH-V2-WORKER-ROB-003`은 `QH-V2-ARCH-018`이 `COMPLETE - VERIFIED`에 도달한 뒤에만
 별도 contract로 시작할 수 있다. 이 Architecture 결정 자체는 production runtime을
 변경하거나 successor를 자동 시작하지 않는다.
+
+`GLOBALIZATION = NOT AUTHORIZED`
+
+## Post-OPS-003 Human Performance Selection - 2026-08-25
+
+QH-V2-OPS-003의 tracked Follow-up Observation과 Human 선택에 따라 authoritative
+close runtime/observability 개선을 OPS-004보다 먼저 수행한다.
+
+```text
+QH-V2-OPS-003 - COMPLETE - VERIFIED
+  -> QH-V2-PERF-006
+  -> QH-V2-OPS-004
+```
+
+QH-V2-PERF-006은 Verification coverage나 Final Gate를 줄이지 않고 current command,
+elapsed heartbeat, completion exit status와 close phase를 표시한다. `qh close`는 exact
+implementation HEAD에서 전체 Verification을 한 번 실행하는 authoritative final path로
+유지된다. 이 순서 변경은 Worker successor 선택, unattended queue 또는 Globalization을
+승인하지 않는다.
 
 `GLOBALIZATION = NOT AUTHORIZED`
