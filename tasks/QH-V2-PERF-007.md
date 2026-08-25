@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED - READY FOR CONTRACT BASELINE
+COMPLETE - VERIFIED
 
 ## Problem
 
@@ -273,8 +273,13 @@ Then run:
   개선을 host speedup으로 재해석하지 않는다.
 - production `tools/**`와 `ops/**`는 변경하지 않았고 Verification concurrency,
   skip, cached PASS, assertion weakening과 Globalization은 도입하지 않았다.
-- Final full `tests.test_qh`와 practical-runtime disposition은 exact implementation
-  HEAD의 authoritative `qh close` 1회에서 결정한다.
+- Exact implementation HEAD `031dcae9beaef2db2730fbb81051fff7c3a40e79`의
+  authoritative `qh close` 1회가 PASS했다. `tests.test_qh` 62 tests는
+  `1157.8s`, 전체 verification은 `1600.9s`, review phase는 `1613.8s`였고
+  post-verification integrity도 같은 HEAD를 확인했다. Final Gate는 PASS했다.
+- PERF-006의 `tests.test_qh 1232.5s`보다 `74.7s` (`6.06%`) 감소했지만 최종
+  suite와 authoritative close가 모두 `300s`를 초과했다. 따라서 practical-runtime
+  disposition은 `ARCHITECTURE REVIEW REQUIRED`이며 QH-V2-OPS-004를 시작하지 않는다.
 
 ## Stop Conditions
 
