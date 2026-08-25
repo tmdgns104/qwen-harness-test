@@ -180,7 +180,9 @@ ADR-018은 다음을 고정한다.
 
 ## Verification
 
-Human이 ACCEPT Candidate A를 선택한 경우 Run exactly:
+Human이 ACCEPT Candidate A를 선택했으므로 다음 Accepted 전용 Verification을 사용한다.
+
+Run exactly:
 
 `python -c "from pathlib import Path; d=Path('DECISIONS.md').read_text(encoding='utf-8'); required=['ADR-018','Accepted','Candidate A','Deterministic Worker Brief','original tracked Task','Source of Truth','QH-V2-WORKER-ROB-003','qwen3:8b','think:false','30.0','GLOBALIZATION = NOT AUTHORIZED']; missing=[x for x in required if x not in d]; assert not missing,missing"`
 
