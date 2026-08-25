@@ -1,9 +1,9 @@
-Current Task: QH-V2-PERF-006 - COMPLETE - VERIFIED - commit d4befcb41dabf230ded83938c83546db1b716700
+Current Task: QH-V2-PERF-007 - ACTIVE
 
-Previous Task: QH-V2-OPS-003 - COMPLETE - VERIFIED - commit 905d575969936216b5648e07f8622c0f23208d58
+Previous Task: QH-V2-PERF-006 - COMPLETE - VERIFIED - commit d4befcb41dabf230ded83938c83546db1b716700
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 6342a80ad1c7cecd4a20a5f6eeaec59aa1da73c5
+Task Baseline: d6dffd6948c9806da5a45eede837f772178bfee3
 
 Handoff:
 - QH-V2-WORKER-ROB-001 is CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED under ADR-015; Candidate promotion remains rejected and objective Evidence is preserved at docs/WORKER_ROB_001_EVIDENCE.md.
