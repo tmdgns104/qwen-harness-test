@@ -1,4 +1,4 @@
-Current Task: TPOS-V016-MODEL-001-QWEN25-CODER-14B - ACTIVE
+Current Task: TPOS-V016-MODEL-001-QWEN25-CODER-14B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-001-qwen25-coder-14b/report.md
 
 Previous Task: QH-EXP-CODEX-REVIEW-004 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/codex-qwen-review-004/report.md
 

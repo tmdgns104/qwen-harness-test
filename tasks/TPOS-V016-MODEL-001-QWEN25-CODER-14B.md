@@ -2,7 +2,7 @@
 
 ## Status
 
-ACTIVE
+CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED
 
 ## Problem
 
@@ -216,6 +216,8 @@ Stop without repair or policy change if:
 ## Benchmark Result
 
 Final disposition: **FAIL — TOOL_CALLING**.
+
+Evidence commit: `e1f207bcc6bce5c41c68c9377215f171180c61f8`.
 
 The single actual model run completed in 10.147933 seconds with Harness outcome
 `NORMAL`, one attempt, Failure Kind `NONE`, and no write-side-effect risk. The
