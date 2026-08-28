@@ -181,6 +181,70 @@ Then run:
 - authoritative `qh close` output and Final Gate result
 - lifecycle commit and final clean Git state
 
+## Experiment Result
+
+- `qh run QH-EXP-CODEX-REVIEW-004`: exit 0
+- Outcome: NORMAL
+- Attempts: 1
+- Failure Kind: NONE
+- Write Side Effect Risk: YES
+- Pre-run output directory: absent
+- Post-run Worker-created path:
+  `experiments/codex-qwen-review-004/report.md`
+- Report raw bytes: 2704
+- Report SHA-256:
+  `eb08a5171d642d37762041a0ea6b4a15d0361e97f5c118a40fc7c4c199dcd240`
+- Structural/length Verification: PASS, 2663 normalized text characters
+- `git diff --check`: PASS
+- Worker changed no production, input, prior-experiment, lifecycle, Task, or
+  external path.
+
+`NORMAL` confirms only a normal Worker interaction. It is not Task PASS.
+
+## Independent Supervisor Review
+
+Final disposition: **TASK ACCEPTANCE NOT MET**.
+
+The run provides strong evidence for the intended read/analyze/write path:
+
+- The report names `source_of_truth_revision`, correctly notes that its hash
+  excludes the cache row, and names `rebase_conflicts`; those details are in the
+  copied source but not supplied in the Worker Brief.
+- The Runner would deterministically return SAFETY rather than NORMAL if any
+  Worker step contained multiple ToolRequests.
+- The previously absent nested directory and report were created, and the only
+  Worker-created Repository path is the authorized report.
+
+The current CLI does not persist a per-step tool trace, so exact first-step
+ordering is inferred from enforced single-request steps, source-specific report
+content, and the write result rather than a durable call transcript. This
+observability limitation is not hidden or treated as stronger Evidence.
+
+The Qwen review itself is logically inadequate and overstated:
+
+1. It states that the implementation "does not provide a mechanism to detect or
+   handle concurrent edits that target the same stable identity." The same
+   source file defines `rebase_conflicts` with the explicit purpose of returning
+   concurrent edits that target the same stable identity. The report is
+   contradicted by its only Evidence file and then inconsistently recommends a
+   regression test for that function.
+2. It assigns `ADDRESSED` with `HIGH` confidence without explaining that
+   `merge_structured_states` is imported, so its precedence behavior cannot be
+   proven from this file alone.
+3. It describes `project_structured_states` as merging with official sources
+   but omits the material nuance that cached decision refs and design keys are
+   reused, and that cached project-update fields outside the explicit DB
+   overwrites can survive reconciliation.
+4. It does not answer what cannot be proven from the file alone and contains no
+   `INSUFFICIENT EVIDENCE` label, contrary to the Task contract.
+5. Its regression tests are generic and do not directly prove stale-cache versus
+   human-edited DB/document precedence for requirements, decisions, designs,
+   catalogs, and retained cache metadata.
+
+Acceptance Criteria 8, 9, and 11 therefore FAIL. The report must be preserved as
+failed experiment Evidence and must not be promoted, rewritten as success, or
+used to claim Team Project OS completion or merge readiness.
+
 ## Stop Conditions
 
 Stop without retry or policy change if:
