@@ -6,6 +6,7 @@ Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
 Task Baseline: ccddbf23d81cf8f1a4a9b34fea9905183224922a
 
 Handoff:
+- 2026-08-28 Qwen 14B CPU-only observation is diagnostic Evidence only, not a model performance FAIL. Root cause was an incomplete Ollama 0.33.1 CUDA payload update; official same-version repair succeeded. The unchanged `qwen2.5-coder:14b-instruct-q3_K_S` at context 16384 now loads 30/49 layers and reports `39%/61% CPU/GPU` with about 6038 MiB GPU memory use. GPU-offload resume gate PASS; model performance remains NOT EVALUATED pending the actual benchmark workload. Evidence: `docs/QWEN_14B_GPU_OFFLOAD_DIAGNOSTIC_2026-08-28.md`.
 - QH-V2-WORKER-ROB-001 is CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED under ADR-015; Candidate promotion remains rejected and objective Evidence is preserved at docs/WORKER_ROB_001_EVIDENCE.md.
 - QH-V2-LIFECYCLE-001 is COMPLETE - VERIFIED; implementation commit 6f6ec879301cf59f85283f65394a4d34bf127c87 and lifecycle commit 32d81ee61e0c1b65c4a488898bd7abbaaedf5488 are authoritative. Durable unsuccessful-close support is implemented; the one-time ADR-015 bootstrap is historical Evidence only and must not be reused.
 - QH-V2-HARD-007 is COMPLETE - VERIFIED; authoritative close used implementation commit 55fedc3282aa858a7ed68a3f52cfd0d64cbf46f1 and lifecycle commit 36e0357d44a9a3e1aba423b891811294e4ec9a71 is pushed to origin/main.
