@@ -1,9 +1,9 @@
-Current Task: QH-EXP-CODEX-REVIEW-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/codex-qwen-review-001/report.md
+Current Task: QH-EXP-CODEX-REVIEW-002 - ACTIVE
 
-Previous Task: QH-V2-PERF-007 - COMPLETE - VERIFIED - commit 031dcae9beaef2db2730fbb81051fff7c3a40e79
+Previous Task: QH-EXP-CODEX-REVIEW-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/codex-qwen-review-001/report.md
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: dce1cddafb2020eaa2825638c46012d23774b6d8
+Task Baseline: 1f65f50d5639a96412b213c5cea94a84a098c44c
 
 Handoff:
 - QH-V2-WORKER-ROB-001 is CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED under ADR-015; Candidate promotion remains rejected and objective Evidence is preserved at docs/WORKER_ROB_001_EVIDENCE.md.
