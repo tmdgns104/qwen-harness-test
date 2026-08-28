@@ -1,0 +1,176 @@
+{
+  "raw_result_sha256": "07b8d10212b1a40be93a9720ace38b372cdbbc8680783d7038245d9935b05c93",
+  "generated_source_review": {
+    "exists": false,
+    "sha256": null,
+    "syntax_valid": false,
+    "imports_real_function": false,
+    "uses_ref_identity": false,
+    "uses_id_identity": false,
+    "exact_conflict_path_present": false,
+    "positive_case_present": false,
+    "negative_case_present": false,
+    "test_weakening_detected": false,
+    "review": "Worker created no regression test."
+  },
+  "commands": {
+    "direct_positive_negative_probe": {
+      "arguments": [
+        "python",
+        "-B",
+        "-c",
+        "\nfrom app.structured_state_v016 import rebase_conflicts\n\npositive_base = {\n    \"requirements\": [{\n        \"ref\": \"REQ-HUMAN-001\",\n        \"title\": \"Baseline requirement\",\n        \"detail\": \"Original detail\",\n    }]\n}\npositive_current = {\n    \"requirements\": [{\n        \"ref\": \"REQ-HUMAN-001\",\n        \"title\": \"Human-edited requirement\",\n        \"detail\": \"Official human edit\",\n    }]\n}\npositive_delta = {\n    \"requirements\": [{\n        \"ref\": \"REQ-HUMAN-001\",\n        \"title\": \"Incoming AI proposal\",\n        \"detail\": \"Proposed overwrite\",\n    }]\n}\npositive = rebase_conflicts(positive_base, positive_current, positive_delta)\nassert positive == [\"requirements.REQ-HUMAN-001\"], positive\n\nnegative_base = {\n    \"requirements\": [\n        {\n            \"ref\": \"REQ-HUMAN-001\",\n            \"title\": \"Baseline requirement\",\n            \"detail\": \"Original detail\",\n        },\n        {\n            \"ref\": \"REQ-HUMAN-002\",\n            \"title\": \"Second baseline requirement\",\n            \"detail\": \"Second original detail\",\n        },\n    ]\n}\nnegative_current = {\n    \"requirements\": [\n        {\n            \"ref\": \"REQ-HUMAN-001\",\n            \"title\": \"Baseline requirement\",\n            \"detail\": \"Original detail\",\n        },\n        {\n            \"ref\": \"REQ-HUMAN-002\",\n            \"title\": \"Human-edited second requirement\",\n            \"detail\": \"Official second human edit\",\n        },\n    ]\n}\nnegative_delta = {\n    \"requirements\": [{\n        \"ref\": \"REQ-HUMAN-001\",\n        \"title\": \"Incoming AI proposal\",\n        \"detail\": \"Proposed overwrite\",\n    }]\n}\nnegative = rebase_conflicts(negative_base, negative_current, negative_delta)\nassert negative == [], negative\nprint(\"positive=\" + repr(positive))\nprint(\"negative=\" + repr(negative))\n"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.501797,
+      "stdout": "positive=['requirements.REQ-HUMAN-001']\nnegative=[]\n",
+      "stderr": ""
+    },
+    "focused_generated_test": {
+      "arguments": [
+        "python",
+        "-m",
+        "unittest",
+        "tests.test_structured_state_v016_ref_identity",
+        "-v"
+      ],
+      "exit_code": 1,
+      "elapsed_seconds": 1.917234,
+      "stdout": "",
+      "stderr": "test_structured_state_v016_ref_identity (unittest.loader._FailedTest.test_structured_state_v016_ref_identity) ... ERROR\n\n======================================================================\nERROR: test_structured_state_v016_ref_identity (unittest.loader._FailedTest.test_structured_state_v016_ref_identity)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_structured_state_v016_ref_identity\nTraceback (most recent call last):\n  File \"C:\\Python313\\Lib\\unittest\\loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\nModuleNotFoundError: No module named 'tests.test_structured_state_v016_ref_identity'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+    },
+    "existing_v016": {
+      "arguments": [
+        "python",
+        "-m",
+        "unittest",
+        "tests.test_conversation_import_v016",
+        "-v"
+      ],
+      "exit_code": 1,
+      "elapsed_seconds": 1.854275,
+      "stdout": "",
+      "stderr": "test_conversation_import_v016 (unittest.loader._FailedTest.test_conversation_import_v016) ... ERROR\n\n======================================================================\nERROR: test_conversation_import_v016 (unittest.loader._FailedTest.test_conversation_import_v016)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_conversation_import_v016\nTraceback (most recent call last):\n  File \"C:\\Python313\\Lib\\unittest\\loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\nModuleNotFoundError: No module named 'tests.test_conversation_import_v016'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+    },
+    "existing_v016_discovery_diagnostic": {
+      "arguments": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_conversation_import_v016.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.136839,
+      "stdout": "",
+      "stderr": "test_scenario_a_first_import_materializes_13_documents_and_3_designs (test_conversation_import_v016.ConversationImportApiTests.test_scenario_a_first_import_materializes_13_documents_and_3_designs) ... ok\ntest_scenario_d_decision_change_preserves_alternative_semantics (test_conversation_import_v016.ConversationImportApiTests.test_scenario_d_decision_change_preserves_alternative_semantics) ... ok\ntest_scenario_e_secrets_never_reach_preview_database_or_documents (test_conversation_import_v016.ConversationImportApiTests.test_scenario_e_secrets_never_reach_preview_database_or_documents) ... ok\ntest_scenario_f_apply_preserves_rich_existing_gantt_and_design (test_conversation_import_v016.ConversationImportApiTests.test_scenario_f_apply_preserves_rich_existing_gantt_and_design) ... ok\ntest_scenarios_b_and_c_incremental_reimport_and_idempotency (test_conversation_import_v016.ConversationImportApiTests.test_scenarios_b_and_c_incremental_reimport_and_idempotency) ... ok\ntest_scenarios_g_and_h_api_survives_broken_or_missing_codex (test_conversation_import_v016.ConversationImportApiTests.test_scenarios_g_and_h_api_survives_broken_or_missing_codex) ... ok\ntest_broken_session_is_isolated (test_conversation_import_v016.ConversationProviderTests.test_broken_session_is_isolated) ... ok\ntest_codex_adapter_detects_lists_and_reads_incrementally (test_conversation_import_v016.ConversationProviderTests.test_codex_adapter_detects_lists_and_reads_incrementally) ... ok\ntest_missing_codex_is_reported_without_exception (test_conversation_import_v016.ConversationProviderTests.test_missing_codex_is_reported_without_exception) ... ok\ntest_secret_redaction_and_manual_fallback (test_conversation_import_v016.ConversationProviderTests.test_secret_redaction_and_manual_fallback) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 1.584s\n\nOK\n"
+    },
+    "full_regression": {
+      "arguments": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 4.273187,
+      "stdout": "",
+      "stderr": "test_apply_preserves_richer_live_milestone_and_process_graph (test_apply_non_regression.ApplyNonRegressionTests.test_apply_preserves_richer_live_milestone_and_process_graph) ... ok\ntest_autofill_project_materializes_with_provisional_decisions (test_autofill_mode.AutofillModeTests.test_autofill_project_materializes_with_provisional_decisions) ... ok\ntest_interactive_phrase_turns_autofill_on_before_chat_and_apply (test_autofill_mode.AutofillModeTests.test_interactive_phrase_turns_autofill_on_before_chat_and_apply) ... ok\ntest_natural_language_enables_autofill (test_autofill_mode.AutofillModeTests.test_natural_language_enables_autofill) ... ok\ntest_preview_separates_human_and_ai_decisions (test_autofill_mode.AutofillModeTests.test_preview_separates_human_and_ai_decisions) ... ok\ntest_prompts_make_provisional_boundary_explicit (test_autofill_mode.AutofillModeTests.test_prompts_make_provisional_boundary_explicit) ... ok\ntest_conversational_cli_subcommands_are_registered (test_bridge.BridgeCliTests.test_conversational_cli_subcommands_are_registered) ... ok\ntest_cmd_interview_can_apply_project (test_cmd_project_create.CmdProjectCreateTests.test_cmd_interview_can_apply_project) ... ok\ntest_conversation_can_start_from_zero_and_apply_ai_proposal (test_conversation.ConversationApiTests.test_conversation_can_start_from_zero_and_apply_ai_proposal) ... ok\ntest_combines_unapplied_proposals_without_duplicate_refs (test_conversation.ConversationCoreTests.test_combines_unapplied_proposals_without_duplicate_refs) ... ok\ntest_extracts_json_from_cli_wrapped_output (test_conversation.ConversationCoreTests.test_extracts_json_from_cli_wrapped_output) ... ok\ntest_merge_brief_preserves_unknowns (test_conversation.ConversationCoreTests.test_merge_brief_preserves_unknowns) ... ok\ntest_normalizes_and_blocks_unknown_fields (test_conversation.ConversationCoreTests.test_normalizes_and_blocks_unknown_fields) ... ok\ntest_prompt_is_provider_neutral_and_forbids_guessing (test_conversation.ConversationCoreTests.test_prompt_is_provider_neutral_and_forbids_guessing) ... ok\ntest_scenario_a_first_import_materializes_13_documents_and_3_designs (test_conversation_import_v016.ConversationImportApiTests.test_scenario_a_first_import_materializes_13_documents_and_3_designs) ... ok\ntest_scenario_d_decision_change_preserves_alternative_semantics (test_conversation_import_v016.ConversationImportApiTests.test_scenario_d_decision_change_preserves_alternative_semantics) ... ok\ntest_scenario_e_secrets_never_reach_preview_database_or_documents (test_conversation_import_v016.ConversationImportApiTests.test_scenario_e_secrets_never_reach_preview_database_or_documents) ... ok\ntest_scenario_f_apply_preserves_rich_existing_gantt_and_design (test_conversation_import_v016.ConversationImportApiTests.test_scenario_f_apply_preserves_rich_existing_gantt_and_design) ... ok\ntest_scenarios_b_and_c_incremental_reimport_and_idempotency (test_conversation_import_v016.ConversationImportApiTests.test_scenarios_b_and_c_incremental_reimport_and_idempotency) ... ok\ntest_scenarios_g_and_h_api_survives_broken_or_missing_codex (test_conversation_import_v016.ConversationImportApiTests.test_scenarios_g_and_h_api_survives_broken_or_missing_codex) ... ok\ntest_broken_session_is_isolated (test_conversation_import_v016.ConversationProviderTests.test_broken_session_is_isolated) ... ok\ntest_codex_adapter_detects_lists_and_reads_incrementally (test_conversation_import_v016.ConversationProviderTests.test_codex_adapter_detects_lists_and_reads_incrementally) ... ok\ntest_missing_codex_is_reported_without_exception (test_conversation_import_v016.ConversationProviderTests.test_missing_codex_is_reported_without_exception) ... ok\ntest_secret_redaction_and_manual_fallback (test_conversation_import_v016.ConversationProviderTests.test_secret_redaction_and_manual_fallback) ... ok\ntest_distilled_hmi_mes_project_materializes_in_real_app (test_design_session.DesignSessionMaterializationTests.test_distilled_hmi_mes_project_materializes_in_real_app) ... ok\ntest_chat_and_distiller_prompts_have_separate_roles (test_design_session.DesignSessionTests.test_chat_and_distiller_prompts_have_separate_roles) ... ok\ntest_chat_phase_is_freeform_and_distillation_happens_only_on_apply (test_design_session.DesignSessionTests.test_chat_phase_is_freeform_and_distillation_happens_only_on_apply) ... ok\ntest_preview_does_not_create_project (test_design_session.DesignSessionTests.test_preview_does_not_create_project) ... ok\ntest_new_project_gets_13_shared_documents_and_revision (test_documents.DocumentWorkspaceTests.test_new_project_gets_13_shared_documents_and_revision) ... ok\ntest_extract_live_delta_hides_machine_block (test_live_design.LiveDeltaTests.test_extract_live_delta_hides_machine_block) ... ok\ntest_merge_live_state_is_incremental_and_idempotent (test_live_design.LiveDeltaTests.test_merge_live_state_is_incremental_and_idempotent) ... ok\ntest_live_draft_sync_updates_web_state_then_promotes (test_live_design.LiveDraftApiTests.test_live_draft_sync_updates_web_state_then_promotes) ... ok\ntest_atomic_json_write_replaces_complete_document (test_operational_hardening.AtomicStorageTests.test_atomic_json_write_replaces_complete_document) ... ok\ntest_bridge_accepts_bearer_header_without_query_secret (test_operational_hardening.OperationalApiTests.test_bridge_accepts_bearer_header_without_query_secret) ... ok\ntest_database_context_rolls_back_failed_transaction (test_operational_hardening.OperationalApiTests.test_database_context_rolls_back_failed_transaction) ... ok\ntest_health_endpoints_and_defensive_headers (test_operational_hardening.OperationalApiTests.test_health_endpoints_and_defensive_headers) ... ok\ntest_oversized_declared_request_is_rejected (test_operational_hardening.OperationalApiTests.test_oversized_declared_request_is_rejected) ... ok\ntest_websocket_uses_subprotocol_instead_of_query_secret (test_operational_hardening.OperationalApiTests.test_websocket_uses_subprotocol_instead_of_query_secret) ... ok\ntest_production_rejects_missing_short_and_placeholder_access_keys (test_operational_hardening.RuntimeSettingsTests.test_production_rejects_missing_short_and_placeholder_access_keys) ... ok\ntest_production_rejects_wildcard_hosts (test_operational_hardening.RuntimeSettingsTests.test_production_rejects_wildcard_hosts) ... ok\ntest_production_uses_explicit_safe_defaults (test_operational_hardening.RuntimeSettingsTests.test_production_uses_explicit_safe_defaults) ... ok\ntest_only_untouched_system_templates_are_refreshed (test_professional_doc_migration.ProfessionalDocumentMigrationTests.test_only_untouched_system_templates_are_refreshed) ... ok\ntest_version_is_current (test_professional_doc_migration.ProfessionalDocumentMigrationTests.test_version_is_current) ... ok\ntest_initial_documents_have_delivery_grade_structure (test_professional_documents.ProfessionalDocumentTests.test_initial_documents_have_delivery_grade_structure) ... ok\ntest_web_workspace_is_read_first_and_printable (test_professional_documents.ProfessionalDocumentTests.test_web_workspace_is_read_first_and_printable) ... ok\ntest_detailed_inputs_score_high_across_project_types (test_project_intake.UniversalProjectIntakeSimulationTests.test_detailed_inputs_score_high_across_project_types) ... ok\ntest_initial_documents_are_domain_neutral_and_use_input (test_project_intake.UniversalProjectIntakeSimulationTests.test_initial_documents_are_domain_neutral_and_use_input) ... ok\ntest_metadata_has_generic_fallback_and_multiple_domains (test_project_intake.UniversalProjectIntakeSimulationTests.test_metadata_has_generic_fallback_and_multiple_domains) ... ok\ntest_vague_input_is_flagged_before_document_generation (test_project_intake.UniversalProjectIntakeSimulationTests.test_vague_input_is_flagged_before_document_generation) ... ok\ntest_all_provider_adapters_preserve_long_unicode_prompt (test_provider_adapters.ProviderAdapterTests.test_all_provider_adapters_preserve_long_unicode_prompt) ... ok\ntest_antigravity_does_not_auto_approve_all_permissions (test_provider_adapters.ProviderAdapterTests.test_antigravity_does_not_auto_approve_all_permissions) ... ok\ntest_codex_conversation_distiller_is_ephemeral_and_read_only (test_provider_adapters.ProviderAdapterTests.test_codex_conversation_distiller_is_ephemeral_and_read_only) ... ok\ntest_codex_uses_explicit_stdin_sentinel (test_provider_adapters.ProviderAdapterTests.test_codex_uses_explicit_stdin_sentinel) ... ok\ntest_long_prompt_is_not_embedded_in_default_argv (test_provider_adapters.ProviderAdapterTests.test_long_prompt_is_not_embedded_in_default_argv) ... ok\ntest_import_and_snapshot_seed (test_smoke.SmokeTests.test_import_and_snapshot_seed) ... ok\ntest_project_brief_traceability_and_export (test_traceability_export.TraceabilityExportTests.test_project_brief_traceability_and_export) ... ok\ntest_all_13_documents_have_delivery_grade_sections (test_v014_hardening.V014ProfessionalDocumentTests.test_all_13_documents_have_delivery_grade_sections) ... ok\ntest_final_distiller_preserves_acceptance_and_verification (test_v014_hardening.V014ProfessionalDocumentTests.test_final_distiller_preserves_acceptance_and_verification) ... ok\ntest_macos_clipboard_supports_multiline (test_v014_hardening.V014ProfessionalDocumentTests.test_macos_clipboard_supports_multiline) ... ok\ntest_malformed_model_state_is_safely_normalized (test_v014_hardening.V014ProfessionalDocumentTests.test_malformed_model_state_is_safely_normalized) ... ok\ntest_repeated_live_sync_with_malformed_items_does_not_500 (test_v014_hardening.V014ServerCompatibilityTests.test_repeated_live_sync_with_malformed_items_does_not_500) ... ok\ntest_full_materialization_and_apply_non_regression (test_v015_materialization.V015MaterializationTests.test_full_materialization_and_apply_non_regression) ... ok\ntest_design_is_not_drawn_before_apply_then_materializes_and_project_can_delete (test_visual_design_delete.ConversationalVisualDesignApiTests.test_design_is_not_drawn_before_apply_then_materializes_and_project_can_delete) ... ok\ntest_diagram_contract_filters_invalid_views_and_edges (test_visual_design_delete.ConversationalVisualDesignContractTests.test_diagram_contract_filters_invalid_views_and_edges) ... ok\n\n----------------------------------------------------------------------\nRan 64 tests in 3.539s\n\nOK\n"
+    },
+    "compile_generated_test": {
+      "arguments": [
+        "python",
+        "-m",
+        "compileall",
+        "tests/test_structured_state_v016_ref_identity.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.059626,
+      "stdout": "Listing 'tests/test_structured_state_v016_ref_identity.py'...\nCan't list 'tests/test_structured_state_v016_ref_identity.py'\n",
+      "stderr": ""
+    },
+    "git_diff_check": {
+      "arguments": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.047682,
+      "stdout": "",
+      "stderr": ""
+    },
+    "git_status": {
+      "arguments": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.050388,
+      "stdout": "",
+      "stderr": ""
+    },
+    "changed_paths": {
+      "arguments": [
+        "git",
+        "diff",
+        "--name-status",
+        "748b77391f2b545e75943f1fefeb9f18277c446f"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.047837,
+      "stdout": "",
+      "stderr": ""
+    },
+    "original_status": {
+      "arguments": [
+        "git",
+        "status",
+        "--short",
+        "--branch"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.050013,
+      "stdout": "## main...origin/main\n?? team_project_os-main.zip\n",
+      "stderr": ""
+    }
+  },
+  "independent_checks": {
+    "canonical_production_positive_case_pass": true,
+    "canonical_production_negative_case_pass": true,
+    "worker_positive_case_pass": false,
+    "worker_negative_case_pass": false,
+    "stable_requirement_identity_is_ref": true,
+    "expected_conflict_path": "requirements.REQ-HUMAN-001",
+    "fixture_contract_is_valid": true,
+    "production_files_unchanged": true,
+    "existing_tests_unchanged": true,
+    "allowed_scope_only": true,
+    "test_weakening": false,
+    "generated_test_missing": true
+  },
+  "offload_log": {
+    "available": true,
+    "log_name": "server.log",
+    "matching_tail": [
+      "load_tensors:    CUDA_Host model buffer size =  2463.37 MiB",
+      "srv    load_model: initializing, n_slots = 1, n_ctx_slot = 16384, kv_unified = 'false'",
+      "slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 16384, n_keep = 4, task.n_tokens = 34",
+      "load_tensors: offloaded 30/49 layers to GPU",
+      "load_tensors:        CUDA0 model buffer size =  3882.02 MiB",
+      "load_tensors:    CUDA_Host model buffer size =  2463.37 MiB",
+      "srv    load_model: initializing, n_slots = 1, n_ctx_slot = 16384, kv_unified = 'false'",
+      "slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 16384, n_keep = 4, task.n_tokens = 1778"
+    ]
+  },
+  "verdict": "FAIL — TOOL_CALLING",
+  "verdict_reason": "The model emitted a read request as plain content instead of a native ToolRequest, so the Harness terminated normally without executing a tool or creating the test."
+}

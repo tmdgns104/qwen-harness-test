@@ -213,6 +213,34 @@ Stop without repair or policy change if:
 - another prompt, repair, fixture alteration, or model run would be needed to
   obtain PASS.
 
+## Benchmark Result
+
+Final disposition: **FAIL — TOOL_CALLING**.
+
+The single actual model run completed in 10.147933 seconds with Harness outcome
+`NORMAL`, one attempt, Failure Kind `NONE`, and no write-side-effect risk. The
+model returned the required `read_repo_text` action as 104 characters of ordinary
+JSON content with zero native ToolRequests. The Runner therefore performed no
+tool action and created no regression test.
+
+Independent verification confirmed the canonical production positive and
+negative fixtures both behave exactly as contracted, the target and original
+repositories are unchanged, V0.16 file discovery passes 10/10, and full Python
+discovery passes 64/64. The required Worker test is absent, so neither Worker
+case is implemented. Harness `NORMAL` was not treated as PASS.
+
+Runtime Evidence records exact tag/digest, Q3_K_S, 6,659,609,738-byte model,
+context 16384, `39%/61% CPU/GPU`, 30/49 GPU-offloaded layers, and 6,060 MiB GPU
+memory after the response. No continuation occurred.
+
+Qwen Harness focused verification passed 62/62 tests across Worker Brief, Task
+Runner, Retry Runner, and Ollama Worker. Both experiment scripts compile, all
+three JSON artifacts parse, and `git diff --check` passes.
+
+Canonical input, raw result, independent verification, exact measurements, and
+the qwen3:8b comparison are preserved under
+`experiments/tpos-v016-model-001-qwen25-coder-14b/`.
+
 ## Next Task
 
 NONE. Complete and report this one model benchmark only.
