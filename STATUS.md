@@ -1,9 +1,9 @@
-Current Task: QH-EXP-CODEX-REVIEW-004 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/codex-qwen-review-004/report.md
+Current Task: TPOS-V016-MODEL-001-QWEN25-CODER-14B - ACTIVE
 
-Previous Task: QH-V2-EDIT-003 - COMPLETE - VERIFIED - commit 22ed216
+Previous Task: QH-EXP-CODEX-REVIEW-004 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/codex-qwen-review-004/report.md
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: ccddbf23d81cf8f1a4a9b34fea9905183224922a
+Task Baseline: 67fa6e4
 
 Handoff:
 - 2026-08-28 Qwen 14B CPU-only observation is diagnostic Evidence only, not a model performance FAIL. Root cause was an incomplete Ollama 0.33.1 CUDA payload update; official same-version repair succeeded. The unchanged `qwen2.5-coder:14b-instruct-q3_K_S` at context 16384 now loads 30/49 layers and reports `39%/61% CPU/GPU` with about 6038 MiB GPU memory use. GPU-offload resume gate PASS; model performance remains NOT EVALUATED pending the actual benchmark workload. Evidence: `docs/QWEN_14B_GPU_OFFLOAD_DIAGNOSTIC_2026-08-28.md`.
