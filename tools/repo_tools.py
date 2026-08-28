@@ -36,5 +36,6 @@ def write_repo_text(
     path = resolve_scoped_write_target(repo_root, relative_path, scope)
     if path.is_dir():
         raise ValueError("directories are not writable as text files")
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     return requested.as_posix()

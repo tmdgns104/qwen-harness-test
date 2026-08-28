@@ -77,6 +77,25 @@ class RepositoryReadToolsTests(unittest.TestCase):
             self.assertEqual((repo / "allowed.txt").read_text(encoding="utf-8"), content)
             self.assertEqual(result, "allowed.txt")
 
+    def test_write_repo_text_creates_missing_parents_for_allowed_nested_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            target = repo / "allowed" / "nested" / "report.md"
+            content = "AUTHORIZED\n"
+
+            self.assertFalse(target.parent.exists())
+
+            result = write_repo_text(
+                repo,
+                "allowed/nested/report.md",
+                content,
+                allowed_changes=("allowed/nested/report.md",),
+                forbidden_changes=(),
+            )
+
+            self.assertEqual(target.read_text(encoding="utf-8"), content)
+            self.assertEqual(result, "allowed/nested/report.md")
+
     def test_write_repo_text_replaces_allowed_file_with_exact_content(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
@@ -129,6 +148,22 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             self.assertEqual(target.read_text(encoding="utf-8"), "ORIGINAL\n")
 
+    def test_write_repo_text_rejects_forbidden_target_without_creating_parents(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            target = repo / "allowed" / "blocked" / "report.md"
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    "allowed/blocked/report.md",
+                    "CHANGED\n",
+                    allowed_changes=("allowed/**",),
+                    forbidden_changes=("allowed/blocked/**",),
+                )
+
+            self.assertFalse(target.parent.exists())
+
     def test_write_repo_text_rejects_absolute_path_before_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -149,6 +184,24 @@ class RepositoryReadToolsTests(unittest.TestCase):
 
             self.assertEqual(outside.read_text(encoding="utf-8"), "ORIGINAL\n")
 
+    def test_write_repo_text_rejects_absolute_target_without_creating_parents(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            target = root / "outside" / "nested" / "report.md"
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    str(target),
+                    "CHANGED\n",
+                    allowed_changes=(target.as_posix(),),
+                    forbidden_changes=(),
+                )
+
+            self.assertFalse(target.parent.exists())
+
     def test_write_repo_text_rejects_path_traversal_before_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -167,6 +220,24 @@ class RepositoryReadToolsTests(unittest.TestCase):
                 )
 
             self.assertEqual(outside.read_text(encoding="utf-8"), "ORIGINAL\n")
+
+    def test_write_repo_text_rejects_escape_without_creating_external_parents(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            target = root / "outside" / "nested" / "report.md"
+
+            with self.assertRaises(ValueError):
+                write_repo_text(
+                    repo,
+                    "../outside/nested/report.md",
+                    "CHANGED\n",
+                    allowed_changes=("../outside/nested/report.md",),
+                    forbidden_changes=(),
+                )
+
+            self.assertFalse(target.parent.exists())
 
     def test_write_repo_text_rejects_directory_before_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:

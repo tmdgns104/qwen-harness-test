@@ -161,6 +161,33 @@ Then run:
 - optional real Harness probe result if unit/integration Evidence is
   insufficient
 
+## Implementation Result
+
+- `write_repo_text` still calls `resolve_scoped_write_target` before any new
+  directory mutation.
+- After the authorized target's existing-directory rejection, the function
+  creates only `path.parent` with `parents=True` and `exist_ok=True`, then uses
+  the existing UTF-8 full-content write.
+- No public API, Worker tool schema, ChangeScope rule, write scope, retry,
+  model, think, timeout, or step budget changed.
+
+## Verification Evidence
+
+- Pre-implementation focused RED: 5 tests ran; the allowed nested missing-parent
+  case failed with the expected `FileNotFoundError`; forbidden, absolute,
+  Repository-escape, and existing-file replacement cases passed.
+- Post-implementation focused GREEN: the same 5 tests PASS.
+- `python -m unittest tests.test_repo_tools -v`: 21 tests ran, PASS with one
+  existing Windows symlink-permission SKIP. The separate resolved-identity
+  helper test PASSed.
+- Related full regression: 169 tests PASS across `tests.test_harness_core`,
+  `tests.test_task_runner`, `tests.test_retry_runner`, and
+  `tests.test_qh_worker_run`.
+- `python -m compileall tools tests/test_repo_tools.py`: exit 0.
+- `git diff --check`: exit 0.
+- Pre-commit changed production/test paths are exactly
+  `tools/repo_tools.py` and `tests/test_repo_tools.py`.
+
 ## Stop Conditions
 
 Stop and report if:
