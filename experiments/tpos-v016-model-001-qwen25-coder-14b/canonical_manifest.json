@@ -1,0 +1,50 @@
+{
+  "experiment": "TPOS-V016-MODEL-001-QWEN25-CODER-14B",
+  "canonical_task": {
+    "bundle": "D:\\team_project_os\\TPOS-V016-REG-002-worker-capability-failure.bundle",
+    "commit": "748b77391f2b545e75943f1fefeb9f18277c446f",
+    "path": "tasks/TPOS-V016-REG-002.md",
+    "bytes": 7495,
+    "sha256": "b4ea3b067e897da23b7ef6f2f61f75daf677ecae081bc30d751e7b255c56c7a0"
+  },
+  "worker_brief": {
+    "projector": "tools.worker_brief.build_worker_brief",
+    "required_sections": [
+      "Goal",
+      "Architecture Basis",
+      "Dependencies",
+      "Scope",
+      "Allowed Changes",
+      "Forbidden Changes",
+      "Acceptance Criteria",
+      "Stop Conditions"
+    ],
+    "bytes": 6223,
+    "sha256": "cd5f861fce3288d68edde4850d61c73677e7e5b9c5ca7252c1b9f8c0eb545081",
+    "exact_section_match": true
+  },
+  "prior_qwen3_8b_failure": {
+    "commit": "30e762d28597cdedcaf3d2176d1cc4a28e2d83c7",
+    "generated_test_path": "tests/test_structured_state_v016_ref_identity.py",
+    "source_blob_bytes": 2387,
+    "source_blob_sha256": "5f84467497e5ccd729b8033066bc20495a3560585cc88fc96c89e876dfc6f156",
+    "preserved_copy_text_sha256": "12c48c3d42b6bee03cde16d2635fe26761fba5f5e3d7ca549665bb3144109164",
+    "copy_difference": "The preserved text copy adds only a final newline; the authoritative byte-exact source remains the bundle commit.",
+    "classification": "FAIL — WORKER_CAPABILITY",
+    "harness_outcome": "NORMAL",
+    "attempts": 1
+  },
+  "fixed_runtime": {
+    "model": "qwen2.5-coder:14b-instruct-q3_K_S",
+    "expected_context": 16384,
+    "think": false,
+    "initial_timeout_seconds": 30.0,
+    "continuation_timeout_seconds": 60.0,
+    "max_worker_steps": 8,
+    "max_runner_attempts": 2,
+    "tools": [
+      "read_repo_text",
+      "write_repo_text"
+    ]
+  }
+}
