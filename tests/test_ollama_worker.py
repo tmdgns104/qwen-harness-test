@@ -477,5 +477,104 @@ class OllamaWorkerTests(unittest.TestCase):
         self.assertIsNotNone(step.error)
 
 
+    def test_tool_session_uses_separate_default_continuation_timeout(self):
+        from tools.harness_core import ToolResult, ToolSpec
+        from tools.ollama_worker import OllamaToolSession
+
+        observed_timeouts = []
+
+        first_message = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-1",
+                    "function": {
+                        "index": 0,
+                        "name": "read_repo_text",
+                        "arguments": {"relative_path": "PROJECT.md"},
+                    },
+                }
+            ],
+        }
+
+        responses = [
+            FakeResponse({"message": first_message}),
+            FakeResponse({"message": {"role": "assistant", "content": "done"}}),
+        ]
+
+        def fake_urlopen(request, timeout):
+            observed_timeouts.append(timeout)
+            return responses[len(observed_timeouts) - 1]
+
+        tool = ToolSpec(
+            "read_repo_text",
+            "Read text",
+            {"type": "object"},
+        )
+
+        with patch("tools.ollama_worker.urlopen", side_effect=fake_urlopen):
+            session = OllamaToolSession(
+                WorkerRequest("inspect project"),
+                tools=(tool,),
+            )
+            first = session.start()
+            session.continue_with_tool_result(
+                ToolResult(first.tool_requests[0].call_id, True, "CONTENT", None)
+            )
+
+        self.assertEqual(observed_timeouts, [30.0, 60.0])
+
+    def test_tool_session_honors_custom_continuation_timeout(self):
+        from tools.harness_core import ToolResult, ToolSpec
+        from tools.ollama_worker import OllamaToolSession
+
+        observed_timeouts = []
+
+        first_message = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-1",
+                    "function": {
+                        "index": 0,
+                        "name": "read_repo_text",
+                        "arguments": {"relative_path": "PROJECT.md"},
+                    },
+                }
+            ],
+        }
+
+        responses = [
+            FakeResponse({"message": first_message}),
+            FakeResponse({"message": {"role": "assistant", "content": "done"}}),
+        ]
+
+        def fake_urlopen(request, timeout):
+            observed_timeouts.append(timeout)
+            return responses[len(observed_timeouts) - 1]
+
+        tool = ToolSpec(
+            "read_repo_text",
+            "Read text",
+            {"type": "object"},
+        )
+
+        with patch("tools.ollama_worker.urlopen", side_effect=fake_urlopen):
+            session = OllamaToolSession(
+                WorkerRequest("inspect project"),
+                tools=(tool,),
+                timeout_seconds=17.0,
+                continuation_timeout_seconds=73.0,
+            )
+            first = session.start()
+            session.continue_with_tool_result(
+                ToolResult(first.tool_requests[0].call_id, True, "CONTENT", None)
+            )
+
+        self.assertEqual(observed_timeouts, [17.0, 73.0])
+
+
 if __name__ == "__main__":
     unittest.main()

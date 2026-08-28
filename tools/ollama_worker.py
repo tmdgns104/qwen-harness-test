@@ -19,6 +19,7 @@ from tools.harness_core import (
 DEFAULT_BASE_URL = "http://127.0.0.1:11434"
 DEFAULT_MODEL = "qwen3:8b"
 DEFAULT_TIMEOUT_SECONDS = 30.0
+DEFAULT_CONTINUATION_TIMEOUT_SECONDS = 60.0
 
 
 def call_ollama_worker(
@@ -69,12 +70,14 @@ class OllamaToolSession:
         base_url: str = DEFAULT_BASE_URL,
         model: str = DEFAULT_MODEL,
         timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+        continuation_timeout_seconds: float = DEFAULT_CONTINUATION_TIMEOUT_SECONDS,
     ) -> None:
         self.request = request
         self.tools = tools
         self.base_url = base_url
         self.model = model
         self.timeout_seconds = timeout_seconds
+        self.continuation_timeout_seconds = continuation_timeout_seconds
         self._messages = [
             {"role": "user", "content": request.task_text}
         ]
@@ -93,7 +96,11 @@ class OllamaToolSession:
             for tool in self.tools
         ]
 
-    def _request_step(self) -> tuple[WorkerStep, dict[str, object] | None]:
+    def _request_step(
+        self,
+        *,
+        timeout_seconds: float | None = None,
+    ) -> tuple[WorkerStep, dict[str, object] | None]:
         payload = {
             "model": self.model,
             "messages": self._messages,
@@ -112,7 +119,9 @@ class OllamaToolSession:
         try:
             with urlopen(
                 http_request,
-                timeout=self.timeout_seconds,
+                timeout=(
+                    self.timeout_seconds if timeout_seconds is None else timeout_seconds
+                ),
             ) as response:
                 decoded = json.loads(response.read().decode("utf-8"))
         except URLError as exc:
@@ -234,7 +243,9 @@ class OllamaToolSession:
         )
         del self._pending_tools[result.call_id]
 
-        step, assistant_message = self._request_step()
+        step, assistant_message = self._request_step(
+            timeout_seconds=self.continuation_timeout_seconds,
+        )
         if step.transport_ok and assistant_message is not None:
             self._messages.append(assistant_message)
         return step
