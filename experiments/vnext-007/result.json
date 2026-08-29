@@ -1,0 +1,206 @@
+{
+  "experiment": "vnext-007",
+  "model": "qwen3:8b",
+  "settings": {
+    "think": false,
+    "temperature": 0,
+    "seed": 424242,
+    "num_ctx": 8192
+  },
+  "tasks": [
+    [
+      "empty",
+      "Implement normalize_name(value): None/blank -> \"\", else trim lowercase."
+    ],
+    [
+      "boundary",
+      "Implement clamp(value, low, high), inclusive bounds."
+    ],
+    [
+      "exception",
+      "Implement divide(a,b), raising ValueError when b is zero."
+    ],
+    [
+      "state",
+      "Implement toggle(value) returning the boolean opposite."
+    ],
+    [
+      "offbyone",
+      "Implement take_prefix(items,n); n=0 gives [], negative n raises ValueError."
+    ],
+    [
+      "parser",
+      "Implement parse_flag(text): trimmed case-insensitive yes/no to bool, otherwise ValueError."
+    ],
+    [
+      "semantic",
+      "Implement is_even(n), including zero and negative integers."
+    ],
+    [
+      "multifile",
+      "Implement format_status(value), ready for True and blocked otherwise."
+    ],
+    [
+      "coordinated",
+      "Implement greeting(name) returning Hello, <name>!."
+    ],
+    [
+      "edge",
+      "Implement safe_len(value): None -> 0, otherwise len(value)."
+    ]
+  ],
+  "funnel": {
+    "total": 10,
+    "transport_ok": 10,
+    "parse_ok": 0,
+    "validation_pass": 0,
+    "snapshot_apply_pass": 0,
+    "visible_pass": 0,
+    "independent_pass": 0,
+    "completed": 0
+  },
+  "latency": {
+    "inference_mean": 1.6277780700009317,
+    "inference_median": 1.5306441000029736
+  },
+  "hardware_before": {
+    "ollama_ps": "NAME        ID              SIZE      PROCESSOR    CONTEXT    UNTIL                   \nqwen3:8b    500a1f067a9f    6.2 GB    100% GPU     8192       About a minute from now",
+    "nvidia_smi": "6076 MiB, 8151 MiB"
+  },
+  "hardware_after": {
+    "ollama_ps": "NAME        ID              SIZE      PROCESSOR    CONTEXT    UNTIL              \nqwen3:8b    500a1f067a9f    6.2 GB    100% GPU     8192       4 minutes from now",
+    "nvidia_smi": "6078 MiB, 8151 MiB"
+  },
+  "rows": [
+    {
+      "task_id": "empty",
+      "context_chars": 84,
+      "request_chars": 492,
+      "context_build_seconds": 3.8100006349850446e-05,
+      "inference_seconds": 1.3907736999972258,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "task_id": "boundary",
+      "context_chars": 84,
+      "request_chars": 474,
+      "context_build_seconds": 1.8399994587525725e-05,
+      "inference_seconds": 2.067542800003139,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "task_id": "exception",
+      "context_chars": 84,
+      "request_chars": 480,
+      "context_build_seconds": 3.1299998227041215e-05,
+      "inference_seconds": 1.748798499997065,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "task_id": "state",
+      "context_chars": 84,
+      "request_chars": 474,
+      "context_build_seconds": 3.6900004488416016e-05,
+      "inference_seconds": 1.1388698000009754,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "task_id": "offbyone",
+      "context_chars": 84,
+      "request_chars": 497,
+      "context_build_seconds": 3.100000321865082e-05,
+      "inference_seconds": 1.591222300005029,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "task_id": "parser",
+      "context_chars": 84,
+      "request_chars": 510,
+      "context_build_seconds": 2.9199996788520366e-05,
+      "inference_seconds": 2.484767500005546,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "task_id": "semantic",
+      "context_chars": 84,
+      "request_chars": 481,
+      "context_build_seconds": 3.060000017285347e-05,
+      "inference_seconds": 1.2570118000003276,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "task_id": "multifile",
+      "context_chars": 84,
+      "request_chars": 492,
+      "context_build_seconds": 2.3799999326001853e-05,
+      "inference_seconds": 1.4700659000009182,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate operation schema"
+    },
+    {
+      "task_id": "coordinated",
+      "context_chars": 84,
+      "request_chars": 475,
+      "context_build_seconds": 3.139999898849055e-05,
+      "inference_seconds": 1.458103500001016,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate operation schema"
+    },
+    {
+      "task_id": "edge",
+      "context_chars": 84,
+      "request_chars": 477,
+      "context_build_seconds": 2.3699998564552516e-05,
+      "inference_seconds": 1.6706248999980744,
+      "transport_ok": true,
+      "parse_ok": false,
+      "validation": null,
+      "stage_failure": "CANDIDATE_PARSE",
+      "candidate": null,
+      "error": "invalid Candidate JSON: Expecting value: line 1 column 1 (char 0)"
+    }
+  ]
+}
