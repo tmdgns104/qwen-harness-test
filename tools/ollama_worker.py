@@ -51,19 +51,23 @@ def _parse_bounded_candidate(content: str) -> Candidate:
         raise ValueError("Candidate must contain only operations list")
     operations = []
     for raw in parsed["operations"]:
-        if not isinstance(raw, dict) or set(raw) != {"operation_type", "path", "content"}:
+        if not isinstance(raw, dict) or not isinstance(raw.get("operation_type"), str):
             raise ValueError("invalid Candidate operation schema")
         try:
             operation_type = CandidateOperationType(raw["operation_type"])
         except (KeyError, ValueError, TypeError) as exc:
             raise ValueError("unsupported Candidate operation type") from exc
-        if not isinstance(raw["path"], str) or not isinstance(raw["content"], str):
-            raise ValueError("Candidate path/content types are invalid")
         if operation_type is CandidateOperationType.REPLACE_TEXT:
             if set(raw) != {"operation_type", "path", "old_text", "new_text", "expected_occurrences"}:
                 raise ValueError("invalid REPLACE_TEXT fields")
+            if not isinstance(raw["path"], str) or not isinstance(raw["old_text"], str) or not isinstance(raw["new_text"], str):
+                raise ValueError("REPLACE_TEXT path/text types are invalid")
             operations.append(CandidateOperation(operation_type, raw["path"], "", raw["old_text"], raw["new_text"], raw["expected_occurrences"]))
         else:
+            if set(raw) != {"operation_type", "path", "content"}:
+                raise ValueError("invalid Candidate operation schema")
+            if not isinstance(raw["path"], str) or not isinstance(raw["content"], str):
+                raise ValueError("Candidate path/content types are invalid")
             operations.append(CandidateOperation(operation_type, raw["path"], raw["content"]))
     return Candidate(tuple(operations))
 
@@ -111,13 +115,13 @@ def call_bounded_stateless_worker(
         with urlopen(http_request, timeout=timeout_seconds) as response:
             decoded = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        return BoundedWorkerResponse(False, None, str(exc), {"model": model, "elapsed_seconds": time.perf_counter() - started})
+        return BoundedWorkerResponse(False, None, str(exc), {"model": model, "elapsed_seconds": time.perf_counter() - started, "failure_stage": "TRANSPORT", "exception_class": type(exc).__name__})
     elapsed = time.perf_counter() - started
     try:
         content = decoded["message"]["content"]
         candidate = _parse_bounded_candidate(content)
     except (KeyError, TypeError, ValueError) as exc:
-        return BoundedWorkerResponse(True, None, str(exc), {"model": model, "elapsed_seconds": elapsed, "parse_ok": False})
+        return BoundedWorkerResponse(True, None, str(exc), {"model": model, "elapsed_seconds": elapsed, "parse_ok": False, "failure_stage": "CANDIDATE_PARSE", "exception_class": type(exc).__name__})
     return BoundedWorkerResponse(True, candidate, None, {"model": model, "elapsed_seconds": elapsed, "parse_ok": True})
 
 

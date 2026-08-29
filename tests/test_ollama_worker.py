@@ -34,6 +34,17 @@ class RawResponse:
 
 
 class OllamaWorkerTests(unittest.TestCase):
+    def test_bounded_parser_accepts_replace_text_and_rejects_cross_operation_fields(self):
+        from tools.ollama_worker import _parse_bounded_candidate
+        from tools.harness_core import CandidateOperationType
+        valid = json.dumps({"operations": [{"operation_type": "REPLACE_TEXT", "path": "a.py", "old_text": "x", "new_text": "y", "expected_occurrences": 1}]})
+        candidate = _parse_bounded_candidate(valid)
+        self.assertEqual(candidate.operations[0].operation_type, CandidateOperationType.REPLACE_TEXT)
+        self.assertEqual(candidate.operations[0].old_text, "x")
+        invalid = json.dumps({"operations": [{"operation_type": "REPLACE_TEXT", "path": "a.py", "old_text": "x", "new_text": "y", "expected_occurrences": 1, "content": "bad"}]})
+        with self.assertRaises(ValueError):
+            _parse_bounded_candidate(invalid)
+
     def test_success_sends_native_chat_payload_and_returns_worker_response(self):
         from tools.ollama_worker import call_ollama_worker
 
