@@ -24,6 +24,8 @@ def hardware():
   p=subprocess.run(args,capture_output=True,text=True,timeout=10); return p.stdout.strip()
  return {'ollama_ps':run(['ollama','ps']),'nvidia_smi':run(['nvidia-smi','--query-gpu=memory.used,memory.total','--format=csv,noheader'])}
 def main():
+ if OUT.exists():
+  return
  rows=[]; before=hardware()
  for tid,goal in TASKS:
   t0=time.perf_counter(); pack=build_context_pack(task_id=tid,goal=goal,acceptance_criteria=('satisfy task','modify only src/module.py'),allowed_changes=('src/module.py',),forbidden_changes=('all other paths',),items=(ContextItem(ContextItemKind.SOURCE_FILE,'src/module.py','def placeholder(value):\n    raise NotImplementedError\n'),ContextItem(ContextItemKind.TEST_FILE,'tests/test_visible.py','visible test contract supplied'),),output_contract={'operations':['CREATE_FILE','REPLACE_FILE']},budget_chars=20000); build_elapsed=time.perf_counter()-t0
