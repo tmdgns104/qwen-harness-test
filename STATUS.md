@@ -1,9 +1,9 @@
-Current Task: TPOS-V016-MODEL-001-QWEN25-CODER-14B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-001-qwen25-coder-14b/report.md
+Current Task: TPOS-V016-MODEL-002-MISTRAL-NEMO-12B - ACTIVE
 
-Previous Task: QH-EXP-CODEX-REVIEW-004 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/codex-qwen-review-004/report.md
+Previous Task: TPOS-V016-MODEL-001-QWEN25-CODER-14B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-001-qwen25-coder-14b/report.md
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 67fa6e4
+Task Baseline: 2b7998b
 
 Handoff:
 - 2026-08-29 TPOS-V016-MODEL-001-QWEN25-CODER-14B result is `FAIL — TOOL_CALLING`. The exact 14B Q3_K_S model completed its cold initial response in 10.146650s at context 16384 with `39%/61% CPU/GPU`, 30/49 GPU-offloaded layers, and 6060 MiB GPU memory, but emitted the required read action as ordinary JSON text with zero native ToolRequests. Harness reported `NORMAL` in one attempt and made no write; Codex did not treat this as PASS. The isolated target and original Team Project OS were unchanged; canonical production fixture probes PASS and full baseline remains 64/64 PASS. Evidence: `experiments/tpos-v016-model-001-qwen25-coder-14b/report.md`.

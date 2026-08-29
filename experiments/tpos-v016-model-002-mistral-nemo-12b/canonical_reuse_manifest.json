@@ -1,0 +1,18 @@
+{
+  "experiment": "TPOS-V016-MODEL-002-MISTRAL-NEMO-12B",
+  "canonical_input_reused_from": "experiments/tpos-v016-model-001-qwen25-coder-14b",
+  "task_source_commit": "748b77391f2b545e75943f1fefeb9f18277c446f",
+  "failure_evidence_commit": "30e762d28597cdedcaf3d2176d1cc4a28e2d83c7",
+  "task_sha256": "b4ea3b067e897da23b7ef6f2f61f75daf677ecae081bc30d751e7b255c56c7a0",
+  "worker_brief_sha256": "cd5f861fce3288d68edde4850d61c73677e7e5b9c5ca7252c1b9f8c0eb545081",
+  "task_path": "experiments/tpos-v016-model-001-qwen25-coder-14b/canonical/TPOS-V016-REG-002.md",
+  "worker_brief_path": "experiments/tpos-v016-model-001-qwen25-coder-14b/canonical/worker_brief.md",
+  "fixed_context": 16384,
+  "fixed_think": false,
+  "fixed_initial_timeout_seconds": 30.0,
+  "fixed_continuation_timeout_seconds": 60.0,
+  "fixed_max_worker_steps": 8,
+  "fixed_max_runner_attempts": 2,
+  "fixed_tools": ["read_repo_text", "write_repo_text"],
+  "model": "mistral-nemo:12b-instruct-2407-q3_K_S"
+}
