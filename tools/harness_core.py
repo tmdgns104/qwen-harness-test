@@ -84,6 +84,71 @@ class BoundedOutcome(Enum):
     BLOCKED = "BLOCKED"
 
 
+class ContextItemKind(Enum):
+    """Provenance category for explicitly selected Context Pack material."""
+
+    SOURCE_FILE = "SOURCE_FILE"
+    TEST_FILE = "TEST_FILE"
+    ARCHITECTURE = "ARCHITECTURE"
+    DECISION = "DECISION"
+    TASK_CONTEXT = "TASK_CONTEXT"
+
+
+@dataclass(frozen=True)
+class ContextItem:
+    """Immutable, provenance-preserving item supplied by the Harness."""
+
+    kind: ContextItemKind
+    source: str
+    content: str
+    metadata: Mapping[str, object] | None = None
+
+
+class ContextPackBuildError(ValueError):
+    """Fail-closed error while constructing a bounded Context Pack."""
+
+
+@dataclass(frozen=True)
+class ContextPack:
+    """Deterministic bounded context; it owns no Repository access."""
+
+    task_id: str
+    goal: str
+    acceptance_criteria: tuple[str, ...]
+    allowed_changes: tuple[str, ...]
+    forbidden_changes: tuple[str, ...]
+    items: tuple[ContextItem, ...]
+    output_contract: Mapping[str, object]
+    metadata: Mapping[str, object]
+    budget_chars: int
+    used_chars: int
+
+
+def build_context_pack(
+    *, task_id: str, goal: str, acceptance_criteria: tuple[str, ...],
+    allowed_changes: tuple[str, ...], forbidden_changes: tuple[str, ...],
+    items: tuple[ContextItem, ...], output_contract: Mapping[str, object],
+    budget_chars: int,
+) -> ContextPack:
+    """Build from explicitly supplied items using stable provenance ordering."""
+    if not task_id or not goal or not acceptance_criteria or not allowed_changes or not forbidden_changes:
+        raise ContextPackBuildError("required task context is missing")
+    if budget_chars < 0:
+        raise ContextPackBuildError("budget_chars must be non-negative")
+    ordered = tuple(sorted(items, key=lambda item: (item.kind.value, item.source, item.content)))
+    used = sum(len(item.content) for item in ordered)
+    if used > budget_chars:
+        raise ContextPackBuildError("context budget exceeded; no truncation performed")
+    return ContextPack(
+        task_id=task_id, goal=goal,
+        acceptance_criteria=tuple(acceptance_criteria),
+        allowed_changes=tuple(allowed_changes), forbidden_changes=tuple(forbidden_changes),
+        items=ordered, output_contract=output_contract,
+        metadata={"item_count": len(ordered), "budget_unit": "characters"},
+        budget_chars=budget_chars, used_chars=used,
+    )
+
+
 @dataclass(frozen=True)
 class ToolSpec:
     """Backend-neutral description of a Harness-owned tool."""
