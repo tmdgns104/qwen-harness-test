@@ -1,0 +1,310 @@
+{
+  "experiment": "worker-evolution-001",
+  "model": "qwen3:8b",
+  "settings": {
+    "think": false,
+    "temperature": 0,
+    "seed": 424242,
+    "context": 8192
+  },
+  "rows": [
+    {
+      "task": "single-function",
+      "variant": "minimal",
+      "repeat": 1,
+      "input_sha256": "6a9e9ce96651b237e516178999de81970e9d25a91536eb8da845e3008428ca15",
+      "response": {
+        "elapsed": 9.324473499997112,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/text_utils.py\",\"content\":\"def normalize_whitespace(text):\\n    return text.replace(\\\"\\\\n\\\", \\\" \\\").replace(\\\"\\\\r\\\", \\\" \\\").replace(\\\"\\\\t\\\", \\\" \\\").strip().replace(\\\"  \\\", \\\" \\\")\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return text.replace(\"\\n\", \" \").replace(\"\\r\", \" \").replace(\"\\t\", \" \").strip().replace(\"  \", \" \")"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "single-function",
+      "variant": "minimal",
+      "repeat": 2,
+      "input_sha256": "6a9e9ce96651b237e516178999de81970e9d25a91536eb8da845e3008428ca15",
+      "response": {
+        "elapsed": 1.1068758000037633,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/text_utils.py\",\"content\":\"def normalize_whitespace(text):\\n    return text.replace(\\\"\\\\n\\\", \\\" \\\").replace(\\\"\\\\r\\\", \\\" \\\").replace(\\\"\\\\t\\\", \\\" \\\").strip().replace(\\\"  \\\", \\\" \\\")\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return text.replace(\"\\n\", \" \").replace(\"\\r\", \" \").replace(\"\\t\", \" \").strip().replace(\"  \", \" \")"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "single-function",
+      "variant": "rich",
+      "repeat": 1,
+      "input_sha256": "1acaf2ae57809ff764f8ec2c1086e1ba312b1892c7d66241059f4ea3c2aa6c2e",
+      "response": {
+        "elapsed": 0.8581371999971452,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/text_utils.py\",\"content\":\"def normalize_whitespace(text):\\n    return ' '.join(text.split())\\n\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return ' '.join(text.split())\n"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "single-function",
+      "variant": "rich",
+      "repeat": 2,
+      "input_sha256": "1acaf2ae57809ff764f8ec2c1086e1ba312b1892c7d66241059f4ea3c2aa6c2e",
+      "response": {
+        "elapsed": 0.795799799998349,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/text_utils.py\",\"content\":\"def normalize_whitespace(text):\\n    return ' '.join(text.split())\\n\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return ' '.join(text.split())\n"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "bug-fix",
+      "variant": "minimal",
+      "repeat": 1,
+      "input_sha256": "ec7f3d477a1a8720670ef7db883fb67662e2747259ccf06b64d6f56a4ddba6f3",
+      "response": {
+        "elapsed": 1.6488729999982752,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"parse_count.py\",\"content\":\"def parse_count(text):\\n    parts = text.split(\\\"COUNT=\\\")\\n    if len(parts) < 2:\\n        raise ValueError(\\\"COUNT not found in text\\\")\\n    count_str = parts[1].split()[0]\\n    return int(count_str)\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "parse_count.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found in text\")\n    count_str = parts[1].split()[0]\n    return int(count_str)"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": false,
+        "exit": 1,
+        "stderr": "\\tmp533iz3z0\\tests\\test_parser.py\", line 6, in test_missing\n    with self.assertRaises(ValueError): parse_count(\"none\")\n                                        ~~~~~~~~~~~^^^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmp533iz3z0\\src\\parser.py\", line 2, in parse_count\n    return int(text.split(\"COUNT=\")[1])\n               ~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n\n----------------------------------------------------------------------\nRan 2 tests in 0.003s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "task": "bug-fix",
+      "variant": "minimal",
+      "repeat": 2,
+      "input_sha256": "ec7f3d477a1a8720670ef7db883fb67662e2747259ccf06b64d6f56a4ddba6f3",
+      "response": {
+        "elapsed": 1.5876040999937686,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"parse_count.py\",\"content\":\"def parse_count(text):\\n    parts = text.split(\\\"COUNT=\\\")\\n    if len(parts) < 2:\\n        raise ValueError(\\\"COUNT not found in text\\\")\\n    count_str = parts[1].split()[0]\\n    return int(count_str)\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "parse_count.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found in text\")\n    count_str = parts[1].split()[0]\n    return int(count_str)"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": false,
+        "exit": 1,
+        "stderr": "\\tmpno53ny_z\\tests\\test_parser.py\", line 6, in test_missing\n    with self.assertRaises(ValueError): parse_count(\"none\")\n                                        ~~~~~~~~~~~^^^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmpno53ny_z\\src\\parser.py\", line 2, in parse_count\n    return int(text.split(\"COUNT=\")[1])\n               ~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "task": "bug-fix",
+      "variant": "rich",
+      "repeat": 1,
+      "input_sha256": "ed2464efdf051743d870b6cbb1d5f86bf5b40e6cae369ee32e1f6f75a825ece4",
+      "response": {
+        "elapsed": 4.117561700004444,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/parser.py\",\"content\":\"def parse_count(text):\\n    parts = text.split(\\\"COUNT=\\\")\\n    if len(parts) < 2:\\n        raise ValueError(\\\"COUNT not found\\\")\\n    count_str = parts[1].strip()\\n    if not count_str.isdigit():\\n        raise ValueError(\\\"Invalid count value\\\")\\n    return int(count_str)\\n\"},{\"operation_type\":\"REPLACE_FILE\",\"path\":\"tests/test_parser.py\",\"content\":\"import unittest\\nfrom src.parser import parse_count\\nclass T(unittest.TestCase):\\n    def test_valid(self):\\n        self.assertEqual(parse_count(\\\"x COUNT= 7 \\\"),7)\\n    def test_missing(self):\\n        with self.assertRaises(ValueError):\\n            parse_count(\\\"none\\\")\\n    def test_invalid(self):\\n        with self.assertRaises(ValueError):\\n            parse_count(\\\"COUNT=abc\\\")\\n\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/parser.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found\")\n    count_str = parts[1].strip()\n    if not count_str.isdigit():\n        raise ValueError(\"Invalid count value\")\n    return int(count_str)\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_parser.py",
+          "content": "import unittest\nfrom src.parser import parse_count\nclass T(unittest.TestCase):\n    def test_valid(self):\n        self.assertEqual(parse_count(\"x COUNT= 7 \"),7)\n    def test_missing(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"none\")\n    def test_invalid(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"COUNT=abc\")\n"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "bug-fix",
+      "variant": "rich",
+      "repeat": 2,
+      "input_sha256": "ed2464efdf051743d870b6cbb1d5f86bf5b40e6cae369ee32e1f6f75a825ece4",
+      "response": {
+        "elapsed": 3.8094761000029393,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/parser.py\",\"content\":\"def parse_count(text):\\n    parts = text.split(\\\"COUNT=\\\")\\n    if len(parts) < 2:\\n        raise ValueError(\\\"COUNT not found\\\")\\n    count_str = parts[1].strip()\\n    if not count_str.isdigit():\\n        raise ValueError(\\\"Invalid count value\\\")\\n    return int(count_str)\\n\"},{\"operation_type\":\"REPLACE_FILE\",\"path\":\"tests/test_parser.py\",\"content\":\"import unittest\\nfrom src.parser import parse_count\\nclass T(unittest.TestCase):\\n def test_valid(self): self.assertEqual(parse_count(\\\"x COUNT= 7 \\\"),7)\\n def test_missing(self):\\n  with self.assertRaises(ValueError): parse_count(\\\"none\\\")\\n def test_invalid(self):\\n  with self.assertRaises(ValueError): parse_count(\\\"COUNT=abc\\\")\\n\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/parser.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found\")\n    count_str = parts[1].strip()\n    if not count_str.isdigit():\n        raise ValueError(\"Invalid count value\")\n    return int(count_str)\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_parser.py",
+          "content": "import unittest\nfrom src.parser import parse_count\nclass T(unittest.TestCase):\n def test_valid(self): self.assertEqual(parse_count(\"x COUNT= 7 \"),7)\n def test_missing(self):\n  with self.assertRaises(ValueError): parse_count(\"none\")\n def test_invalid(self):\n  with self.assertRaises(ValueError): parse_count(\"COUNT=abc\")\n"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "multi-file",
+      "variant": "minimal",
+      "repeat": 1,
+      "input_sha256": "17f2223de42fd6338d2e011742b97a1e74629ed9b066a4b29d7508010b98f0db",
+      "response": {
+        "elapsed": 1.3378541999991285,
+        "text": "{\"operations\":[{\"operation_type\":\"CREATE_FILE\",\"path\":\"status.py\",\"content\":\"def format_status(value):\\n    return \\\"ready\\\" if value else \\\"blocked\\\"\\n\\nif __name__ == \\\"__main__\\\":\\n    import doctest\\n    doctest.testmod()\\n\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "CREATE_FILE",
+          "path": "status.py",
+          "content": "def format_status(value):\n    return \"ready\" if value else \"blocked\"\n\nif __name__ == \"__main__\":\n    import doctest\n    doctest.testmod()\n"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": false,
+        "exit": 1,
+        "stderr": "  File \"C:\\Python313\\Lib\\unittest\\loader.py\", line 339, in _get_module_from_name\n    __import__(name)\n    ~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmpzba7gxng\\tests\\test_status.py\", line 2, in <module>\n    from src.status import format_status\nImportError: cannot import name 'format_status' from 'src.status' (C:\\Users\\user\\AppData\\Local\\Temp\\tmpzba7gxng\\src\\status.py)\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "task": "multi-file",
+      "variant": "minimal",
+      "repeat": 2,
+      "input_sha256": "17f2223de42fd6338d2e011742b97a1e74629ed9b066a4b29d7508010b98f0db",
+      "response": {
+        "elapsed": 1.2655089999971096,
+        "text": "{\"operations\":[{\"operation_type\":\"CREATE_FILE\",\"path\":\"status.py\",\"content\":\"def format_status(value):\\n    return \\\"ready\\\" if value else \\\"blocked\\\"\\n\\nif __name__ == \\\"__main__\\\":\\n    import doctest\\n    doctest.testmod()\\n\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "CREATE_FILE",
+          "path": "status.py",
+          "content": "def format_status(value):\n    return \"ready\" if value else \"blocked\"\n\nif __name__ == \"__main__\":\n    import doctest\n    doctest.testmod()\n"
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": false,
+        "exit": 1,
+        "stderr": "  File \"C:\\Python313\\Lib\\unittest\\loader.py\", line 339, in _get_module_from_name\n    __import__(name)\n    ~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmpia1uxd12\\tests\\test_status.py\", line 2, in <module>\n    from src.status import format_status\nImportError: cannot import name 'format_status' from 'src.status' (C:\\Users\\user\\AppData\\Local\\Temp\\tmpia1uxd12\\src\\status.py)\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "task": "multi-file",
+      "variant": "rich",
+      "repeat": 1,
+      "input_sha256": "505ecab884975d7e6920ce92b7b2522cf041be92ceeaf616ed0b81b3c96bc3df",
+      "response": {
+        "elapsed": 0.9378776000012294,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/status.py\",\"content\":\"# status module\\n\\\\ndef format_status(value):\\n    return \\\"ready\\\" if value else \\\"blocked\\\"\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/status.py",
+          "content": "# status module\n\\ndef format_status(value):\n    return \"ready\" if value else \"blocked\""
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": false,
+        "exit": 1,
+        "stderr": "in _get_module_from_name\n    __import__(name)\n    ~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmpm6y168x5\\tests\\test_status.py\", line 2, in <module>\n    from src.status import format_status\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmpm6y168x5\\src\\status.py\", line 2\n    \\ndef format_status(value):\n     ^\nSyntaxError: unexpected character after line continuation character\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "task": "multi-file",
+      "variant": "rich",
+      "repeat": 2,
+      "input_sha256": "505ecab884975d7e6920ce92b7b2522cf041be92ceeaf616ed0b81b3c96bc3df",
+      "response": {
+        "elapsed": 0.8663601000007475,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/status.py\",\"content\":\"# status module\\n\\\\ndef format_status(value):\\n    return \\\"ready\\\" if value else \\\"blocked\\\"\"}]}",
+        "error": null
+      },
+      "candidate": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/status.py",
+          "content": "# status module\n\\ndef format_status(value):\n    return \"ready\" if value else \"blocked\""
+        }
+      ],
+      "evaluation": {
+        "valid": true,
+        "tests_pass": false,
+        "exit": 1,
+        "stderr": "in _get_module_from_name\n    __import__(name)\n    ~~~~~~~~~~^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmp0tgapte7\\tests\\test_status.py\", line 2, in <module>\n    from src.status import format_status\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\tmp0tgapte7\\src\\status.py\", line 2\n    \\ndef format_status(value):\n     ^\nSyntaxError: unexpected character after line continuation character\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    }
+  ]
+}
