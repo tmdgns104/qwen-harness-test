@@ -194,6 +194,55 @@ class BoundedOutcome(Enum):
     BLOCKED = "BLOCKED"
 
 
+@dataclass(frozen=True)
+class BoundedVerificationResult:
+    """Deterministic verification evidence and outcome for an applied Candidate."""
+
+    outcome: BoundedOutcome
+    verification_passed: bool
+    test_results: tuple[object, ...]
+    expected_paths: tuple[str, ...]
+    actual_paths: tuple[str, ...]
+    unexpected_paths: tuple[str, ...]
+    diff_summary: str
+    errors: tuple[str, ...]
+    failure_evidence: Mapping[str, object]
+    metadata: Mapping[str, object]
+
+
+def verify_bounded_candidate(
+    candidate: Candidate | None,
+    validation: CandidateValidationResult,
+    apply_result: CandidateApplyResult,
+    verification_results: tuple[object, ...],
+    expected_paths: tuple[str, ...],
+    actual_paths: tuple[str, ...],
+    original_unchanged: bool,
+    *, allow_no_action: bool = False,
+) -> BoundedVerificationResult:
+    """Map deterministic apply/test/diff evidence to a bounded workflow outcome."""
+    errors: list[str] = []
+    unexpected = tuple(sorted(set(actual_paths) - set(expected_paths)))
+    if not validation.valid:
+        outcome = BoundedOutcome.CANDIDATE_INVALID; errors.extend(validation.errors)
+    elif not apply_result.success or not original_unchanged:
+        outcome = BoundedOutcome.SAFETY_FAIL
+        if apply_result.error: errors.append(apply_result.error)
+        if not original_unchanged: errors.append("original repository changed")
+    elif candidate is None or not candidate.operations:
+        outcome = BoundedOutcome.NO_ACTION if allow_no_action else BoundedOutcome.VERIFICATION_FAILED
+        if not allow_no_action: errors.append("empty candidate is not approved")
+    elif unexpected or tuple(sorted(expected_paths)) != tuple(sorted(actual_paths)):
+        outcome = BoundedOutcome.VERIFICATION_FAILED; errors.append("candidate paths differ from snapshot paths")
+    elif any(getattr(result, "exit_code", 1) != 0 for result in verification_results):
+        outcome = BoundedOutcome.VERIFICATION_FAILED; errors.append("verification command failed")
+    else:
+        outcome = BoundedOutcome.COMPLETED
+    passed = outcome in (BoundedOutcome.COMPLETED, BoundedOutcome.NO_ACTION)
+    evidence = {"outcome": outcome.value, "errors": tuple(errors), "unexpected_paths": unexpected}
+    return BoundedVerificationResult(outcome, passed, verification_results, tuple(expected_paths), tuple(actual_paths), unexpected, "paths compared deterministically", tuple(errors), evidence, {"original_unchanged": original_unchanged})
+
+
 class ContextItemKind(Enum):
     """Provenance category for explicitly selected Context Pack material."""
 
