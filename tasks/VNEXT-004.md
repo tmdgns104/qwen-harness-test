@@ -1,7 +1,7 @@
 # VNEXT-004 — Temporary Candidate Apply
 
 ## Status
-APPROVED - READY FOR CONTRACT BASELINE
+COMPLETE - VERIFIED
 
 ## Goal
 
