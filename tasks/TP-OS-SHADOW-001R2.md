@@ -12,6 +12,11 @@ ACTIVE
 - `experiments/tpos-os-shadow-001r2-result.json`
 - `experiments/tpos-os-shadow-001r2-report.md`
 
+## Forbidden Changes
+- Original Team Project OS repository contents
+- Native Agent, production timeout, retry, parser or validator relaxation
+- Any path not listed in Allowed Changes
+
 ## Verification
 Run:
 
@@ -20,4 +25,3 @@ Run:
 Then run:
 
 `git diff --check`
-
