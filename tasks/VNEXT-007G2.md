@@ -1,7 +1,7 @@
 # VNEXT-007G Phase 2 — Auditable Semantic Generalization Benchmark
 
 ## Status
-COMPLETE - VERIFIED
+ACTIVE
 
 ## Task Baseline
 75ad0d2
