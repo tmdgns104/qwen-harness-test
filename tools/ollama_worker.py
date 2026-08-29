@@ -70,6 +70,7 @@ def call_bounded_stateless_worker(
     model: str = "qwen3:8b",
     timeout_seconds: float = 30.0,
     authorized_paths: tuple[str, ...] | None = None,
+    think: bool = False,
 ) -> BoundedWorkerResponse:
     """Call Ollama without native tools and strictly parse a passive Candidate."""
     schema = json.loads(json.dumps(BOUNDED_CANDIDATE_SCHEMA))
@@ -81,7 +82,7 @@ def call_bounded_stateless_worker(
         "model": model,
         "messages": [{"role": "user", "content": _bounded_prompt(request)}],
         "stream": False,
-        "think": False,
+        "think": think,
         "format": schema,
         "options": {"num_ctx": 8192, "temperature": 0, "seed": 424242},
     }

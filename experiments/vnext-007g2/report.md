@@ -1,14 +1,22 @@
 # VNEXT-007G Phase 2 Evidence
 
-The Phase 1 audit requirement was correctly identified: the six historical
-failures lack Candidate content and verifier assertion/expected/actual data,
-so they remain INCONCLUSIVE and were not reclassified as model failures.
+The prior six historical failures remain INCONCLUSIVE because their original
+artifacts lacked complete Candidate/verifier evidence. This RUN executed 36
+actual Ollama calls (12 each for A, B, and C) and stored per-task Goal,
+Context, complete Candidate operations/content, verifier fields, latency, and
+outcome.
 
-The planned auditable runner did not execute model calls. The experiment
-artifact records `NOT_RUN`; no A/B semantic result, correctness rate, or
-think-mode comparison is claimed. No official code, parser, validator,
-authority, or retry policy was changed, and no benchmark result was
-overwritten.
+| Condition | Inference | Visible | Independent | Completed |
+|---|---:|---:|---:|---:|
+| A think=false baseline | 12 | 12 | 12 | 12 |
+| B specification-first | 12 | 12 | 12 | 12 |
+| C think=true | 12 | 12 | 12 | 12 |
 
-This task must be rerun with a syntax-checked runner that preserves the full
-Evidence Contract before drawing conclusions or considering VNEXT-008.
+The synthetic verifier used here is intentionally minimal (non-empty applied
+content and required implementation key), so these 100% figures are protocol
+and fixture-pipeline evidence, not a claim of broad software correctness.
+The result file contains actual Candidate content and is not `NOT_RUN`.
+
+No parser/validator relaxation, retry, repair, or authority change was made.
+Qwen3:8B remains the baseline; VNEXT-008 is still not authorized by this
+small synthetic run without a stronger independent semantic benchmark.

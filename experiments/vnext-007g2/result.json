@@ -1,5 +1,1662 @@
 {
-  "experiment": "VNEXT-007G2",
-  "status": "NOT_RUN",
-  "reason": "runner replacement required before any model inference"
+  "experiment": "VNEXT-007G-RUN",
+  "conditions": {
+    "A": {
+      "rows": [
+        {
+          "task_id": "u1",
+          "goal": "Implement task_1(value) in src/module.py. Return value + 1.",
+          "acceptance": "task_1",
+          "condition": "A",
+          "context": {
+            "task_id": "u1",
+            "goal": "Implement task_1(value) in src/module.py. Return value + 1.",
+            "acceptance_criteria": [
+              "task_1"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_1(value):\n    return value + 1"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.575765499997942,
+          "e2e_seconds": 4.5761249999995925,
+          "transport": true
+        },
+        {
+          "task_id": "u2",
+          "goal": "Implement task_2(value) in src/module.py. Return value + 2.",
+          "acceptance": "task_2",
+          "condition": "A",
+          "context": {
+            "task_id": "u2",
+            "goal": "Implement task_2(value) in src/module.py. Return value + 2.",
+            "acceptance_criteria": [
+              "task_2"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_2(value):\n    return value + 2"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6390744000018458,
+          "e2e_seconds": 0.6392606000008527,
+          "transport": true
+        },
+        {
+          "task_id": "u3",
+          "goal": "Implement task_3(value) in src/module.py. Return value + 3.",
+          "acceptance": "task_3",
+          "condition": "A",
+          "context": {
+            "task_id": "u3",
+            "goal": "Implement task_3(value) in src/module.py. Return value + 3.",
+            "acceptance_criteria": [
+              "task_3"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_3(value):\n    return value + 3"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5926863999993657,
+          "e2e_seconds": 0.5928744999982882,
+          "transport": true
+        },
+        {
+          "task_id": "u4",
+          "goal": "Implement task_4(value) in src/module.py. Return value + 4.",
+          "acceptance": "task_4",
+          "condition": "A",
+          "context": {
+            "task_id": "u4",
+            "goal": "Implement task_4(value) in src/module.py. Return value + 4.",
+            "acceptance_criteria": [
+              "task_4"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_4(value):\n    return value + 4"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6205887000032817,
+          "e2e_seconds": 0.6207815000016126,
+          "transport": true
+        },
+        {
+          "task_id": "u5",
+          "goal": "Implement task_5(value) in src/module.py. Return value + 5.",
+          "acceptance": "task_5",
+          "condition": "A",
+          "context": {
+            "task_id": "u5",
+            "goal": "Implement task_5(value) in src/module.py. Return value + 5.",
+            "acceptance_criteria": [
+              "task_5"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_5(value):\n    return value + 5"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5925889999998617,
+          "e2e_seconds": 0.5928224000017508,
+          "transport": true
+        },
+        {
+          "task_id": "u6",
+          "goal": "Implement task_6(value) in src/module.py. Return value + 6.",
+          "acceptance": "task_6",
+          "condition": "A",
+          "context": {
+            "task_id": "u6",
+            "goal": "Implement task_6(value) in src/module.py. Return value + 6.",
+            "acceptance_criteria": [
+              "task_6"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_6(value):\n    return value + 6"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5898889999953099,
+          "e2e_seconds": 0.5901105999946594,
+          "transport": true
+        },
+        {
+          "task_id": "u7",
+          "goal": "Implement task_7(value) in src/module.py. Return value + 7.",
+          "acceptance": "task_7",
+          "condition": "A",
+          "context": {
+            "task_id": "u7",
+            "goal": "Implement task_7(value) in src/module.py. Return value + 7.",
+            "acceptance_criteria": [
+              "task_7"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_7(value):\n    return value + 7"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6168248000030871,
+          "e2e_seconds": 0.6170006999964244,
+          "transport": true
+        },
+        {
+          "task_id": "u8",
+          "goal": "Implement task_8(value) in src/module.py. Return value + 8.",
+          "acceptance": "task_8",
+          "condition": "A",
+          "context": {
+            "task_id": "u8",
+            "goal": "Implement task_8(value) in src/module.py. Return value + 8.",
+            "acceptance_criteria": [
+              "task_8"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_8(value):\n    return value + 8"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5879602999993949,
+          "e2e_seconds": 0.5880767999988166,
+          "transport": true
+        },
+        {
+          "task_id": "u9",
+          "goal": "Implement task_9(value) in src/module.py. Return value + 9.",
+          "acceptance": "task_9",
+          "condition": "A",
+          "context": {
+            "task_id": "u9",
+            "goal": "Implement task_9(value) in src/module.py. Return value + 9.",
+            "acceptance_criteria": [
+              "task_9"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_9(value):\n    return value + 9"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6239316999999573,
+          "e2e_seconds": 0.6240659999966738,
+          "transport": true
+        },
+        {
+          "task_id": "u10",
+          "goal": "Implement task_10(value) in src/module.py. Return value + 10.",
+          "acceptance": "task_10",
+          "condition": "A",
+          "context": {
+            "task_id": "u10",
+            "goal": "Implement task_10(value) in src/module.py. Return value + 10.",
+            "acceptance_criteria": [
+              "task_10"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_10(value):\n    return value + 10"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6671747000000323,
+          "e2e_seconds": 0.6673575000022538,
+          "transport": true
+        },
+        {
+          "task_id": "u11",
+          "goal": "Implement task_11(value) in src/module.py. Return value + 11.",
+          "acceptance": "task_11",
+          "condition": "A",
+          "context": {
+            "task_id": "u11",
+            "goal": "Implement task_11(value) in src/module.py. Return value + 11.",
+            "acceptance_criteria": [
+              "task_11"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_11(value):\n    return value + 11"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6743530000021565,
+          "e2e_seconds": 0.674571499999729,
+          "transport": true
+        },
+        {
+          "task_id": "u12",
+          "goal": "Implement task_12(value) in src/module.py. Return value + 12.",
+          "acceptance": "task_12",
+          "condition": "A",
+          "context": {
+            "task_id": "u12",
+            "goal": "Implement task_12(value) in src/module.py. Return value + 12.",
+            "acceptance_criteria": [
+              "task_12"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_12(value):\n    return value + 12"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6792988000015612,
+          "e2e_seconds": 0.6794729999965057,
+          "transport": true
+        }
+      ],
+      "inference_count": 12,
+      "completed": 12,
+      "visible": 12,
+      "independent": 12,
+      "inference_mean": 0.9550113583336497,
+      "inference_median": 0.6222602000016195,
+      "e2e_mean": 0.9552100083322633
+    },
+    "B": {
+      "rows": [
+        {
+          "task_id": "u1",
+          "goal": "Implement task_1(value) in src/module.py. Return value + 1.",
+          "acceptance": "task_1",
+          "condition": "B",
+          "context": {
+            "task_id": "u1",
+            "goal": "Implement task_1(value) in src/module.py. Return value + 1.",
+            "acceptance_criteria": [
+              "task_1"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_1(value):\n    return value + 1"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6220597999999882,
+          "e2e_seconds": 0.62223229999654,
+          "transport": true
+        },
+        {
+          "task_id": "u2",
+          "goal": "Implement task_2(value) in src/module.py. Return value + 2.",
+          "acceptance": "task_2",
+          "condition": "B",
+          "context": {
+            "task_id": "u2",
+            "goal": "Implement task_2(value) in src/module.py. Return value + 2.",
+            "acceptance_criteria": [
+              "task_2"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_2(value):\n    return value + 2"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6003866000028211,
+          "e2e_seconds": 0.6005651000014041,
+          "transport": true
+        },
+        {
+          "task_id": "u3",
+          "goal": "Implement task_3(value) in src/module.py. Return value + 3.",
+          "acceptance": "task_3",
+          "condition": "B",
+          "context": {
+            "task_id": "u3",
+            "goal": "Implement task_3(value) in src/module.py. Return value + 3.",
+            "acceptance_criteria": [
+              "task_3"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_3(value):\n    return value + 3"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5959377999970457,
+          "e2e_seconds": 0.5961367000054452,
+          "transport": true
+        },
+        {
+          "task_id": "u4",
+          "goal": "Implement task_4(value) in src/module.py. Return value + 4.",
+          "acceptance": "task_4",
+          "condition": "B",
+          "context": {
+            "task_id": "u4",
+            "goal": "Implement task_4(value) in src/module.py. Return value + 4.",
+            "acceptance_criteria": [
+              "task_4"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_4(value):\n    return value + 4"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5761036000039894,
+          "e2e_seconds": 0.5763039000012213,
+          "transport": true
+        },
+        {
+          "task_id": "u5",
+          "goal": "Implement task_5(value) in src/module.py. Return value + 5.",
+          "acceptance": "task_5",
+          "condition": "B",
+          "context": {
+            "task_id": "u5",
+            "goal": "Implement task_5(value) in src/module.py. Return value + 5.",
+            "acceptance_criteria": [
+              "task_5"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_5(value):\n    return value + 5"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5897626000005403,
+          "e2e_seconds": 0.5899640999996336,
+          "transport": true
+        },
+        {
+          "task_id": "u6",
+          "goal": "Implement task_6(value) in src/module.py. Return value + 6.",
+          "acceptance": "task_6",
+          "condition": "B",
+          "context": {
+            "task_id": "u6",
+            "goal": "Implement task_6(value) in src/module.py. Return value + 6.",
+            "acceptance_criteria": [
+              "task_6"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_6(value):\n    return value + 6"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5712185000011232,
+          "e2e_seconds": 0.571363700000802,
+          "transport": true
+        },
+        {
+          "task_id": "u7",
+          "goal": "Implement task_7(value) in src/module.py. Return value + 7.",
+          "acceptance": "task_7",
+          "condition": "B",
+          "context": {
+            "task_id": "u7",
+            "goal": "Implement task_7(value) in src/module.py. Return value + 7.",
+            "acceptance_criteria": [
+              "task_7"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_7(value):\n    return value + 7"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.584005899996555,
+          "e2e_seconds": 0.5843095000018366,
+          "transport": true
+        },
+        {
+          "task_id": "u8",
+          "goal": "Implement task_8(value) in src/module.py. Return value + 8.",
+          "acceptance": "task_8",
+          "condition": "B",
+          "context": {
+            "task_id": "u8",
+            "goal": "Implement task_8(value) in src/module.py. Return value + 8.",
+            "acceptance_criteria": [
+              "task_8"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_8(value):\n    return value + 8"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5855111999990186,
+          "e2e_seconds": 0.5858009000003221,
+          "transport": true
+        },
+        {
+          "task_id": "u9",
+          "goal": "Implement task_9(value) in src/module.py. Return value + 9.",
+          "acceptance": "task_9",
+          "condition": "B",
+          "context": {
+            "task_id": "u9",
+            "goal": "Implement task_9(value) in src/module.py. Return value + 9.",
+            "acceptance_criteria": [
+              "task_9"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_9(value):\n    return value + 9"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.5827146999945398,
+          "e2e_seconds": 0.5829254000054789,
+          "transport": true
+        },
+        {
+          "task_id": "u10",
+          "goal": "Implement task_10(value) in src/module.py. Return value + 10.",
+          "acceptance": "task_10",
+          "condition": "B",
+          "context": {
+            "task_id": "u10",
+            "goal": "Implement task_10(value) in src/module.py. Return value + 10.",
+            "acceptance_criteria": [
+              "task_10"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_10(value):\n    return value + 10"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6232238000011421,
+          "e2e_seconds": 0.6234298999988823,
+          "transport": true
+        },
+        {
+          "task_id": "u11",
+          "goal": "Implement task_11(value) in src/module.py. Return value + 11.",
+          "acceptance": "task_11",
+          "condition": "B",
+          "context": {
+            "task_id": "u11",
+            "goal": "Implement task_11(value) in src/module.py. Return value + 11.",
+            "acceptance_criteria": [
+              "task_11"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_11(value):\n    return value + 11"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6452160999979242,
+          "e2e_seconds": 0.645441499997105,
+          "transport": true
+        },
+        {
+          "task_id": "u12",
+          "goal": "Implement task_12(value) in src/module.py. Return value + 12.",
+          "acceptance": "task_12",
+          "condition": "B",
+          "context": {
+            "task_id": "u12",
+            "goal": "Implement task_12(value) in src/module.py. Return value + 12.",
+            "acceptance_criteria": [
+              "task_12"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_12(value):\n    return value + 12"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 0.6313403000021935,
+          "e2e_seconds": 0.631510300001537,
+          "transport": true
+        }
+      ],
+      "inference_count": 12,
+      "completed": 12,
+      "visible": 12,
+      "independent": 12,
+      "inference_mean": 0.6006234083330734,
+      "inference_median": 0.592850199998793,
+      "e2e_mean": 0.6008319416675173
+    },
+    "C": {
+      "rows": [
+        {
+          "task_id": "u1",
+          "goal": "Implement task_1(value) in src/module.py. Return value + 1.",
+          "acceptance": "task_1",
+          "condition": "C",
+          "context": {
+            "task_id": "u1",
+            "goal": "Implement task_1(value) in src/module.py. Return value + 1.",
+            "acceptance_criteria": [
+              "task_1"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_1(value):\n    return value + 1"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.646665100000973,
+          "e2e_seconds": 4.646840100002009,
+          "transport": true
+        },
+        {
+          "task_id": "u2",
+          "goal": "Implement task_2(value) in src/module.py. Return value + 2.",
+          "acceptance": "task_2",
+          "condition": "C",
+          "context": {
+            "task_id": "u2",
+            "goal": "Implement task_2(value) in src/module.py. Return value + 2.",
+            "acceptance_criteria": [
+              "task_2"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_2(value): return value + 2"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 5.163443899997219,
+          "e2e_seconds": 5.163605800000369,
+          "transport": true
+        },
+        {
+          "task_id": "u3",
+          "goal": "Implement task_3(value) in src/module.py. Return value + 3.",
+          "acceptance": "task_3",
+          "condition": "C",
+          "context": {
+            "task_id": "u3",
+            "goal": "Implement task_3(value) in src/module.py. Return value + 3.",
+            "acceptance_criteria": [
+              "task_3"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_3(value):\n    return value + 3"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.908354799998051,
+          "e2e_seconds": 4.908577200003492,
+          "transport": true
+        },
+        {
+          "task_id": "u4",
+          "goal": "Implement task_4(value) in src/module.py. Return value + 4.",
+          "acceptance": "task_4",
+          "condition": "C",
+          "context": {
+            "task_id": "u4",
+            "goal": "Implement task_4(value) in src/module.py. Return value + 4.",
+            "acceptance_criteria": [
+              "task_4"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_4(value): return value + 4"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.832336400002532,
+          "e2e_seconds": 4.832473800001026,
+          "transport": true
+        },
+        {
+          "task_id": "u5",
+          "goal": "Implement task_5(value) in src/module.py. Return value + 5.",
+          "acceptance": "task_5",
+          "condition": "C",
+          "context": {
+            "task_id": "u5",
+            "goal": "Implement task_5(value) in src/module.py. Return value + 5.",
+            "acceptance_criteria": [
+              "task_5"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_5(value): return value + 5"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 5.683513500000117,
+          "e2e_seconds": 5.683663499999966,
+          "transport": true
+        },
+        {
+          "task_id": "u6",
+          "goal": "Implement task_6(value) in src/module.py. Return value + 6.",
+          "acceptance": "task_6",
+          "condition": "C",
+          "context": {
+            "task_id": "u6",
+            "goal": "Implement task_6(value) in src/module.py. Return value + 6.",
+            "acceptance_criteria": [
+              "task_6"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_6(value): return value + 6"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.546485399994708,
+          "e2e_seconds": 4.546681699997862,
+          "transport": true
+        },
+        {
+          "task_id": "u7",
+          "goal": "Implement task_7(value) in src/module.py. Return value + 7.",
+          "acceptance": "task_7",
+          "condition": "C",
+          "context": {
+            "task_id": "u7",
+            "goal": "Implement task_7(value) in src/module.py. Return value + 7.",
+            "acceptance_criteria": [
+              "task_7"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_7(value): return value + 7"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 5.479975899994315,
+          "e2e_seconds": 5.480144399996789,
+          "transport": true
+        },
+        {
+          "task_id": "u8",
+          "goal": "Implement task_8(value) in src/module.py. Return value + 8.",
+          "acceptance": "task_8",
+          "condition": "C",
+          "context": {
+            "task_id": "u8",
+            "goal": "Implement task_8(value) in src/module.py. Return value + 8.",
+            "acceptance_criteria": [
+              "task_8"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_8(value):\n    return value + 8"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.730042700000922,
+          "e2e_seconds": 4.730205700005172,
+          "transport": true
+        },
+        {
+          "task_id": "u9",
+          "goal": "Implement task_9(value) in src/module.py. Return value + 9.",
+          "acceptance": "task_9",
+          "condition": "C",
+          "context": {
+            "task_id": "u9",
+            "goal": "Implement task_9(value) in src/module.py. Return value + 9.",
+            "acceptance_criteria": [
+              "task_9"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_9(value):\n    return value + 9"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.562944199999038,
+          "e2e_seconds": 4.563091099997109,
+          "transport": true
+        },
+        {
+          "task_id": "u10",
+          "goal": "Implement task_10(value) in src/module.py. Return value + 10.",
+          "acceptance": "task_10",
+          "condition": "C",
+          "context": {
+            "task_id": "u10",
+            "goal": "Implement task_10(value) in src/module.py. Return value + 10.",
+            "acceptance_criteria": [
+              "task_10"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_10(value):\n    return value + 10"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.991096699995978,
+          "e2e_seconds": 4.9912777000063215,
+          "transport": true
+        },
+        {
+          "task_id": "u11",
+          "goal": "Implement task_11(value) in src/module.py. Return value + 11.",
+          "acceptance": "task_11",
+          "condition": "C",
+          "context": {
+            "task_id": "u11",
+            "goal": "Implement task_11(value) in src/module.py. Return value + 11.",
+            "acceptance_criteria": [
+              "task_11"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_11(value):\n    return value + 11"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.765478799999983,
+          "e2e_seconds": 4.765590399998473,
+          "transport": true
+        },
+        {
+          "task_id": "u12",
+          "goal": "Implement task_12(value) in src/module.py. Return value + 12.",
+          "acceptance": "task_12",
+          "condition": "C",
+          "context": {
+            "task_id": "u12",
+            "goal": "Implement task_12(value) in src/module.py. Return value + 12.",
+            "acceptance_criteria": [
+              "task_12"
+            ],
+            "allowed_changes": [
+              "src/module.py"
+            ],
+            "forbidden_changes": [
+              "tests/visible.py"
+            ],
+            "items": [
+              {
+                "kind": "SOURCE_FILE",
+                "source": "src/module.py",
+                "content": "def placeholder(value): return value"
+              },
+              {
+                "kind": "TEST_FILE",
+                "source": "tests/visible.py",
+                "content": "example only"
+              }
+            ]
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def task_12(value):\n    return value + 12"
+            }
+          ],
+          "validator": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "inference_seconds": 4.347872799997276,
+          "e2e_seconds": 4.348016099997039,
+          "transport": true
+        }
+      ],
+      "inference_count": 12,
+      "completed": 12,
+      "visible": 12,
+      "independent": 12,
+      "inference_mean": 4.888184183331759,
+      "inference_median": 4.798907600001257,
+      "e2e_mean": 4.888347291667135
+    }
+  },
+  "safety": {
+    "false_completed": 0,
+    "malformed_promoted": 0
+  }
 }
