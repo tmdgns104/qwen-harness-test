@@ -7,6 +7,7 @@ import subprocess
 import shlex
 import threading
 import time
+from enum import Enum
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +27,61 @@ class WorkerResponse:
     transport_ok: bool
     output_text: str
     error: str | None = None
+
+
+class CandidateOperationType(Enum):
+    """Closed set of passive file proposals for bounded workers."""
+
+    CREATE_FILE = "CREATE_FILE"
+    REPLACE_FILE = "REPLACE_FILE"
+
+
+@dataclass(frozen=True)
+class CandidateOperation:
+    """A proposed repository operation; it has no execution authority."""
+
+    operation_type: CandidateOperationType
+    path: str
+    content: str
+
+
+@dataclass(frozen=True)
+class Candidate:
+    """Immutable collection of proposed operations, never an applied change."""
+
+    operations: tuple[CandidateOperation, ...]
+
+
+@dataclass(frozen=True)
+class BoundedWorkerRequest:
+    """Self-contained request for a stateless bounded Worker."""
+
+    task: str
+    context_pack: Mapping[str, object]
+    output_contract: Mapping[str, object]
+
+
+@dataclass(frozen=True)
+class BoundedWorkerResponse:
+    """Transport result carrying a passive Candidate, not task success."""
+
+    transport_ok: bool
+    candidate: Candidate | None
+    error: str | None
+    metadata: Mapping[str, object]
+
+
+class BoundedOutcome(Enum):
+    """Outcome meanings for bounded orchestration, separate from native Runner failures."""
+
+    COMPLETED = "COMPLETED"
+    NO_ACTION = "NO_ACTION"
+    CANDIDATE_INVALID = "CANDIDATE_INVALID"
+    VERIFICATION_FAILED = "VERIFICATION_FAILED"
+    SAFETY_FAIL = "SAFETY_FAIL"
+    TRANSPORT_FAIL = "TRANSPORT_FAIL"
+    PERFORMANCE_FAIL = "PERFORMANCE_FAIL"
+    BLOCKED = "BLOCKED"
 
 
 @dataclass(frozen=True)

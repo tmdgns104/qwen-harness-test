@@ -30,7 +30,17 @@ Freeze the bounded_stateless contract as a backend-neutral, machine-validatable 
 
 ## Verification
 
-Focused contract tests, existing Harness regression, schema negative cases, and Git scope check.
+Run:
+
+`python -m unittest discover -s tests -p "test_bounded_stateless_contract.py"`
+
+`python -m unittest tests.test_harness_core -q`
+
+`python -m unittest discover -s tests -q`
+
+`git diff --check`
+
+Focused contract tests and existing Harness regression must pass. Full-suite failures unrelated to this Task are recorded in Evidence.
 
 ## Stop Conditions
 
