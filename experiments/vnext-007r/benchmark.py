@@ -30,6 +30,8 @@ def hardware():
     return {'ollama_ps': run(['ollama','ps']), 'nvidia_smi': run(['nvidia-smi','--query-gpu=memory.used,memory.total','--format=csv,noheader'])}
 
 def main():
+    if OUT.exists():
+        return
     rows=[]; before=hardware()
     for tid, goal in TASKS:
         t0=time.perf_counter(); pack=build_context_pack(task_id=tid, goal=goal,
