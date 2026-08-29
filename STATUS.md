@@ -1,9 +1,9 @@
-Current Task: QH-V2-MODEL-TOOLCALL-ROOTCAUSE-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/model-toolcall-rootcause-001/report.md
+Current Task: QH-V2-MODEL-PROTOCOL-CAPABILITY-002 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/model-protocol-capability-002/report.md
 
-Previous Task: TPOS-V016-MODEL-003-COMMAND-R7B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-003-command-r7b/report.md
+Previous Task: QH-V2-MODEL-TOOLCALL-ROOTCAUSE-001 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/model-toolcall-rootcause-001/report.md
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 1d54567
+Task Baseline: 0e97b8f
 
 Handoff:
 - 2026-08-29 TPOS-V016-MODEL-002-MISTRAL-NEMO-12B benchmark is pending unsuccessful close after evidence commit. First attempt generated a native read and ToolResult but timed out at 60.014106s; bounded retry emitted `[TOOL_CALLS]` ordinary text with zero native ToolRequests. Preliminary verdict is `FAIL — TOOL_CALLING`; total wall-clock 75.702831s, `26%/74% CPU/GPU`, 31/41 layers, 6110 MiB GPU memory. No target or original Team Project OS change.
