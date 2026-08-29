@@ -32,7 +32,10 @@ def _bounded_prompt(request: BoundedWorkerRequest) -> str:
     return (
         "Return ONLY one JSON object. Do not explain, use markdown, or add code fences. "
         "The object must contain exactly operations; each operation must contain exactly "
-        "operation_type, path, content; operation_type is CREATE_FILE or REPLACE_FILE.\n"
+        "operation_type, path, content; operation_type is CREATE_FILE or REPLACE_FILE. "
+        "Candidate operation.path MUST exactly match one of the authorized paths supplied "
+        "by the Harness; do not shorten, rename, infer, normalize, or invent repository paths. "
+        "Use the exact provenance path associated with the file being modified.\n"
         + serialized
     )
 

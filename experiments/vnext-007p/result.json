@@ -1,0 +1,326 @@
+{
+  "experiment": "VNEXT-007P",
+  "task_count": 12,
+  "A_current": {
+    "summary": {
+      "transport": 12,
+      "parse": 12,
+      "validator": 2,
+      "aligned": 2,
+      "mean": 1.1803254583343612,
+      "median": 1.0141519000026165
+    },
+    "rows": [
+      {
+        "task_id": "single-1",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.20695490000071,
+        "error": null
+      },
+      {
+        "task_id": "single-2",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9697809999997844,
+        "error": null
+      },
+      {
+        "task_id": "single-3",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9815545000019483,
+        "error": null
+      },
+      {
+        "task_id": "single-4",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9658926000047359,
+        "error": null
+      },
+      {
+        "task_id": "single-5",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9690942000015639,
+        "error": null
+      },
+      {
+        "task_id": "single-6",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.967243300001428,
+        "error": null
+      },
+      {
+        "task_id": "semantic",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.3294664999993984,
+        "error": null
+      },
+      {
+        "task_id": "boundary",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.0907317999954103,
+        "error": null
+      },
+      {
+        "task_id": "exception",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.9025254000007408,
+        "error": null
+      },
+      {
+        "task_id": "parser",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.7523575000013807,
+        "error": null
+      },
+      {
+        "task_id": "multi",
+        "paths": [
+          "src/module.py",
+          "src/caller.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "elapsed": 0.9955247000034433,
+        "error": null
+      },
+      {
+        "task_id": "coordination",
+        "paths": [
+          "src/module.py",
+          "src/caller.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "elapsed": 1.0327791000017896,
+        "error": null
+      }
+    ],
+    "wall": 14.167331899996498
+  },
+  "B_path_contract": {
+    "summary": {
+      "transport": 12,
+      "parse": 12,
+      "validator": 3,
+      "aligned": 3,
+      "mean": 1.1509169166662712,
+      "median": 1.0024031000029936
+    },
+    "rows": [
+      {
+        "task_id": "single-1",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9896831000005477,
+        "error": null
+      },
+      {
+        "task_id": "single-2",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9728963000015938,
+        "error": null
+      },
+      {
+        "task_id": "single-3",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9837694999951054,
+        "error": null
+      },
+      {
+        "task_id": "single-4",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9892181999966851,
+        "error": null
+      },
+      {
+        "task_id": "single-5",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9656892999992124,
+        "error": null
+      },
+      {
+        "task_id": "single-6",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 0.9894032999945921,
+        "error": null
+      },
+      {
+        "task_id": "semantic",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.410169800001313,
+        "error": null
+      },
+      {
+        "task_id": "boundary",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.0784760000024107,
+        "error": null
+      },
+      {
+        "task_id": "exception",
+        "paths": [
+          "src/module.py",
+          "tests/visible.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "elapsed": 1.9211326000004192,
+        "error": null
+      },
+      {
+        "task_id": "parser",
+        "paths": [
+          "src/module.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "elapsed": 1.4476807000028202,
+        "error": null
+      },
+      {
+        "task_id": "multi",
+        "paths": [
+          "src/module.py",
+          "src/caller.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "elapsed": 1.0151231000054395,
+        "error": null
+      },
+      {
+        "task_id": "coordination",
+        "paths": [
+          "src/module.py",
+          "src/caller.py"
+        ],
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "elapsed": 1.047761099995114,
+        "error": null
+      }
+    ],
+    "wall": 13.81394420000288
+  },
+  "authorized_paths": [
+    "src/module.py",
+    "src/caller.py"
+  ],
+  "safety": {
+    "validator_relaxed": false,
+    "path_repaired": 0,
+    "original_mutation": 0
+  }
+}
