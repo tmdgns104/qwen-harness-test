@@ -21,7 +21,9 @@ Experiment-only orchestration under `experiments/vnext-007/`; direct use of exis
 
 ## Allowed Changes
 
-- `experiments/vnext-007/`
+- `experiments/vnext-007/benchmark.py`
+- `experiments/vnext-007/result.json`
+- `experiments/vnext-007/report.md`
 - `tasks/VNEXT-007.md`
 - `STATUS.md`
 
