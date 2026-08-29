@@ -1,0 +1,12 @@
+{
+  "experiment": "VNEXT-007G",
+  "audit": {
+    "visible_pass_independent_fail": 6,
+    "auditable_from_preserved_evidence": 0,
+    "classification": "INCONCLUSIVE",
+    "reason": "VNEXT-007S preserved paths and boolean outcomes but not Candidate content, verifier assertions, or failure values."
+  },
+  "baseline": {"set_a_applied_independent": "9/10", "set_b_applied_independent": "4/9", "overall_completed": "13/24"},
+  "thinking_probe": {"model": "qwen3:8b", "think": true, "transport": "OK", "strict_empty_candidate_response": "OK", "full_benchmark": "NOT_RUN"},
+  "comparison": "A/B/C semantic causal comparison not claimed because the six failures are not independently auditable and the preserved experiment lacks Candidate content."
+}
