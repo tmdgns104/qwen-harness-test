@@ -1,0 +1,8 @@
+{
+  "experiment": "TP-OS-SHADOW-001D",
+  "status": "INCONCLUSIVE",
+  "reason": "Diagnostic direct calls did not complete within the observation window; no response metrics were produced.",
+  "model": "qwen3:8b",
+  "production_timeout_changed": false,
+  "target_mutation": false
+}
