@@ -1,0 +1,517 @@
+{
+  "experiment": "VNEXT-007S",
+  "sets": {
+    "A": {
+      "funnel": {
+        "total": 12,
+        "transport": 12,
+        "parse": 12,
+        "validator": 10,
+        "apply": 10,
+        "visible": 10,
+        "independent": 9,
+        "completed": 9
+      },
+      "rows": [
+        {
+          "set": "A",
+          "task_id": "a1",
+          "key": "task_1",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 4.296373399993172,
+          "e2e": 4.3077699999994365,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a2",
+          "key": "task_2",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.036863399996946,
+          "e2e": 1.0470787000012933,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a3",
+          "key": "task_3",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.0358485000033397,
+          "e2e": 1.0458048000000417,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a4",
+          "key": "task_4",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.0212652999980492,
+          "e2e": 1.0312762000030489,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a5",
+          "key": "task_5",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.0644008000017493,
+          "e2e": 1.0737416999982088,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a6",
+          "key": "task_6",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.0825827000007848,
+          "e2e": 1.0932121999940136,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a-sem",
+          "key": "is_valid",
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "outcome": null,
+          "paths": [
+            "src/caller.py",
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.5218906000009156,
+          "e2e": 1.5226407000009203,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a-bound",
+          "key": "clamp",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.4644935000033001,
+          "e2e": 1.4745637999949395,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a-exc",
+          "key": "divide",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.9081079000025056,
+          "e2e": 1.920039299999189,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a-parse",
+          "key": "parse_flag",
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "outcome": null,
+          "paths": [
+            "src/caller.py",
+            "src/caller.py",
+            "src/module.py",
+            "src/module.py"
+          ],
+          "inference": 2.54681569999957,
+          "e2e": 2.5477644999991753,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a-multi",
+          "key": "format_status",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "outcome": "VERIFICATION_FAILED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 0.9731582999957027,
+          "e2e": 0.9826976000040304,
+          "error": null
+        },
+        {
+          "set": "A",
+          "task_id": "a-coord",
+          "key": "normalize_name",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.1021655000004102,
+          "e2e": 1.1122600999951828,
+          "error": null
+        }
+      ]
+    },
+    "B": {
+      "funnel": {
+        "total": 12,
+        "transport": 12,
+        "parse": 12,
+        "validator": 9,
+        "apply": 9,
+        "visible": 9,
+        "independent": 4,
+        "completed": 4
+      },
+      "rows": [
+        {
+          "set": "B",
+          "task_id": "b-empty",
+          "key": "compact",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "outcome": "VERIFICATION_FAILED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 0.9618139000012889,
+          "e2e": 0.9728193999981158,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-bound",
+          "key": "percentage",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.1588507999986177,
+          "e2e": 1.170105400000466,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-exc",
+          "key": "lookup",
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "outcome": null,
+          "paths": [
+            "src/caller.py",
+            "src/caller.py",
+            "src/caller.py",
+            "src/caller.py",
+            "src/caller.py",
+            "src/module.py",
+            "src/module.py",
+            "src/module.py",
+            "src/module.py",
+            "src/module.py"
+          ],
+          "inference": 5.91282130000036,
+          "e2e": 5.913857700004883,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-state",
+          "key": "transition",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "outcome": "VERIFICATION_FAILED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 0.9736685999960173,
+          "e2e": 0.9841702999983681,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-transform",
+          "key": "snake_case",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.16628320000018,
+          "e2e": 1.1775539000009303,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-parser",
+          "key": "parse_pair",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "outcome": "VERIFICATION_FAILED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 0.9688752000001841,
+          "e2e": 0.981254500002251,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-none",
+          "key": "first_or_none",
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "outcome": null,
+          "paths": [
+            "src/caller.py",
+            "src/caller.py",
+            "src/module.py",
+            "src/module.py"
+          ],
+          "inference": 1.9194768000015756,
+          "e2e": 1.9204660000032163,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-off",
+          "key": "chunk",
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "outcome": null,
+          "paths": [
+            "src/caller.py",
+            "src/caller.py",
+            "src/module.py",
+            "src/module.py"
+          ],
+          "inference": 2.7693852000011248,
+          "e2e": 2.7703239000038593,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-multi",
+          "key": "render_user",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "outcome": "VERIFICATION_FAILED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 0.9560644000011962,
+          "e2e": 0.9666709000011906,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-sem",
+          "key": "is_palindrome",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.377175300003728,
+          "e2e": 1.388190300000133,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-exc2",
+          "key": "ratio",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "outcome": "COMPLETED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 1.6064901999998256,
+          "e2e": 1.618885500000033,
+          "error": null
+        },
+        {
+          "set": "B",
+          "task_id": "b-scope",
+          "key": "summarize",
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "outcome": "VERIFICATION_FAILED",
+          "paths": [
+            "src/caller.py",
+            "src/module.py"
+          ],
+          "inference": 0.9823400000022957,
+          "e2e": 0.9937417000037385,
+          "error": null
+        }
+      ]
+    }
+  },
+  "latency": {
+    "inference_mean": 1.6586337708334515,
+    "inference_median": 1.130508149999514,
+    "e2e_mean": 1.6673703791669443,
+    "e2e_median": 1.1411827499978244
+  },
+  "safety": {
+    "malformed_promoted": 0,
+    "readonly": 0,
+    "scope_apply": 0,
+    "original_mutation": 0,
+    "false_completed": 0
+  }
+}
