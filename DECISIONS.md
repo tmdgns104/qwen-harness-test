@@ -1,5 +1,28 @@
 # Qwen Harness V2 Decisions
 
+## ADR-019 - Bounded Stateless Worker VNext
+
+### Status
+Accepted by Human direction; design-only, implementation pending.
+
+### Context
+
+The model protocol capability experiments showed that native tool autonomy is not a dependable common denominator: qwen3 reliably emitted an initial native call but did not complete repeated multi-turn probes, while three other exact Ollama artifacts failed initial native emission in direct probes. Existing deterministic Harness and Codex verification boundaries are effective and must not be weakened.
+
+### Decision
+
+Add a `bounded_stateless` Worker mode alongside (not replacing) `native_agent`. Deterministic Harness orchestration builds a bounded Context Pack and sends a self-contained request. The Local LLM returns only a schema-validated Candidate proposal. Harness-owned validation and temporary-snapshot verification control all application and evidence decisions.
+
+Candidate operations are explicit structured file operations, not free-form text or parser-promoted JSON. Unified diff may be represented inside a candidate only after schema validation; text imitation is never upgraded into authority. Context selection is manifest-bound and budget overflow fails closed. Outcomes distinguish completion, no action, invalid candidate, verification, safety, transport, performance, and blocked states.
+
+### Consequences
+
+Native Agent mode, tool schemas, authority, retry, production timeout, and existing evidence remain unchanged. Stateless mode improves determinism and makes model capability a bounded proposal concern, at the cost of more Harness implementation and stricter context preparation. Team Project OS remains an independent read-only pilot target; promotion requires Codex Final Gate. No quantization or model choice is implied by this ADR.
+
+### Implementation decomposition
+
+VNEXT-001 contract and outcome records; VNEXT-002 deterministic Context Pack; VNEXT-003 Candidate schema/validator; VNEXT-004 temporary apply; VNEXT-005 verification/evidence integration; VNEXT-006 stateless Ollama adapter; VNEXT-007 synthetic E2E benchmark; VNEXT-008 Team Project OS pilot. Each is separately verified.
+
 ## ADR-001 - Deterministic Harness Core Before Further Orchestration
 
 ### Status
