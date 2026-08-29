@@ -1,0 +1,207 @@
+{
+  "models": [
+    "qwen2.5-coder:7b",
+    "qwen3:8b"
+  ],
+  "results": [
+    {
+      "task_id": "SHADOW-003R",
+      "stage_a": {
+        "model": "qwen2.5-coder:7b",
+        "latency": 30.0455748999957,
+        "transport_ok": false,
+        "metadata": {
+          "model": "qwen2.5-coder:7b",
+          "elapsed_seconds": 30.045298799988814,
+          "failure_stage": "TRANSPORT",
+          "exception_class": "TimeoutError"
+        },
+        "error": "timed out",
+        "candidate": null,
+        "validator": null,
+        "apply": null,
+        "syntax": null,
+        "semantic": null,
+        "passed": false
+      },
+      "stage_b": {
+        "model": "qwen3:8b",
+        "latency": 7.063268199999584,
+        "transport_ok": true,
+        "metadata": {
+          "model": "qwen3:8b",
+          "elapsed_seconds": 7.062734000006458,
+          "parse_ok": true
+        },
+        "error": null,
+        "candidate": [
+          {
+            "operation_type": "CandidateOperationType.REPLACE_TEXT",
+            "path": "app/live_state.py",
+            "content": "",
+            "old_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n\n",
+            "new_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n\n",
+            "expected_occurrences": 1
+          }
+        ],
+        "validator": true,
+        "apply": true,
+        "syntax": true,
+        "semantic": {
+          "passed": false,
+          "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _text(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n"
+        },
+        "passed": false
+      },
+      "final_pass": false,
+      "total_latency": 37.10884309999528
+    },
+    {
+      "task_id": "SHADOW-005",
+      "stage_a": {
+        "model": "qwen2.5-coder:7b",
+        "latency": 30.014417799990042,
+        "transport_ok": false,
+        "metadata": {
+          "model": "qwen2.5-coder:7b",
+          "elapsed_seconds": 30.014169700007187,
+          "failure_stage": "TRANSPORT",
+          "exception_class": "TimeoutError"
+        },
+        "error": "timed out",
+        "candidate": null,
+        "validator": null,
+        "apply": null,
+        "syntax": null,
+        "semantic": null,
+        "passed": false
+      },
+      "stage_b": {
+        "model": "qwen3:8b",
+        "latency": 7.762643499998376,
+        "transport_ok": true,
+        "metadata": {
+          "model": "qwen3:8b",
+          "elapsed_seconds": 7.762421399995219,
+          "parse_ok": false,
+          "failure_stage": "CANDIDATE_PARSE",
+          "exception_class": "ValueError"
+        },
+        "error": "invalid Candidate JSON: Unterminated string starting at: line 1 column 223 (char 222)",
+        "candidate": null,
+        "validator": null,
+        "apply": null,
+        "syntax": null,
+        "semantic": null,
+        "passed": false
+      },
+      "final_pass": false,
+      "total_latency": 37.77706129998842
+    },
+    {
+      "task_id": "SHADOW-006",
+      "stage_a": {
+        "model": "qwen2.5-coder:7b",
+        "latency": 30.014235399998142,
+        "transport_ok": false,
+        "metadata": {
+          "model": "qwen2.5-coder:7b",
+          "elapsed_seconds": 30.013997799993376,
+          "failure_stage": "TRANSPORT",
+          "exception_class": "TimeoutError"
+        },
+        "error": "timed out",
+        "candidate": null,
+        "validator": null,
+        "apply": null,
+        "syntax": null,
+        "semantic": null,
+        "passed": false
+      },
+      "stage_b": {
+        "model": "qwen3:8b",
+        "latency": 6.988511999996263,
+        "transport_ok": true,
+        "metadata": {
+          "model": "qwen3:8b",
+          "elapsed_seconds": 6.988249899994116,
+          "parse_ok": true
+        },
+        "error": null,
+        "candidate": [
+          {
+            "operation_type": "CandidateOperationType.REPLACE_TEXT",
+            "path": "app/conversation.py",
+            "content": "",
+            "old_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n\n",
+            "new_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n\n",
+            "expected_occurrences": 1
+          }
+        ],
+        "validator": true,
+        "apply": true,
+        "syntax": true,
+        "semantic": {
+          "passed": false,
+          "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _clip(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n"
+        },
+        "passed": false
+      },
+      "final_pass": false,
+      "total_latency": 37.002747399994405
+    },
+    {
+      "task_id": "SHADOW-007",
+      "stage_a": {
+        "model": "qwen2.5-coder:7b",
+        "latency": 30.010593300001347,
+        "transport_ok": false,
+        "metadata": {
+          "model": "qwen2.5-coder:7b",
+          "elapsed_seconds": 30.01038989999506,
+          "failure_stage": "TRANSPORT",
+          "exception_class": "TimeoutError"
+        },
+        "error": "timed out",
+        "candidate": null,
+        "validator": null,
+        "apply": null,
+        "syntax": null,
+        "semantic": null,
+        "passed": false
+      },
+      "stage_b": {
+        "model": "qwen3:8b",
+        "latency": 8.475519200001145,
+        "transport_ok": true,
+        "metadata": {
+          "model": "qwen3:8b",
+          "elapsed_seconds": 8.475327200008905,
+          "parse_ok": true
+        },
+        "error": null,
+        "candidate": [
+          {
+            "operation_type": "CandidateOperationType.REPLACE_TEXT",
+            "path": "app/conversation.py",
+            "content": "",
+            "old_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged\n\n",
+            "new_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged\n\n",
+            "expected_occurrences": 1
+          }
+        ],
+        "validator": true,
+        "apply": true,
+        "syntax": true,
+        "semantic": {
+          "passed": true,
+          "stderr": ""
+        },
+        "passed": true
+      },
+      "final_pass": true,
+      "total_latency": 38.48611250000249
+    }
+  ],
+  "target_mutation": 0
+}
