@@ -3,6 +3,8 @@
 ## Status
 ACTIVE
 
+Task Baseline: ff6632d
+
 ## Allowed Changes
 - `tasks/TP-OS-SHADOW-001R2F.md`
 - `experiments/tpos-os-shadow-001r2f.py`
