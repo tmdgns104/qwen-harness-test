@@ -6,7 +6,7 @@ Baseline: `a0246e9`. Canonical source and hashes are recorded in `experiments/tp
 
 ## Status
 
-ACTIVE
+CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED
 
 ## Benchmark Result
 

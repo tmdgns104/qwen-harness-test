@@ -1,4 +1,4 @@
-Current Task: TPOS-V016-MODEL-003-COMMAND-R7B - ACTIVE
+Current Task: TPOS-V016-MODEL-003-COMMAND-R7B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-003-command-r7b/report.md
 
 Previous Task: TPOS-V016-MODEL-002-MISTRAL-NEMO-12B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-002-mistral-nemo-12b/report.md
 
