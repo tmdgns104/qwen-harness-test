@@ -1,0 +1,348 @@
+{
+  "prompt": "allowed.txt를 read_repo_text 도구로 읽어라. 직접 추측하거나 내용을 말하지 말고 반드시 제공된 도구를 사용하라.",
+  "tool_schema": {
+    "type": "function",
+    "function": {
+      "name": "read_repo_text",
+      "description": "Read the diagnostic fixture.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "models": [
+    {
+      "model": "qwen3:8b",
+      "show": {
+        "digest": null,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "8.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "size": null,
+        "template": "\n{{- $lastUserIdx := -1 -}}\n{{- range $idx, $msg := .Messages -}}\n{{- if eq $msg.Role \"user\" }}{{ $lastUserIdx = $idx }}{{ end -}}\n{{- end }}\n{{- if or .System .Tools }}<|im_start|>system\n{{ if .System }}\n{{ .System }}\n{{- end }}\n{{- if .Tools }}\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{{- range .Tools }}\n{\"type\": \"function\", \"function\": {{ .Function }}}\n{{- end }}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call>\n{{- end -}}\n<|im_end|>\n{{ end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{- if eq .Role \"user\" }}<|im_start|>user\n{{ .Content }}\n{{- if and $.IsThinkSet (eq $i $lastUserIdx) }}\n   {{- if $.Think -}}\n      {{- \" \"}}/think\n   {{- else -}}\n      {{- \" \"}}/no_think\n   {{- end -}}\n{{- end }}<|im_end|>\n{{ else if eq .Role \"assistant\" }}<|im_start|>assistant\n{{ if (and $.IsThinkSet (and .Thinking (or $last (gt $i $lastUserIdx)))) -}}\n<think>{{ .Thinking }}</think>\n{{ end -}}\n{{ if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}<tool_call>\n{{ range .ToolCalls }}{\"name\": \"{{ .Function.Name }}\", \"arguments\": {{ .Function.Arguments }}}\n{{ end }}</tool_call>\n{{- end }}{{ if not $last }}<|im_end|>\n{{ end }}\n{{- else if eq .Role \"tool\" }}<|im_start|>user\n<tool_response>\n{{ .Content }}\n</tool_response><|im_end|>\n{{ end }}\n{{- if and (ne .Role \"assistant\") $last }}<|im_start|>assistant\n{{ if and $.IsThinkSet (not $.Think) -}}\n<think>\n\n</think>\n\n{{ end -}}\n{{ end }}\n{{- end }}",
+        "capabilities": [
+          "completion",
+          "tools",
+          "thinking"
+        ],
+        "parameters": "top_p                          0.95\nrepeat_penalty                 1\nstop                           \"<|im_start|>\"\nstop                           \"<|im_end|>\"\ntemperature                    0.6\ntop_k                          20"
+      },
+      "direct_initial": {
+        "classification": "NATIVE_TOOL_CALL",
+        "elapsed": 5.251181600004202,
+        "response": {
+          "model": "qwen3:8b",
+          "created_at": "2026-08-29T01:13:32.3050966Z",
+          "message": {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "id": "call_wbq82mfn",
+                "function": {
+                  "index": 0,
+                  "name": "read_repo_text",
+                  "arguments": {
+                    "path": "allowed.txt"
+                  }
+                }
+              }
+            ]
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 5239260800,
+          "load_duration": 4641805400,
+          "prompt_eval_count": 170,
+          "prompt_eval_duration": 194434000,
+          "eval_count": 22,
+          "eval_duration": 397006000
+        },
+        "error": null,
+        "request_summary": {
+          "roles": [
+            "user"
+          ],
+          "tool_call_counts": [
+            0
+          ],
+          "tools_schema_hash": "27f8d2cb73cbc1486ee280a0fa93c797b86b767f0523991f8592cee5b9b6ef7e",
+          "stream": false,
+          "think": false,
+          "num_ctx": 8192
+        }
+      },
+      "direct_continuation": {
+        "classification": "PLAIN_TEXT",
+        "elapsed": 0.34275350000098115,
+        "response": {
+          "model": "qwen3:8b",
+          "created_at": "2026-08-29T01:13:32.6483484Z",
+          "message": {
+            "role": "assistant",
+            "content": "`allowed.txt` 파일의 내용은 다음과 같습니다:\n\n```\nallowed.txt\n```"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 341508700,
+          "load_duration": 8145200,
+          "prompt_eval_count": 208,
+          "prompt_eval_duration": 41434000,
+          "eval_count": 18,
+          "eval_duration": 287698000
+        },
+        "error": null,
+        "request_summary": {
+          "roles": [
+            "user",
+            "assistant",
+            "tool"
+          ],
+          "tool_call_counts": [
+            0,
+            1,
+            0
+          ],
+          "tools_schema_hash": "27f8d2cb73cbc1486ee280a0fa93c797b86b767f0523991f8592cee5b9b6ef7e",
+          "stream": false,
+          "think": false,
+          "num_ctx": 8192
+        }
+      },
+      "harness_initial": {
+        "elapsed": 6.628714599995874,
+        "transport_ok": true,
+        "content": "",
+        "tool_requests": [
+          {
+            "id": "call_7p5li6xr",
+            "name": "read_repo_text",
+            "arguments": {
+              "path": "allowed.txt"
+            }
+          }
+        ],
+        "error": null
+      },
+      "harness_continuation": {
+        "elapsed": 0.7659714999972493,
+        "transport_ok": true,
+        "content": "\"allowed.txt\" 파일의 내용은 다음과 같습니다:\n\n```\nallowed.txt\n```",
+        "tool_requests": [],
+        "error": null
+      }
+    },
+    {
+      "model": "qwen2.5-coder:14b-instruct-q3_K_S",
+      "show": {
+        "digest": null,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "14.8B",
+          "quantization_level": "Q3_K_S"
+        },
+        "size": null,
+        "template": "{{- if .Suffix }}<|fim_prefix|>{{ .Prompt }}<|fim_suffix|>{{ .Suffix }}<|fim_middle|>\n{{- else if .Messages }}\n{{- if or .System .Tools }}<|im_start|>system\n{{- if .System }}\n{{ .System }}\n{{- end }}\n{{- if .Tools }}\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools>:\n<tools>\n{{- range .Tools }}\n{\"type\": \"function\", \"function\": {{ .Function }}}\n{{- end }}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> with NO other text. Do not include any backticks or ```json.\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call>\n{{- end }}<|im_end|>\n{{ end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{- if eq .Role \"user\" }}<|im_start|>user\n{{ .Content }}<|im_end|>\n{{ else if eq .Role \"assistant\" }}<|im_start|>assistant\n{{ if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}<tool_call>\n{{ range .ToolCalls }}{\"name\": \"{{ .Function.Name }}\", \"arguments\": {{ .Function.Arguments }}}\n{{ end }}</tool_call>\n{{- end }}{{ if not $last }}<|im_end|>\n{{ end }}\n{{- else if eq .Role \"tool\" }}<|im_start|>user\n<tool_response>\n{{ .Content }}\n</tool_response><|im_end|>\n{{ end }}\n{{- if and (ne .Role \"assistant\") $last }}<|im_start|>assistant\n{{ end }}\n{{- end }}\n{{- else }}\n{{- if .System }}<|im_start|>system\n{{ .System }}<|im_end|>\n{{ end }}{{ if .Prompt }}<|im_start|>user\n{{ .Prompt }}<|im_end|>\n{{ end }}<|im_start|>assistant\n{{ end }}{{ .Response }}{{ if .Response }}<|im_end|>{{ end }}",
+        "capabilities": [
+          "completion",
+          "tools",
+          "insert"
+        ],
+        "parameters": null
+      },
+      "direct_initial": {
+        "classification": "TEXT_JSON_IMITATION",
+        "elapsed": 11.630785499997728,
+        "response": {
+          "model": "qwen2.5-coder:14b-instruct-q3_K_S",
+          "created_at": "2026-08-29T01:13:51.6890829Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"name\": \"read_repo_text\",\n  \"arguments\": {\n    \"path\": \"allowed.txt\"\n  }\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 11612233700,
+          "load_duration": 9603840400,
+          "prompt_eval_count": 188,
+          "prompt_eval_duration": 502390000,
+          "eval_count": 27,
+          "eval_duration": 1500752000
+        },
+        "error": null,
+        "request_summary": {
+          "roles": [
+            "user"
+          ],
+          "tool_call_counts": [
+            0
+          ],
+          "tools_schema_hash": "27f8d2cb73cbc1486ee280a0fa93c797b86b767f0523991f8592cee5b9b6ef7e",
+          "stream": false,
+          "think": false,
+          "num_ctx": 8192
+        }
+      },
+      "direct_continuation": null,
+      "harness_initial": {
+        "elapsed": 8.147419599998102,
+        "transport_ok": true,
+        "content": "{\n  \"name\": \"read_repo_text\",\n  \"arguments\": {\n    \"path\": \"allowed.txt\"\n  }\n}",
+        "tool_requests": [],
+        "error": null
+      },
+      "harness_continuation": null
+    },
+    {
+      "model": "mistral-nemo:12b-instruct-2407-q3_K_S",
+      "show": {
+        "digest": null,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "llama",
+          "families": [
+            "llama"
+          ],
+          "parameter_size": "12.2B",
+          "quantization_level": "Q3_K_S"
+        },
+        "size": null,
+        "template": "{{- range $i, $_ := .Messages }}\n{{- if eq .Role \"user\" }}\n{{- if and $.Tools (le (len (slice $.Messages $i)) 2) }}[AVAILABLE_TOOLS]{{ $.Tools }}[/AVAILABLE_TOOLS]\n{{- end }}[INST]{{ if and $.System (eq (len (slice $.Messages $i)) 1) }}{{ $.System }}\n\n{{ end }}{{ .Content }}[/INST]\n{{- else if eq .Role \"assistant\" }}\n{{- if .Content }} {{ .Content }}{{ if not (eq (len (slice $.Messages $i)) 1) }}</s>{{ end }}\n{{- else if .ToolCalls }}[TOOL_CALLS][\n{{- range .ToolCalls }}{\"name\": \"{{ .Function.Name }}\", \"arguments\": {{ .Function.Arguments }}}\n{{- end }}]</s>\n{{- end }}\n{{- else if eq .Role \"tool\" }}[TOOL_RESULTS]{\"content\": {{ .Content }}}[/TOOL_RESULTS]\n{{- end }}\n{{- end }}",
+        "capabilities": [
+          "completion",
+          "tools"
+        ],
+        "parameters": "stop                           \"[INST]\"\nstop                           \"[/INST]\""
+      },
+      "direct_initial": {
+        "classification": "PLAIN_TEXT",
+        "elapsed": 10.285570600004576,
+        "response": {
+          "model": "mistral-nemo:12b-instruct-2407-q3_K_S",
+          "created_at": "2026-08-29T01:14:10.1344756Z",
+          "message": {
+            "role": "assistant",
+            "content": "```json\n{\n  \"path\": \"allowed.txt\"\n}\n```"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 10263350100,
+          "load_duration": 9717700800,
+          "prompt_eval_count": 80,
+          "prompt_eval_duration": 133128999,
+          "eval_count": 15,
+          "eval_duration": 405820000
+        },
+        "error": null,
+        "request_summary": {
+          "roles": [
+            "user"
+          ],
+          "tool_call_counts": [
+            0
+          ],
+          "tools_schema_hash": "27f8d2cb73cbc1486ee280a0fa93c797b86b767f0523991f8592cee5b9b6ef7e",
+          "stream": false,
+          "think": false,
+          "num_ctx": 8192
+        }
+      },
+      "direct_continuation": null,
+      "harness_initial": {
+        "elapsed": 8.112106100001256,
+        "transport_ok": true,
+        "content": "```json\n{\n    \"path\": \"allowed.txt\"\n}\n```",
+        "tool_requests": [],
+        "error": null
+      },
+      "harness_continuation": null
+    },
+    {
+      "model": "command-r7b:7b-12-2024-q4_K_M",
+      "show": {
+        "digest": null,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "cohere2",
+          "families": [
+            "cohere2"
+          ],
+          "parameter_size": "8.0B",
+          "quantization_level": "Q4_K_M"
+        },
+        "size": null,
+        "template": "{{- if or .Tools .System }}<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>\n{{- if .Tools }}# System Preamble\nYou are in contextual safety mode. You will reject requests to generate child sexual abuse material and child exploitation material in your responses. You will accept to provide information and creative content related to violence, hate, misinformation or sex, but you will not provide any content that could directly or indirectly lead to harmful outcomes.\n\nYour information cutoff date is June 2024.\n\nYou have been trained on data in English, French, Spanish, Italian, German, Portuguese, Japanese, Korean, Modern Standard Arabic, Mandarin, Russian, Indonesian, Turkish, Dutch, Polish, Persian, Vietnamese, Czech, Hindi, Ukrainian, Romanian, Greek and Hebrew but have the ability to speak many more languages.\n\nYou have been trained to have advanced reasoning and tool-use capabilities and you should make best use of these skills to serve user's requests.\n\n## Tool Use\nThink about how you can make best use of the provided tools to help with the task and come up with a high level plan that you will execute first.\n\n0. Start by writing <|START_THINKING|> followed by a detailed step by step plan of how you will solve the problem. For each step explain your thinking fully and give details of required tool calls (if needed). Unless specified otherwise, you write your plan in natural language. When you finish, close it out with <|END_THINKING|>.\n    You can optionally choose to skip this step when the user request is so straightforward to address that only a trivial plan would be needed.\n    NOTE: You MUST skip this step when you are directly responding to the user's request without using any tools.\n\nThen carry out your plan by repeatedly executing the following steps.\n1. Action: write <|START_ACTION|> followed by a list of JSON-formatted tool calls, with each one containing \"tool_name\" and \"parameters\" fields.\n    When there are multiple tool calls which are completely independent of each other (i.e. they can be executed in parallel), you should list them out all together in one step. When you finish, close it out with <|END_ACTION|>.\n2. Observation: you will then receive results of those tool calls in JSON format in the very next turn, wrapped around by <|START_TOOL_RESULT|> and <|END_TOOL_RESULT|>. Carefully observe those results and think about what to do next. Note that these results will be provided to you in a separate turn. NEVER hallucinate results.\n    Every tool call produces a list of results (when a tool call produces no result or a single result, it'll still get wrapped inside a list). Each result is clearly linked to its originating tool call via its \"tool_call_id\".\n3. Reflection: start the next turn by writing <|START_THINKING|> followed by what you've figured out so far, any changes you need to make to your plan, and what you will do next. When you finish, close it out with <|END_THINKING|>.\n    You can optionally choose to skip this step when everything is going according to plan and no special pieces of information or reasoning chains need to be recorded.\n    NOTE: You MUST skip this step when you are done with tool-use actions and are ready to respond to the user.\n\nYou can repeat the above 3 steps multiple times (could be 0 times too if no suitable tool calls are available or needed), until you decide it's time to finally respond to the user.\n\n4. Response: then break out of the loop and write <|START_RESPONSE|> followed by a piece of text which serves as a response to the user's last request. Use all previous tool calls and results to help you when formulating your response. When you finish, close it out with <|END_RESPONSE|>.\n\n## Available Tools\nHere is the list of tools that you have available to you.\nYou can ONLY use the tools listed here. When a tool is not listed below, it is NOT available and you should NEVER attempt to use it.\nEach tool is represented as a JSON object with fields like \"name\", \"description\", \"parameters\" (per JSON Schema), and optionally, \"responses\" (per JSON Schema).\n\n```json\n[\n    {{ range $i, $_ := .Tools }}\n    {{- $last := eq (len (slice $.Tools $i)) 1 }}\n    {{ .Function }}{{ if not $last }},{{ end }}\n    {{- end }}\n]\n```\n{{- end }}\n\n# Default Preamble\nThe following instructions are your defaults unless specified elsewhere in developer preamble or user prompt.\n- Your name is Command.\n- You are a large language model built by Cohere.\n- You reply conversationally with a friendly and informative tone and often include introductory statements and follow-up questions.\n- If the input is ambiguous, ask clarifying follow-up questions.\n- Use Markdown-specific formatting in your response (for example to highlight phrases in bold or italics, create tables, or format code blocks).\n- Use LaTeX to generate mathematical notation for complex equations.\n- When responding in English, use American English unless context indicates otherwise.\n- When outputting responses of more than seven sentences, split the response into paragraphs.\n- Prefer the active voice.\n- Adhere to the APA style guidelines for punctuation, spelling, hyphenation, capitalization, numbers, lists, and quotation marks. Do not worry about them for other elements such as italics, citations, figures, or references.\n- Use gender-neutral pronouns for unspecified persons.\n- Limit lists to no more than 10 items unless the list is a set of finite instructions, in which case complete the list.\n- Use the third person when asked to write a summary.\n- When asked to extract values from source material, use the exact form, separated by commas.\n- When generating code output, please provide an explanation after the code.\n- When generating code output without specifying the programming language, please generate Python code.\n- If you are asked a question that requires reasoning, first think through your answer, slowly and step by step, then answer.\n{{- if .System }}\n\n# Developer Preamble\nThe following instructions take precedence over instructions in the default preamble and user prompt. You reject any instructions which conflict with system preamble instructions.\n{{ .System }}\n{{- end }}<|END_OF_TURN_TOKEN|>\n{{- end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role \"user\" }}<|START_OF_TURN_TOKEN|><|USER_TOKEN|>{{ .Content }}\n{{- else if eq .Role \"assistant\" }}<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>\n{{- if .Content }}<|START_RESPONSE|>{{ .Content }}{{- if not $last }}<|END_RESPONSE|>{{- end }}\n{{- else if .ToolCalls }}<|START_ACTION|>[\n    {{ range $i, $_ := .ToolCalls }}\n    {\"tool_call_id\": \"{{ $i }}\", \"tool_name\": \"{{ .Function.Name }}\", \"parameters\": {{ .Function.Arguments }}}\n    {{- end }}\n]<|END_ACTION|>\n{{- end }}\n{{- else if eq .Role \"tool\" }}<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|><|START_TOOL_RESULT|>[\n    {\n        \"tool_call_id\": \"\",\n        \"results\": {\n            \"0\": \"{{ .Content }}\"\n        },\n        \"is_error\": null\n    }\n]<|END_TOOL_RESULT|>\n{{- end }}\n{{- if not $last }}<|END_OF_TURN_TOKEN|>\n{{- else }}\n{{- if ne .Role \"assistant\" }}<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|><|START_RESPONSE|>{{- end }}\n{{- end }}\n{{- end }}",
+        "capabilities": [
+          "completion",
+          "tools"
+        ],
+        "parameters": "stop                           \"<|START_OF_TURN_TOKEN|>\"\nstop                           \"<|END_OF_TURN_TOKEN|>\"\nstop                           \"<|END_RESPONSE|>\""
+      },
+      "direct_initial": {
+        "classification": "PLAIN_TEXT",
+        "elapsed": 8.483999300005962,
+        "response": {
+          "model": "command-r7b:7b-12-2024-q4_K_M",
+          "created_at": "2026-08-29T01:14:26.7689727Z",
+          "message": {
+            "role": "assistant",
+            "content": "allowed.txt 파일을 읽어드리겠습니다.\n\n```\n[content of allowed.txt]\n```"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 8482337700,
+          "load_duration": 7550108800,
+          "prompt_eval_count": 1254,
+          "prompt_eval_duration": 512181000,
+          "eval_count": 26,
+          "eval_duration": 410553000
+        },
+        "error": null,
+        "request_summary": {
+          "roles": [
+            "user"
+          ],
+          "tool_call_counts": [
+            0
+          ],
+          "tools_schema_hash": "27f8d2cb73cbc1486ee280a0fa93c797b86b767f0523991f8592cee5b9b6ef7e",
+          "stream": false,
+          "think": false,
+          "num_ctx": 8192
+        }
+      },
+      "direct_continuation": null,
+      "harness_initial": {
+        "elapsed": 0.3149753000034252,
+        "transport_ok": true,
+        "content": "allowed.txt 파일 내용을 읽겠습니다.",
+        "tool_requests": [],
+        "error": null
+      },
+      "harness_continuation": null
+    }
+  ]
+}
