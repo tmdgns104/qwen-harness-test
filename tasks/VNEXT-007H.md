@@ -29,6 +29,14 @@ existing authority and safety boundaries.
 
 ## Verification
 
-- `python -m unittest discover -s tests -p "test_bounded_ollama_worker.py"`
-- `python -m unittest tests.test_bounded_stateless_contract tests.test_context_pack tests.test_candidate_validator tests.test_candidate_apply tests.test_bounded_verification tests.test_harness_core tests.test_ollama_worker -q`
-- `git diff --check`
+Run:
+
+`python -m unittest discover -s tests -p "test_bounded_ollama_worker.py"`
+
+Then run:
+
+`python -m unittest tests.test_bounded_stateless_contract tests.test_context_pack tests.test_candidate_validator tests.test_candidate_apply tests.test_bounded_verification tests.test_harness_core tests.test_ollama_worker -q`
+
+Then run:
+
+`git diff --check`
