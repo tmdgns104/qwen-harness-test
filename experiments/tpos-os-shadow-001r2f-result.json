@@ -1,0 +1,115 @@
+{
+  "target_status": "?? team_project_os-main.zip\n",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "operations"
+    ],
+    "properties": {
+      "operations": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "operation_type",
+                "path",
+                "content"
+              ],
+              "properties": {
+                "operation_type": {
+                  "const": "CREATE_FILE"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "operation_type",
+                "path",
+                "content"
+              ],
+              "properties": {
+                "operation_type": {
+                  "const": "REPLACE_FILE"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "operation_type",
+                "path",
+                "old_text",
+                "new_text",
+                "expected_occurrences"
+              ],
+              "properties": {
+                "operation_type": {
+                  "const": "REPLACE_TEXT"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "old_text": {
+                  "type": "string"
+                },
+                "new_text": {
+                  "type": "string"
+                },
+                "expected_occurrences": {
+                  "const": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "schema_chars": 848,
+  "prompt_chars": 2636,
+  "results": [
+    {
+      "label": "minimal",
+      "elapsed_wall": 1.2355437000078382,
+      "transport_ok": true,
+      "error": "invalid Candidate operation schema",
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 1.2352315000025555,
+        "parse_ok": false
+      },
+      "candidate": null
+    },
+    {
+      "label": "r2-replay",
+      "elapsed_wall": 14.450162299996009,
+      "transport_ok": true,
+      "error": "invalid Candidate operation schema",
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 14.449976799995056,
+        "parse_ok": false
+      },
+      "candidate": null
+    }
+  ]
+}
