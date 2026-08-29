@@ -1,0 +1,107 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "profile": "strict coder instruction; no Core changes",
+  "results": [
+    {
+      "task_id": "SHADOW-003R",
+      "target": "app/live_state.py",
+      "latency": 3.0812175999890314,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 3.080956600009813,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/live_state.py",
+          "content": "",
+          "old_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n\n",
+          "new_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": true,
+      "apply": true,
+      "outcome": "PIPELINE_REACHED"
+    },
+    {
+      "task_id": "SHADOW-005",
+      "target": "app/delivery_documents.py",
+      "latency": 2.7772107000055257,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 2.7769862999994075,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/delivery_documents.py",
+          "content": "",
+          "old_text": "def _safe(value: Any) -> str:\n    return str(value or \"\").replace(\"|\", \"/\").replace(\"\\n\", \" \").strip()\n\n",
+          "new_text": "def _safe(value: Any) -> str:\n    return str(value or \"\").replace(\"|\", \"/\").replace(\"\\n\", \" \").strip()\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": true,
+      "apply": true,
+      "outcome": "PIPELINE_REACHED"
+    },
+    {
+      "task_id": "SHADOW-006",
+      "target": "app/conversation.py",
+      "latency": 2.8810014000046067,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 2.880850899993675,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n\n",
+          "new_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n\n# New line added for demonstration\nprint('Hello, World!')\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": true,
+      "apply": true,
+      "outcome": "PIPELINE_REACHED"
+    },
+    {
+      "task_id": "SHADOW-007",
+      "target": "app/conversation.py",
+      "latency": 4.966437900002347,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 4.966250700003002,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged\n\n",
+          "new_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": true,
+      "apply": true,
+      "outcome": "PIPELINE_REACHED"
+    }
+  ],
+  "target_mutation": 0
+}
