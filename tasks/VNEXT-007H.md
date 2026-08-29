@@ -11,15 +11,15 @@ existing authority and safety boundaries.
 
 ## Allowed Changes
 
-tools/ollama_worker.py
-tests/test_bounded_ollama_worker.py
-tasks/VNEXT-007H.md
-STATUS.md
-experiments/vnext-007h/probe.py
-experiments/vnext-007h/result.json
-experiments/vnext-007h/rerun.py
-experiments/vnext-007h/rerun_result.json
-experiments/vnext-007h/report.md
+- `tools/ollama_worker.py`
+- `tests/test_bounded_ollama_worker.py`
+- `tasks/VNEXT-007H.md`
+- `STATUS.md`
+- `experiments/vnext-007h/probe.py`
+- `experiments/vnext-007h/result.json`
+- `experiments/vnext-007h/rerun.py`
+- `experiments/vnext-007h/rerun_result.json`
+- `experiments/vnext-007h/report.md`
 
 ## Forbidden Changes
 
@@ -31,4 +31,3 @@ retry policy, production timeout, authority boundaries, or VNEXT-008.
 - `python -m unittest discover -s tests -p "test_bounded_ollama_worker.py"`
 - `python -m unittest tests.test_bounded_stateless_contract tests.test_context_pack tests.test_candidate_validator tests.test_candidate_apply tests.test_bounded_verification tests.test_harness_core tests.test_ollama_worker -q`
 - `git diff --check`
-
