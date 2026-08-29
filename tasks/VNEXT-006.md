@@ -1,7 +1,7 @@
 # VNEXT-006 — Stateless Ollama Adapter
 
 ## Status
-APPROVED - READY FOR CONTRACT BASELINE
+COMPLETE - VERIFIED
 
 ## Goal
 
