@@ -11,8 +11,11 @@ Freeze the bounded_stateless contract as a backend-neutral, machine-validatable 
 
 ## Allowed Changes
 
-- `tools/` contract records and focused tests only
-- `tasks/VNEXT-001.md`, `STATUS.md`, and evidence for this Task
+- `tools/harness_core.py`
+- `tests/test_bounded_stateless_contract.py`
+- `tasks/VNEXT-001.md`
+- `STATUS.md`
+- `experiments/vnext-001/report.md`
 
 ## Forbidden Changes
 
