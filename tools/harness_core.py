@@ -5,6 +5,8 @@ import hashlib
 import re
 import subprocess
 import shlex
+import shutil
+import tempfile
 import threading
 import time
 from enum import Enum
@@ -58,6 +60,63 @@ class CandidateValidationResult:
 
     valid: bool
     errors: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class CandidateApplyResult:
+    """Result of applying a validated Candidate to an isolated snapshot."""
+
+    success: bool
+    snapshot_path: str | None
+    applied_operations: tuple[str, ...]
+    error: str | None
+
+
+def apply_candidate_to_snapshot(
+    source_repo: str | Path,
+    candidate: Candidate | None,
+    validation: CandidateValidationResult,
+) -> CandidateApplyResult:
+    """Copy a repository to a fresh temp directory and apply operations atomically."""
+    if not validation.valid:
+        return CandidateApplyResult(False, None, (), "candidate validation failed")
+    source = Path(source_repo).resolve()
+    if not source.is_dir():
+        return CandidateApplyResult(False, None, (), "source repository is not a directory")
+    for root, dirs, files in os.walk(source, followlinks=False):
+        if any((Path(root) / name).is_symlink() for name in (*dirs, *files)):
+            return CandidateApplyResult(False, None, (), "source contains symlink/reparse point")
+    snapshot = Path(tempfile.mkdtemp(prefix="qh-vnext-snapshot-"))
+    try:
+        for item in source.iterdir():
+            destination = snapshot / item.name
+            if item.is_dir():
+                shutil.copytree(item, destination, symlinks=False)
+            else:
+                shutil.copy2(item, destination)
+        applied: list[str] = []
+        for operation in candidate.operations:
+            relative = operation.path.replace("\\", "/")
+            target = (snapshot / relative).resolve()
+            if target != snapshot and snapshot not in target.parents:
+                raise ValueError("operation escapes snapshot")
+            if any(part.is_symlink() for part in [snapshot / p for p in Path(relative).parts[:-1]]):
+                raise ValueError("operation crosses symlink")
+            if operation.operation_type is CandidateOperationType.CREATE_FILE:
+                if target.exists():
+                    raise FileExistsError(relative)
+            elif operation.operation_type is CandidateOperationType.REPLACE_FILE:
+                if not target.is_file():
+                    raise FileNotFoundError(relative)
+            else:
+                raise ValueError("unsupported operation type")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(operation.content, encoding="utf-8")
+            applied.append(relative)
+        return CandidateApplyResult(True, str(snapshot), tuple(applied), None)
+    except Exception as exc:
+        shutil.rmtree(snapshot, ignore_errors=True)
+        return CandidateApplyResult(False, None, (), str(exc))
 
 
 def validate_candidate(
