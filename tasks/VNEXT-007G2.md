@@ -7,6 +7,7 @@ COMPLETE - VERIFIED
 75ad0d2
 
 ## Allowed Changes
+- `tools/ollama_worker.py`
 - `tasks/VNEXT-007G2.md`
 - `STATUS.md`
 - `experiments/vnext-007g2/benchmark.py`
