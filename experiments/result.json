@@ -1,43 +1,27 @@
 {
-  "experiment": "TP-OS-SHADOW-001D3",
-  "full_context_chars": 16634,
-  "stages": [
+  "target_baseline": "3c05219d50a51f2bdad8e6671e702e8c5d575e50",
+  "target_status_before": "?? team_project_os-main.zip\n",
+  "target_status_after": "?? team_project_os-main.zip\n",
+  "inference_count": 1,
+  "elapsed": 11.80980199998885,
+  "inference_seconds": 9.336177400007728,
+  "error": null,
+  "candidate": [
     {
-      "label": "A-decision",
-      "request_chars": 18361,
-      "elapsed": 3.066264199995203,
-      "metrics": {
-        "total_duration": 3033384500,
-        "load_duration": 8379000,
-        "prompt_eval_count": 4009,
-        "prompt_eval_duration": 1384189000,
-        "eval_count": 52,
-        "eval_duration": 1120084000
-      },
-      "output": "{\n  \"path\": \"app/conversation.py\",\n  \"operation\": \"update\",\n  \"summary\": \"Fix extract_json_object to skip invalid balanced brace blocks and return the first valid JSON object, preserving string and escaped quote semantics.\"\n}",
-      "transport": true
-    },
-    {
-      "label": "B-function",
-      "request_chars": 18333,
-      "elapsed": 10.249577599999611,
-      "metrics": {
-        "total_duration": 10231487100,
-        "load_duration": 7056200,
-        "prompt_eval_count": 4009,
-        "prompt_eval_duration": 18499000,
-        "eval_count": 596,
-        "eval_duration": 10177147000
-      },
-      "output": "{\n  \"path\": \"app/conversation.py\",\n  \"function_content\": \"from __future__ import annotations\\n\\nimport json\\nfrom typing import Any\\n\\nfrom app.project_intake import FIELD_GUIDE, PROJECT_TYPES, evaluate_intake\\n\\nPROJECT_FIELDS = (\\n    \\\"name\\\",\\n    \\\"goal\\\",\\n    \\\"project_type\\\",\\n    \\\"problem\\\",\\n    \\\"users\\\",\\n    \\\"deliverables\\\",\\n    \\\"success_criteria\\\",\\n    \\\"scope\\\",\\n    \\\"current_state\\\",\\n    \\\"target_state\\\",\\n    \\\"constraints\\\",\\n    \\\"schedule\\\",\\n    \\\"team\\\",\\n    \\\"risks\\\",\\n    \\\"description\\\",\\n)\\n\\nALLOWED_DIAGRAM_VIEWS = {\\\"process\\\", \\\"architecture\\\", \\\"dataflow\\\"}\\n\\nALLOWED_DOCUMENT_TYPES = {\\n    \\\"proposal\\\",\\n    \\\"plan\\\",\\n    \\\"milestone\\\",\\n    \\\"backlog\\\",\\n    \\\"requirements\\\",\\n    \\\"service_policy\\\",\\n    \\\"function_definition\\\",\\n    \\\"ia\\\",\\n    \\\"screen_design\\\",\\n    \\\"system_architecture\\\",\\n    \\\"data_flow\\\",\\n    \\\"api_design\\\",\\n    \\\"qa\\\",\\n}\\n\\ndef _clip(value: Any, limit: int) -> str:\\n    return str(value or \\\").strip()[:limit]\\n\\ndef extract_json_object(text: str) -> dict[str, Any]:\\n    \\\"\\\"\\\"Extract the first complete JSON object from common CLI model output.\\\"\\\"\\\"\\n    raw = (text or \\\").strip()\\n    if not raw:\\n        raise ValueError(\\\"AI output is empty\\\")\\n    try:\\n        value = json.loads(raw)\\n        if isinstance(value, dict):\\n            return value\\n    except json.JSONDecodeError:\\n        pass\\n\\n    in_string = False\\n    escaped = False\\n    depth = 0\\n    start = None\\n    for index, char in enumerate(raw):\\n        if start is None:\\n            if char == \\\"{\\\":\\n                start = index\\n                depth = 1\\n            continue\\n        if in_string:\\n            if escaped:\\n                escaped = False\\n            elif char == \\\\\\\":\\n                escaped = True\\n            elif char == \\\"\\\":\\n                in_string = False\\n            continue\\n        if char == \\\"\\\":\\n            in_string = True\\n        elif char == \\\"{\\\":\\n            depth += 1\\n        elif char == \\\"}\\\":\\n            depth -= 1\\n            if depth == 0:\\n                candidate = raw[start : index + 1]\\n                try:\\n                    value = json.loads(candidate)\\n                    if isinstance(value, dict):\\n                        return value\\n                except json.JSONDecodeError:\\n                    pass\\n    raise ValueError(\\\"No complete JSON object found in AI output\\\")\"\n}",
-      "transport": true
-    },
-    {
-      "label": "C-full-candidate",
-      "request_chars": 18549,
-      "elapsed": 60.009500500003924,
-      "transport": false,
-      "error": "timed out"
+      "operation_type": "REPLACE_FILE",
+      "path": "app/conversation.py",
+      "old_text": null,
+      "new_text": null,
+      "expected_occurrences": null
     }
-  ]
+  ],
+  "validator": {
+    "valid": true,
+    "errors": []
+  },
+  "apply": {
+    "success": true,
+    "error": null
+  },
+  "outcome": "COMPLETED"
 }

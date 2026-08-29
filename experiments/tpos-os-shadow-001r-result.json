@@ -1,0 +1,1 @@
+{"experiment":"TP-OS-SHADOW-001R","source":"experiments/result.json","candidate_operation":"REPLACE_FILE","expected_operation":"REPLACE_TEXT","first_pass_success":false,"classification":"WRONG_OPERATION","target_mutation":false}

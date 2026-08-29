@@ -1,0 +1,14 @@
+import json, subprocess, time, sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.harness_core import BoundedWorkerRequest, ChangeScope, ContextItem, ContextItemKind, build_context_pack, validate_candidate, apply_candidate_to_snapshot
+from tools.ollama_worker import call_bounded_stateless_worker
+T=Path(r'D:\team_project_os\team_project_os-main'); OUT=Path(__file__).with_name('result.json')
+def main():
+    base=subprocess.run(['git','-C',str(T),'rev-parse','HEAD'],capture_output=True,text=True).stdout.strip(); status=subprocess.run(['git','-C',str(T),'status','--short'],capture_output=True,text=True).stdout
+    src=(T/'app/conversation.py').read_text(encoding='utf-8'); s=src.index('def extract_json_object'); e=src.index('def normalize_ai_result'); block=src[s:e]
+    goal='Fix extract_json_object to skip invalid balanced blocks and find a later valid JSON object while preserving string and escaped quote semantics.'
+    req=BoundedWorkerRequest(task=goal+' Return exactly one REPLACE_TEXT operation for app/conversation.py. old_text must equal the supplied function exactly; expected_occurrences=1. Tests are read-only.',context_pack={'task_id':'TP-OS-SHADOW-001','goal':goal,'acceptance_criteria':('valid JSON works','wrapped JSON works','invalid block skipped','string braces preserved','no valid object fails'),'allowed_changes':('app/conversation.py',),'forbidden_changes':('tests/**','all other paths'),'items':[{'kind':'SOURCE_FILE','source':'app/conversation.py','content':block},{'kind':'TEST_FILE','source':'tests/test_conversation.py','content':'read-only'}]},output_contract={'operations':['REPLACE_TEXT'],'strict_json':True})
+    t=time.perf_counter(); r=call_bounded_stateless_worker(req,authorized_paths=('app/conversation.py',),timeout_seconds=60); v=validate_candidate(r.candidate,ChangeScope(('app/conversation.py',),('tests/**',))) if r.candidate else None; a=apply_candidate_to_snapshot(T,r.candidate,v) if v and v.valid else None
+    OUT.write_text(json.dumps({'target_baseline':base,'target_status_before':status,'target_status_after':subprocess.run(['git','-C',str(T),'status','--short'],capture_output=True,text=True).stdout,'inference_count':1,'elapsed':time.perf_counter()-t,'inference_seconds':r.metadata.get('elapsed_seconds'),'error':r.error,'candidate':None if not r.candidate else [{'operation_type':o.operation_type.value,'path':o.path,'old_text':o.old_text,'new_text':o.new_text,'expected_occurrences':o.expected_occurrences} for o in r.candidate.operations],'validator':None if not v else {'valid':v.valid,'errors':v.errors},'apply':None if not a else {'success':a.success,'error':a.error},'outcome':'COMPLETED' if a and a.success else 'FAILED'},indent=2,ensure_ascii=False),encoding='utf-8')
+if __name__=='__main__':main()

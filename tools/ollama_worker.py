@@ -80,9 +80,13 @@ def call_bounded_stateless_worker(
     """Call Ollama without native tools and strictly parse a passive Candidate."""
     schema = json.loads(json.dumps(BOUNDED_CANDIDATE_SCHEMA))
     if authorized_paths:
-        schema["properties"]["operations"]["items"]["properties"]["path"] = {
-            "type": "string", "enum": list(authorized_paths)
-        }
+        path_schema = {"type": "string", "enum": list(authorized_paths)}
+        items = schema["properties"]["operations"]["items"]
+        if "oneOf" in items:
+            for variant in items["oneOf"]:
+                variant["properties"]["path"] = path_schema
+        else:
+            items["properties"]["path"] = path_schema
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": _bounded_prompt(request)}],
