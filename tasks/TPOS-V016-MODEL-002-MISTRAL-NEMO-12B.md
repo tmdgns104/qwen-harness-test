@@ -2,7 +2,7 @@
 
 ## Status
 
-ACTIVE
+CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED
 
 ## Problem
 
@@ -138,6 +138,8 @@ NONE. Command-R7B is not part of this Task.
 ## Benchmark Result
 
 Final disposition: **FAIL — TOOL_CALLING**.
+
+Evidence commit: `b5ba9fb5cdcc30bc33ab27b240a5a700c9da363e`.
 
 Attempt 1 produced a native read ToolRequest and ToolResult, then timed out at
 the unchanged 60-second continuation limit. Attempt 2, under the unchanged
