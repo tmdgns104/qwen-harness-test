@@ -3,7 +3,7 @@
 ## Status
 ACTIVE
 
-Task Baseline: 2964447
+Task Baseline: 76ba2a7
 
 ## Allowed Changes
 - `tasks/TP-OS-SHADOW-001R4.md`
