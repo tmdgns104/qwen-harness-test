@@ -1,0 +1,468 @@
+{
+  "experiment": "worker-evolution-002",
+  "model": "qwen3:8b",
+  "settings": {
+    "think": false,
+    "temperature": 0,
+    "seed": 424242,
+    "num_ctx": 8192
+  },
+  "task_count": 5,
+  "rows": [
+    {
+      "task": "whitespace",
+      "condition": "A",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return ' '.join(text.split())"
+        },
+        {
+          "operation_type": "CREATE_FILE",
+          "path": "tests/test_text_utils.py",
+          "content": "import unittest\nfrom src.text_utils import normalize_whitespace\nclass T(unittest.TestCase):\n def test_x(self):\n    self.assertEqual(normalize_whitespace(\"  a\\tb\\n c \"),\"a b c\")\n"
+        }
+      ],
+      "response_a": {
+        "elapsed": 5.748864699999103,
+        "text": "{\n  \"operations\": [\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"src/text_utils.py\",\n      \"content\": \"def normalize_whitespace(text):\\n    return ' '.join(text.split())\"\n    },\n    {\n      \"operation_type\": \"CREATE_FILE\",\n      \"path\": \"tests/test_text_utils.py\",\n      \"content\": \"import unittest\\nfrom src.text_utils import normalize_whitespace\\nclass T(unittest.TestCase):\\n def test_x(self):\\n    self.assertEqual(normalize_whitespace(\\\"  a\\\\tb\\\\n c \\\"),\\\"a b c\\\")\\n\"\n    }\n  ]\n}",
+        "error": null
+      },
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "whitespace",
+      "condition": "B",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return ' '.join(text.split())"
+        },
+        {
+          "operation_type": "CREATE_FILE",
+          "path": "tests/test_text_utils.py",
+          "content": "import unittest\nfrom src.text_utils import normalize_whitespace\nclass T(unittest.TestCase):\n def test_x(self):\n    self.assertEqual(normalize_whitespace(\"  a\\tb\\n c \"),\"a b c\")\n"
+        }
+      ],
+      "candidate_b": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return ' '.join(text.split())"
+        },
+        {
+          "operation_type": "CREATE_FILE",
+          "path": "tests/test_text_utils.py",
+          "content": "import unittest\nfrom src.text_utils import normalize_whitespace\nclass T(unittest.TestCase):\n def test_x(self):\n    self.assertEqual(normalize_whitespace(\"  a\\tb\\n c \"),\"a b c\")\n"
+        }
+      ],
+      "response_b": {
+        "elapsed": 1.5918298999968101,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/text_utils.py\",\"content\":\"def normalize_whitespace(text):\\n    return ' '.join(text.split())\"},{\"operation_type\":\"CREATE_FILE\",\"path\":\"tests/test_text_utils.py\",\"content\":\"import unittest\\nfrom src.text_utils import normalize_whitespace\\nclass T(unittest.TestCase):\\n def test_x(self):\\n    self.assertEqual(normalize_whitespace(\\\"  a\\\\tb\\\\n c \\\"),\\\"a b c\\\")\\n\"}]}",
+        "error": null
+      },
+      "evaluation_b": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "whitespace",
+      "condition": "C",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/text_utils.py",
+          "content": "def normalize_whitespace(text):\n    return ' '.join(text.split())"
+        },
+        {
+          "operation_type": "CREATE_FILE",
+          "path": "tests/test_text_utils.py",
+          "content": "import unittest\nfrom src.text_utils import normalize_whitespace\nclass T(unittest.TestCase):\n def test_x(self):\n    self.assertEqual(normalize_whitespace(\"  a\\tb\\n c \"),\"a b c\")\n"
+        }
+      ],
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      },
+      "revision": null
+    },
+    {
+      "task": "parser",
+      "condition": "A",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/parser.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found\")\n    count_str = parts[1].strip()\n    if not count_str.isdigit():\n        raise ValueError(\"Invalid count value\")\n    return int(count_str)"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_parser.py",
+          "content": "import unittest\nfrom src.parser import parse_count\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.assertEqual(parse_count(\"x COUNT= 7 \"), 7)\n    def test_b(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"none\")\n    def test_c(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"COUNT= \")\n    def test_d(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"COUNT= abc \")"
+        }
+      ],
+      "response_a": {
+        "elapsed": 4.047100900002988,
+        "text": "{\n  \"operations\": [\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"src/parser.py\",\n      \"content\": \"def parse_count(text):\\n    parts = text.split(\\\"COUNT=\\\")\\n    if len(parts) < 2:\\n        raise ValueError(\\\"COUNT not found\\\")\\n    count_str = parts[1].strip()\\n    if not count_str.isdigit():\\n        raise ValueError(\\\"Invalid count value\\\")\\n    return int(count_str)\"\n    },\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"tests/test_parser.py\",\n      \"content\": \"import unittest\\nfrom src.parser import parse_count\\nclass T(unittest.TestCase):\\n    def test_a(self):\\n        self.assertEqual(parse_count(\\\"x COUNT= 7 \\\"), 7)\\n    def test_b(self):\\n        with self.assertRaises(ValueError):\\n            parse_count(\\\"none\\\")\\n    def test_c(self):\\n        with self.assertRaises(ValueError):\\n            parse_count(\\\"COUNT= \\\")\\n    def test_d(self):\\n        with self.assertRaises(ValueError):\\n            parse_count(\\\"COUNT= abc \\\")\"\n    }\n  ]\n}",
+        "error": null
+      },
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "parser",
+      "condition": "B",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/parser.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found\")\n    count_str = parts[1].strip()\n    if not count_str.isdigit():\n        raise ValueError(\"Invalid count value\")\n    return int(count_str)"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_parser.py",
+          "content": "import unittest\nfrom src.parser import parse_count\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.assertEqual(parse_count(\"x COUNT= 7 \"), 7)\n    def test_b(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"none\")\n    def test_c(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"COUNT= \")\n    def test_d(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"COUNT= abc \")"
+        }
+      ],
+      "candidate_b": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/parser.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found\")\n    count_str = parts[1].strip()\n    if not count_str.isdigit():\n        raise ValueError(\"Invalid count value\")\n    return int(count_str)"
+        }
+      ],
+      "response_b": {
+        "elapsed": 1.640863900000113,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/parser.py\",\"content\":\"def parse_count(text):\\n    parts = text.split(\\\"COUNT=\\\")\\n    if len(parts) < 2:\\n        raise ValueError(\\\"COUNT not found\\\")\\n    count_str = parts[1].strip()\\n    if not count_str.isdigit():\\n        raise ValueError(\\\"Invalid count value\\\")\\n    return int(count_str)\"}]}",
+        "error": null
+      },
+      "evaluation_b": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "parser",
+      "condition": "C",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/parser.py",
+          "content": "def parse_count(text):\n    parts = text.split(\"COUNT=\")\n    if len(parts) < 2:\n        raise ValueError(\"COUNT not found\")\n    count_str = parts[1].strip()\n    if not count_str.isdigit():\n        raise ValueError(\"Invalid count value\")\n    return int(count_str)"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_parser.py",
+          "content": "import unittest\nfrom src.parser import parse_count\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.assertEqual(parse_count(\"x COUNT= 7 \"), 7)\n    def test_b(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"none\")\n    def test_c(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"COUNT= \")\n    def test_d(self):\n        with self.assertRaises(ValueError):\n            parse_count(\"COUNT= abc \")"
+        }
+      ],
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n"
+      },
+      "revision": null
+    },
+    {
+      "task": "semantic",
+      "condition": "A",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/timecheck.py",
+          "content": "def is_expired(timestamp, now):\n return timestamp < now\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_timecheck.py",
+          "content": "import unittest\nfrom src.timecheck import is_expired\nclass T(unittest.TestCase):\n def test_equal(self): self.assertFalse(is_expired(10,10))\n def test_old(self): self.assertTrue(is_expired(9,10))\n"
+        }
+      ],
+      "response_a": {
+        "elapsed": 1.833437799999956,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/timecheck.py\",\"content\":\"def is_expired(timestamp, now):\\n return timestamp < now\\n\"},{\"operation_type\":\"REPLACE_FILE\",\"path\":\"tests/test_timecheck.py\",\"content\":\"import unittest\\nfrom src.timecheck import is_expired\\nclass T(unittest.TestCase):\\n def test_equal(self): self.assertFalse(is_expired(10,10))\\n def test_old(self): self.assertTrue(is_expired(9,10))\\n\"}]}",
+        "error": null
+      },
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "semantic",
+      "condition": "B",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/timecheck.py",
+          "content": "def is_expired(timestamp, now):\n return timestamp < now\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_timecheck.py",
+          "content": "import unittest\nfrom src.timecheck import is_expired\nclass T(unittest.TestCase):\n def test_equal(self): self.assertFalse(is_expired(10,10))\n def test_old(self): self.assertTrue(is_expired(9,10))\n"
+        }
+      ],
+      "candidate_b": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/timecheck.py",
+          "content": "def is_expired(timestamp, now):\n return timestamp < now\n"
+        }
+      ],
+      "response_b": {
+        "elapsed": 0.647441400004027,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/timecheck.py\",\"content\":\"def is_expired(timestamp, now):\\n return timestamp < now\\n\"}]}",
+        "error": null
+      },
+      "evaluation_b": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "semantic",
+      "condition": "C",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/timecheck.py",
+          "content": "def is_expired(timestamp, now):\n return timestamp < now\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_timecheck.py",
+          "content": "import unittest\nfrom src.timecheck import is_expired\nclass T(unittest.TestCase):\n def test_equal(self): self.assertFalse(is_expired(10,10))\n def test_old(self): self.assertTrue(is_expired(9,10))\n"
+        }
+      ],
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n"
+      },
+      "revision": null
+    },
+    {
+      "task": "multifile",
+      "condition": "A",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/status.py",
+          "content": "# status module\ndef format_status(value):\n    return \"ready\" if value else \"blocked\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_status.py",
+          "content": "import unittest\nfrom src.status import format_status\nclass T(unittest.TestCase):\n def test_ready(self): self.assertEqual(format_status(True),\"ready\")\n def test_blocked(self): self.assertEqual(format_status(False),\"blocked\")\n"
+        }
+      ],
+      "response_a": {
+        "elapsed": 2.3297520999985863,
+        "text": "{\n  \"operations\": [\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"src/status.py\",\n      \"content\": \"# status module\\ndef format_status(value):\\n    return \\\"ready\\\" if value else \\\"blocked\\\"\\n\"\n    },\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"tests/test_status.py\",\n      \"content\": \"import unittest\\nfrom src.status import format_status\\nclass T(unittest.TestCase):\\n def test_ready(self): self.assertEqual(format_status(True),\\\"ready\\\")\\n def test_blocked(self): self.assertEqual(format_status(False),\\\"blocked\\\")\\n\"\n    }\n  ]\n}",
+        "error": null
+      },
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "multifile",
+      "condition": "B",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/status.py",
+          "content": "# status module\ndef format_status(value):\n    return \"ready\" if value else \"blocked\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_status.py",
+          "content": "import unittest\nfrom src.status import format_status\nclass T(unittest.TestCase):\n def test_ready(self): self.assertEqual(format_status(True),\"ready\")\n def test_blocked(self): self.assertEqual(format_status(False),\"blocked\")\n"
+        }
+      ],
+      "candidate_b": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/status.py",
+          "content": "# status module\ndef format_status(value):\n    return \"ready\" if value else \"blocked\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_status.py",
+          "content": "import unittest\nfrom src.status import format_status\nclass T(unittest.TestCase):\n def test_ready(self): self.assertEqual(format_status(True),\"ready\")\n def test_blocked(self): self.assertEqual(format_status(False),\"blocked\")\n"
+        }
+      ],
+      "response_b": {
+        "elapsed": 1.8335497000007308,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/status.py\",\"content\":\"# status module\\ndef format_status(value):\\n    return \\\"ready\\\" if value else \\\"blocked\\\"\\n\"},{\"operation_type\":\"REPLACE_FILE\",\"path\":\"tests/test_status.py\",\"content\":\"import unittest\\nfrom src.status import format_status\\nclass T(unittest.TestCase):\\n def test_ready(self): self.assertEqual(format_status(True),\\\"ready\\\")\\n def test_blocked(self): self.assertEqual(format_status(False),\\\"blocked\\\")\\n\"}]}",
+        "error": null
+      },
+      "evaluation_b": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "multifile",
+      "condition": "C",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/status.py",
+          "content": "# status module\ndef format_status(value):\n    return \"ready\" if value else \"blocked\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_status.py",
+          "content": "import unittest\nfrom src.status import format_status\nclass T(unittest.TestCase):\n def test_ready(self): self.assertEqual(format_status(True),\"ready\")\n def test_blocked(self): self.assertEqual(format_status(False),\"blocked\")\n"
+        }
+      ],
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n"
+      },
+      "revision": null
+    },
+    {
+      "task": "coordinated",
+      "condition": "A",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/greet.py",
+          "content": "def greeting(name):\n return f\"Hello, {name}!\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/app.py",
+          "content": "from src.greet import greeting\ndef run(): return greeting(\"Ada\")\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_app.py",
+          "content": "import unittest\nfrom src.app import run\nclass T(unittest.TestCase):\n def test_run(self): self.assertEqual(run(),\"Hello, Ada!\")\n"
+        }
+      ],
+      "response_a": {
+        "elapsed": 2.7387903000053484,
+        "text": "{\n  \"operations\": [\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"src/greet.py\",\n      \"content\": \"def greeting(name):\\n return f\\\"Hello, {name}!\\\"\\n\"\n    },\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"src/app.py\",\n      \"content\": \"from src.greet import greeting\\ndef run(): return greeting(\\\"Ada\\\")\\n\"\n    },\n    {\n      \"operation_type\": \"REPLACE_FILE\",\n      \"path\": \"tests/test_app.py\",\n      \"content\": \"import unittest\\nfrom src.app import run\\nclass T(unittest.TestCase):\\n def test_run(self): self.assertEqual(run(),\\\"Hello, Ada!\\\")\\n\"\n    }\n  ]\n}",
+        "error": null
+      },
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "coordinated",
+      "condition": "B",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/greet.py",
+          "content": "def greeting(name):\n return f\"Hello, {name}!\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/app.py",
+          "content": "from src.greet import greeting\ndef run(): return greeting(\"Ada\")\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_app.py",
+          "content": "import unittest\nfrom src.app import run\nclass T(unittest.TestCase):\n def test_run(self): self.assertEqual(run(),\"Hello, Ada!\")\n"
+        }
+      ],
+      "candidate_b": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/greet.py",
+          "content": "def greeting(name):\n return f\"Hello, {name}!\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/app.py",
+          "content": "from src.greet import greeting\ndef run(): return greeting(\"Ada\")\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_app.py",
+          "content": "import unittest\nfrom src.app import run\nclass T(unittest.TestCase):\n def test_run(self): self.assertEqual(run(),\"Hello, Ada!\")\n"
+        }
+      ],
+      "response_b": {
+        "elapsed": 2.031745799999044,
+        "text": "{\"operations\":[{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/greet.py\",\"content\":\"def greeting(name):\\n return f\\\"Hello, {name}!\\\"\\n\"},{\"operation_type\":\"REPLACE_FILE\",\"path\":\"src/app.py\",\"content\":\"from src.greet import greeting\\ndef run(): return greeting(\\\"Ada\\\")\\n\"},{\"operation_type\":\"REPLACE_FILE\",\"path\":\"tests/test_app.py\",\"content\":\"import unittest\\nfrom src.app import run\\nclass T(unittest.TestCase):\\n def test_run(self): self.assertEqual(run(),\\\"Hello, Ada!\\\")\\n\"}]}",
+        "error": null
+      },
+      "evaluation_b": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    },
+    {
+      "task": "coordinated",
+      "condition": "C",
+      "candidate_a": [
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/greet.py",
+          "content": "def greeting(name):\n return f\"Hello, {name}!\"\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "src/app.py",
+          "content": "from src.greet import greeting\ndef run(): return greeting(\"Ada\")\n"
+        },
+        {
+          "operation_type": "REPLACE_FILE",
+          "path": "tests/test_app.py",
+          "content": "import unittest\nfrom src.app import run\nclass T(unittest.TestCase):\n def test_run(self): self.assertEqual(run(),\"Hello, Ada!\")\n"
+        }
+      ],
+      "evaluation_a": {
+        "valid": true,
+        "tests_pass": true,
+        "exit": 0,
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      },
+      "revision": null
+    }
+  ]
+}
