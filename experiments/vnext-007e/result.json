@@ -1,0 +1,246 @@
+{
+  "experiment": "VNEXT-007E",
+  "tasks": [
+    {
+      "task_id": "single-1",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.2334830000036163,
+      "e2e": 1.242386700003408,
+      "error": null
+    },
+    {
+      "task_id": "single-2",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.32627119999961,
+      "e2e": 1.3343085999949835,
+      "error": null
+    },
+    {
+      "task_id": "single-3",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.3217979000037303,
+      "e2e": 1.3352652000030503,
+      "error": null
+    },
+    {
+      "task_id": "single-4",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.3294670000032056,
+      "e2e": 1.3407428999998956,
+      "error": null
+    },
+    {
+      "task_id": "single-5",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.3236780000006547,
+      "e2e": 1.3362135999996099,
+      "error": null
+    },
+    {
+      "task_id": "single-6",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.3202066000012564,
+      "e2e": 1.331734499995946,
+      "error": null
+    },
+    {
+      "task_id": "semantic",
+      "transport": true,
+      "parse": true,
+      "validator": false,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "CANDIDATE_INVALID",
+      "paths": [
+        "src/caller.py",
+        "src/module.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.8580824000018765,
+      "e2e": 1.8597431000016513,
+      "error": null
+    },
+    {
+      "task_id": "boundary",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.2076155999966431,
+      "e2e": 1.2150512000007438,
+      "error": null
+    },
+    {
+      "task_id": "exception",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 2.391790800000308,
+      "e2e": 2.397658900001261,
+      "error": null
+    },
+    {
+      "task_id": "parser",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.233876300000702,
+      "e2e": 1.240593299997272,
+      "error": null
+    },
+    {
+      "task_id": "multi",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": true,
+      "visible": true,
+      "independent": true,
+      "outcome": "COMPLETED",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.318037800003367,
+      "e2e": 1.3308018000025186,
+      "error": null
+    },
+    {
+      "task_id": "coordination",
+      "transport": true,
+      "parse": true,
+      "validator": true,
+      "apply": false,
+      "visible": false,
+      "independent": false,
+      "outcome": "SAFETY_FAIL",
+      "paths": [
+        "src/caller.py",
+        "src/module.py"
+      ],
+      "readonly_violation": false,
+      "inference": 1.244703299998946,
+      "e2e": 1.2541917999988073,
+      "error": null
+    }
+  ],
+  "funnel": {
+    "total": 12,
+    "transport": 12,
+    "parse": 12,
+    "validator": 11,
+    "apply": 1,
+    "visible": 1,
+    "independent": 1,
+    "completed": 1
+  },
+  "latency": {
+    "inference_mean": 1.4257508250011597,
+    "inference_median": 1.3210022500024934,
+    "e2e_mean": 1.4348909666665957,
+    "e2e_median": 1.3330215499954647
+  },
+  "safety": {
+    "malformed_promoted": 0,
+    "readonly_candidates": 0,
+    "scope_applied": 0,
+    "original_mutation": 0,
+    "visible_pass_hidden_fail": 0,
+    "false_completed": 0
+  }
+}
