@@ -69,14 +69,20 @@ def call_bounded_stateless_worker(
     base_url: str = "http://127.0.0.1:11434",
     model: str = "qwen3:8b",
     timeout_seconds: float = 30.0,
+    authorized_paths: tuple[str, ...] | None = None,
 ) -> BoundedWorkerResponse:
     """Call Ollama without native tools and strictly parse a passive Candidate."""
+    schema = json.loads(json.dumps(BOUNDED_CANDIDATE_SCHEMA))
+    if authorized_paths:
+        schema["properties"]["operations"]["items"]["properties"]["path"] = {
+            "type": "string", "enum": list(authorized_paths)
+        }
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": _bounded_prompt(request)}],
         "stream": False,
         "think": False,
-        "format": BOUNDED_CANDIDATE_SCHEMA,
+        "format": schema,
         "options": {"num_ctx": 8192, "temperature": 0, "seed": 424242},
     }
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")

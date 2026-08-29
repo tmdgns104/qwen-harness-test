@@ -1,0 +1,452 @@
+{
+  "experiment": "VNEXT-007C",
+  "tasks": 12,
+  "authorized_paths": [
+    "src/module.py"
+  ],
+  "conditions": {
+    "A": {
+      "rows": [
+        {
+          "task_id": "t1",
+          "paths": [
+            "src/module.py",
+            "tests/visible.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "readonly_in_candidate": true,
+          "elapsed": 1.1153350000022328
+        },
+        {
+          "task_id": "t2",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.7675589000064065
+        },
+        {
+          "task_id": "t3",
+          "paths": [
+            "src/module.py",
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "readonly_in_candidate": false,
+          "elapsed": 1.3619357999996282
+        },
+        {
+          "task_id": "t4",
+          "paths": [
+            "src/module.py",
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "readonly_in_candidate": false,
+          "elapsed": 1.356064100000367
+        },
+        {
+          "task_id": "t5",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.7824328999995487
+        },
+        {
+          "task_id": "t6",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.7756843999959528
+        },
+        {
+          "task_id": "t7",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.7608987999992678
+        },
+        {
+          "task_id": "t8",
+          "paths": [
+            "src/module.py",
+            "tests/visible.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "readonly_in_candidate": true,
+          "elapsed": 1.1727781999943545
+        },
+        {
+          "task_id": "t9",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.7745880000002217
+        },
+        {
+          "task_id": "t10",
+          "paths": [
+            "src/module.py",
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "readonly_in_candidate": false,
+          "elapsed": 1.4247775999974692
+        },
+        {
+          "task_id": "t11",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8036700000011479
+        },
+        {
+          "task_id": "t12",
+          "paths": [
+            "src/module.py",
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": false,
+          "readonly_in_candidate": false,
+          "elapsed": 1.4441081000040867
+        }
+      ],
+      "summary": {
+        "transport": 12,
+        "parse": 12,
+        "validator": 6,
+        "readonly": 2,
+        "mean": 1.0449859833333903,
+        "median": 0.9595025000016904
+      }
+    },
+    "B": {
+      "rows": [
+        {
+          "task_id": "t1",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8189001999999164
+        },
+        {
+          "task_id": "t2",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.836057400003483
+        },
+        {
+          "task_id": "t3",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8355369999990216
+        },
+        {
+          "task_id": "t4",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8148760999974911
+        },
+        {
+          "task_id": "t5",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8164611000029254
+        },
+        {
+          "task_id": "t6",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8299674000008963
+        },
+        {
+          "task_id": "t7",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8308342000018456
+        },
+        {
+          "task_id": "t8",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8365590000030352
+        },
+        {
+          "task_id": "t9",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8340327000041725
+        },
+        {
+          "task_id": "t10",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.8721350999985589
+        },
+        {
+          "task_id": "t11",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.7093603999965126
+        },
+        {
+          "task_id": "t12",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6685454000034952
+        }
+      ],
+      "summary": {
+        "transport": 12,
+        "parse": 12,
+        "validator": 12,
+        "readonly": 0,
+        "mean": 0.8086055000009461,
+        "median": 0.830400800001371
+      }
+    },
+    "C": {
+      "rows": [
+        {
+          "task_id": "t1",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.5537078999986988
+        },
+        {
+          "task_id": "t2",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.5987229000020307
+        },
+        {
+          "task_id": "t3",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.5561785000027157
+        },
+        {
+          "task_id": "t4",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.5756320000000414
+        },
+        {
+          "task_id": "t5",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.5999127999966731
+        },
+        {
+          "task_id": "t6",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6016776999967988
+        },
+        {
+          "task_id": "t7",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6081800999963889
+        },
+        {
+          "task_id": "t8",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6051431000014418
+        },
+        {
+          "task_id": "t9",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6081895000024815
+        },
+        {
+          "task_id": "t10",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6175119999970775
+        },
+        {
+          "task_id": "t11",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6303440999981831
+        },
+        {
+          "task_id": "t12",
+          "paths": [
+            "src/module.py"
+          ],
+          "transport": true,
+          "parse": true,
+          "validator": true,
+          "readonly_in_candidate": false,
+          "elapsed": 0.6447681999998167
+        }
+      ],
+      "summary": {
+        "transport": 12,
+        "parse": 12,
+        "validator": 12,
+        "readonly": 0,
+        "mean": 0.5999973999993623,
+        "median": 0.6034103999991203
+      }
+    }
+  },
+  "safety": {
+    "path_repaired": 0,
+    "original_mutation": 0,
+    "false_completed": 0
+  }
+}
