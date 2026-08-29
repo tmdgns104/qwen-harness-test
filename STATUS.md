@@ -1,4 +1,4 @@
-Current Task: TP-OS-SHADOW-001R3 - COMPLETE - VERIFIED - commit 384bf8f
+Current Task: TP-OS-SHADOW-001R4 - ACTIVE
 
 Previous Task: VNEXT-006 - COMPLETE - VERIFIED - commit 9269c8f9a864f857086cc6278eef4b0b9ba29205
 

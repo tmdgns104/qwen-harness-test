@@ -1,0 +1,89 @@
+{
+  "target_baseline": "3c05219d50a51f2bdad8e6671e702e8c5d575e50",
+  "first_pass": {
+    "target_baseline": "3c05219d50a51f2bdad8e6671e702e8c5d575e50",
+    "inference_count": 1,
+    "inference_seconds": 10.98912320000818,
+    "candidate": {
+      "operation_type": "CandidateOperationType.REPLACE_TEXT",
+      "path": "app/conversation.py",
+      "content": "",
+      "old_text": "def extract_json_object(text: str) -> dict[str, Any]:\n    \"\"\"Extract the first complete JSON object from common CLI model output.\"\"\"\n    raw = (text or \"\").strip()\n    if not raw:\n        raise ValueError(\"AI output is empty\")\n    try:\n        value = json.loads(raw)\n        if isinstance(value, dict):\n            return value\n    except json.JSONDecodeError:\n        pass\n\n    in_string = False\n    escaped = False\n    depth = 0\n    start = None\n    for index, char in enumerate(raw):\n        if start is None:\n            if char == \"{\":\n                start = index\n                depth = 1\n            continue\n        if in_string:\n            if escaped:\n                escaped = False\n            elif char == \"\\\\\":\n                escaped = True\n            elif char == '\"':\n                in_string = False\n            continue\n        if char == '\"':\n            in_string = True\n        elif char == \"{\":\n            depth += 1\n        elif char == \"}\":\n            depth -= 1\n            if depth == 0:\n                candidate = raw[start : index + 1]\n                value = json.loads(candidate)\n                if not isinstance(value, dict):\n                    raise ValueError(\"AI JSON root must be an object\")\n                return value\n    raise ValueError(\"No complete JSON object found in AI output\")\n\n\n",
+      "new_text": "def extract_json_object(text: str) -> dict[str, Any]:\n    \"\"\"Extract the first complete JSON object from common CLI model output.\"\"\"\n    raw = (text or \"\").strip()\n    if not raw:\n        raise ValueError(\"AI output is empty\")\n    try:\n        value = json.loads(raw)\n        if isinstance(value, dict):\n            return value\n    except json.JSONDecodeError:\n        pass\n\n    in_string = False\n    escaped = False\n    depth = 0\n    start = None\n    for index, char in enumerate(raw):\n        if start is None:\n            if char == \"{\":\n                start = index\n                depth = 1\n            continue\n        if in_string:\n            if escaped:\n                escaped = False\n            elif char == \"\\\\\":\n                escaped = True\n            elif char == '\"':\n                in_string = False\n            continue\n        if char == '\"':\n            in_string = True\n        elif char == \"{\":\n            depth += 1\n        elif char == \"}\":\n            depth -= 1\n            if depth == 0:\n                candidate = raw[start : index + 1]\n                try:\n                    value = json.loads(candidate)\n                    if not isinstance(value, dict):\n                        raise ValueError(\"AI JSON root must be an object\")\n                    return value\n                except json.JSONDecodeError:\n                    pass\n    raise ValueError(\"No complete JSON object found in AI output\")\n\n\n",
+      "expected_occurrences": 1
+    },
+    "parser": {
+      "model": "qwen3:8b",
+      "elapsed_seconds": 10.98912320000818,
+      "parse_ok": true
+    },
+    "validator": {
+      "valid": true,
+      "errors": []
+    },
+    "apply": {
+      "success": true,
+      "error": null,
+      "snapshot_path": "C:\\Users\\user\\AppData\\Local\\Temp\\qh-vnext-snapshot-93eeowz0"
+    },
+    "independent_semantic": {
+      "passed": false,
+      "exit_code": 1,
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert f(\"x {not valid} y {\\\"reply\\\":\\\"ok\\\"}\")=={\"reply\":\"ok\"}\n           ~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\qh-vnext-snapshot-93eeowz0\\app\\conversation.py\", line 94, in extract_json_object\n    raise ValueError(\"No complete JSON object found in AI output\")\nValueError: No complete JSON object found in AI output\n"
+    },
+    "regression": {
+      "status": "not_run",
+      "reason": "semantic verification failed; no retry"
+    },
+    "outcome": "VERIFICATION_FAILED",
+    "target_status_before": "?? team_project_os-main.zip\n",
+    "target_status_after": "?? team_project_os-main.zip\n"
+  },
+  "failure_evidence": {
+    "scenario": "invalid balanced block before valid object",
+    "expected": "later valid object returned",
+    "actual": "No complete JSON object found",
+    "failure_category": "SEMANTIC_FAIL",
+    "observation": "search state was not reset after invalid candidate"
+  },
+  "revision": {
+    "inference_count": 1,
+    "inference_seconds": 11.879576799998176,
+    "wall_seconds": 11.879978400000255,
+    "transport_ok": true,
+    "error": null,
+    "metadata": {
+      "model": "qwen3:8b",
+      "elapsed_seconds": 11.879576799998176,
+      "parse_ok": true
+    },
+    "candidate": [
+      {
+        "operation_type": "CandidateOperationType.REPLACE_TEXT",
+        "path": "app/conversation.py",
+        "content": "",
+        "old_text": "def extract_json_object(text: str) -> dict[str, Any]:\n    \"\"\"Extract the first complete JSON object from common CLI model output.\"\"\"\n    raw = (text or \"\").strip()\n    if not raw:\n        raise ValueError(\"AI output is empty\")\n    try:\n        value = json.loads(raw)\n        if isinstance(value, dict):\n            return value\n    except json.JSONDecodeError:\n        pass\n\n    in_string = False\n    escaped = False\n    depth = 0\n    start = None\n    for index, char in enumerate(raw):\n        if start is None:\n            if char == \"{\":\n                start = index\n                depth = 1\n            continue\n        if in_string:\n            if escaped:\n                escaped = False\n            elif char == \"\\\\\":\n                escaped = True\n            elif char == '\"':\n                in_string = False\n            continue\n        if char == '\"':\n            in_string = True\n        elif char == \"{\":\n            depth += 1\n        elif char == \"}\":\n            depth -= 1\n            if depth == 0:\n                candidate = raw[start : index + 1]\n                value = json.loads(candidate)\n                if not isinstance(value, dict):\n                    raise ValueError(\"AI JSON root must be an object\")\n                return value\n    raise ValueError(\"No complete JSON object found in AI output\")\n\n\n",
+        "new_text": "def extract_json_object(text: str) -> dict[str, Any]:\n    \"\"\"Extract the first complete JSON object from common CLI model output.\"\"\"\n    raw = (text or \"\").strip()\n    if not raw:\n        raise ValueError(\"AI output is empty\")\n    try:\n        value = json.loads(raw)\n        if isinstance(value, dict):\n            return value\n    except json.JSONDecodeError:\n        pass\n\n    in_string = False\n    escaped = False\n    depth = 0\n    start = None\n    for index, char in enumerate(raw):\n        if start is None:\n            if char == \"{\":\n                start = index\n                depth = 1\n            continue\n        if in_string:\n            if escaped:\n                escaped = False\n            elif char == \"\\\\\":\n                escaped = True\n            elif char == '\"':\n                in_string = False\n            continue\n        if char == '\"':\n            in_string = True\n        elif char == \"{\":\n            depth += 1\n        elif char == \"}\":\n            depth -= 1\n            if depth == 0:\n                candidate = raw[start : index + 1]\n                try:\n                    value = json.loads(candidate)\n                    if not isinstance(value, dict):\n                        raise ValueError(\"AI JSON root must be an object\")\n                    return value\n                except json.JSONDecodeError:\n                    pass\n    raise ValueError(\"No complete JSON object found in AI output\")\n\n\n",
+        "expected_occurrences": 1
+      }
+    ],
+    "validator": {
+      "valid": true,
+      "errors": []
+    },
+    "apply": {
+      "success": true,
+      "error": null,
+      "snapshot_path": "C:\\Users\\user\\AppData\\Local\\Temp\\qh-vnext-snapshot-pujyxxtl"
+    },
+    "semantic": {
+      "passed": false,
+      "exit_code": 1,
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert f(\"x {not valid} y {\\\"reply\\\":\\\"ok\\\"}\")=={\"reply\":\"ok\"}\n           ~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\qh-vnext-snapshot-pujyxxtl\\app\\conversation.py\", line 94, in extract_json_object\n    raise ValueError(\"No complete JSON object found in AI output\")\nValueError: No complete JSON object found in AI output\n"
+    }
+  },
+  "regression": "not_run",
+  "outcome": "VERIFICATION_FAILED",
+  "target_status_before": "?? team_project_os-main.zip\\n",
+  "target_status_after": "?? team_project_os-main.zip\n"
+}

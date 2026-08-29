@@ -1,0 +1,18 @@
+import json, subprocess, sys, time
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from tools.harness_core import *
+from tools.ollama_worker import call_bounded_stateless_worker
+ROOT=Path(__file__).resolve().parents[1]; T=Path(r'D:\team_project_os\team_project_os-main')
+r3=json.loads((ROOT/'experiments/tpos-os-shadow-001r3-result.json').read_text(encoding='utf-8')); old=r3['candidate']['old_text']; base={'task_id':'TP-OS-SHADOW-001','goal':'Fix extract_json_object to find a later valid JSON object after invalid balanced blocks.','acceptance_criteria':['whole valid JSON','wrapped JSON','invalid block then valid object','multiple invalid blocks then valid object','preserve string braces and escaped quotes','fail when no valid object'],'allowed_changes':['app/conversation.py'],'forbidden_changes':['tests/**','all other paths'],'items':[{'kind':'SOURCE_FILE','source':'app/conversation.py','content':old},{'kind':'TEST_FILE','source':'tests/test_conversation.py','content':'read-only'}]}
+evidence={'scenario':'invalid balanced block before valid object','expected':'later valid object returned','actual':'No complete JSON object found','failure_category':'SEMANTIC_FAIL','observation':'search state was not reset after invalid candidate'}
+req=BoundedWorkerRequest('Produce exactly one REPLACE_TEXT revision. Original candidate failed verification. Failure evidence: '+json.dumps(evidence),{**base,'first_candidate':r3['candidate'],'failure_evidence':evidence},{'operations':['REPLACE_TEXT'],'strict_json':True},(CandidateOperationType.REPLACE_TEXT,))
+t=time.perf_counter(); resp=call_bounded_stateless_worker(req,authorized_paths=('app/conversation.py',),timeout_seconds=60); wall=time.perf_counter()-t
+v=validate_candidate(resp.candidate,ChangeScope(('app/conversation.py',),('tests/**',)),allowed_operation_types=(CandidateOperationType.REPLACE_TEXT,)) if resp.candidate else None; a=apply_candidate_to_snapshot(T,resp.candidate,v) if v and v.valid else None
+sem=None
+if a and a.success:
+ code='import json\nfrom app.conversation import extract_json_object as f\nassert f("{\\"a\\":1}")=={"a":1}\nassert f("x {not valid} y {\\"reply\\":\\"ok\\"}")=={"reply":"ok"}\nassert f("{bad} x {also bad} y {\\"ok\\":true}")=={"ok":True}\nassert f("{\\"s\\":\\"{}\\"}")=={"s":"{}"}\ntry:f("{bad}")\nexcept ValueError:pass\nelse:raise AssertionError'
+ p=subprocess.run(['python','-c',code],cwd=a.snapshot_path,capture_output=True,text=True); sem={'passed':p.returncode==0,'exit_code':p.returncode,'stderr':p.stderr}
+raw=None if not resp.candidate else [o.__dict__ for o in resp.candidate.operations]
+result={'target_baseline':subprocess.run(['git','-C',str(T),'rev-parse','HEAD'],capture_output=True,text=True).stdout.strip(),'first_pass':r3,'failure_evidence':evidence,'revision':{'inference_count':1,'inference_seconds':resp.metadata.get('elapsed_seconds'),'wall_seconds':wall,'transport_ok':resp.transport_ok,'error':resp.error,'metadata':dict(resp.metadata),'candidate':raw,'validator':None if not v else {'valid':v.valid,'errors':v.errors},'apply':None if not a else {'success':a.success,'error':a.error,'snapshot_path':a.snapshot_path},'semantic':sem},'regression':'not_run','outcome':'COMPLETED' if v and v.valid and a and a.success and sem and sem['passed'] else 'VERIFICATION_FAILED','target_status_before':'?? team_project_os-main.zip\\n','target_status_after':subprocess.run(['git','-C',str(T),'status','--short'],capture_output=True,text=True).stdout}
+(ROOT/'experiments/tpos-os-shadow-001r4-result.json').write_text(json.dumps(result,indent=2,ensure_ascii=False,default=str),encoding='utf-8')
