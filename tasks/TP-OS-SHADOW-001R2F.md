@@ -16,5 +16,10 @@ ACTIVE
 - Any path outside Allowed Changes
 
 ## Verification
-- `python -m unittest tests.test_bounded_stateless_contract tests.test_candidate_apply tests.test_candidate_validator tests.test_ollama_worker -q`
-- `git diff --check`
+Run:
+
+`python -m unittest tests.test_bounded_stateless_contract tests.test_candidate_apply tests.test_candidate_validator tests.test_ollama_worker -q`
+
+Then run:
+
+`git diff --check`
