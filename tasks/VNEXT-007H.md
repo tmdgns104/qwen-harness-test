@@ -1,6 +1,11 @@
 # VNEXT-007H — Bounded Candidate Protocol Hardening
 
-Status: ACTIVE
+## Status
+
+COMPLETE - VERIFIED
+
+## Baseline
+
 Baseline: 9fbadebf87c3c02c56bc37f3654170ec76a6718
 
 ## Goal
