@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import json
+import time
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 from collections.abc import Mapping
 
 from tools.harness_core import (
+    BoundedWorkerRequest,
+    BoundedWorkerResponse,
+    Candidate,
+    CandidateOperation,
+    CandidateOperationType,
     ToolRequest,
     ToolResult,
     ToolSpec,
@@ -14,6 +20,74 @@ from tools.harness_core import (
     WorkerResponse,
     WorkerStep,
 )
+
+
+def _bounded_prompt(request: BoundedWorkerRequest) -> str:
+    """Serialize only the self-contained bounded request in stable JSON order."""
+    return json.dumps({
+        "task": request.task,
+        "context_pack": request.context_pack,
+        "output_contract": request.output_contract,
+    }, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _parse_bounded_candidate(content: str) -> Candidate:
+    if not isinstance(content, str):
+        raise ValueError("response content must be text")
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid Candidate JSON: {exc}") from exc
+    if not isinstance(parsed, dict) or set(parsed) != {"operations"} or not isinstance(parsed["operations"], list):
+        raise ValueError("Candidate must contain only operations list")
+    operations = []
+    for raw in parsed["operations"]:
+        if not isinstance(raw, dict) or set(raw) != {"operation_type", "path", "content"}:
+            raise ValueError("invalid Candidate operation schema")
+        try:
+            operation_type = CandidateOperationType(raw["operation_type"])
+        except (KeyError, ValueError, TypeError) as exc:
+            raise ValueError("unsupported Candidate operation type") from exc
+        if not isinstance(raw["path"], str) or not isinstance(raw["content"], str):
+            raise ValueError("Candidate path/content types are invalid")
+        operations.append(CandidateOperation(operation_type, raw["path"], raw["content"]))
+    return Candidate(tuple(operations))
+
+
+def call_bounded_stateless_worker(
+    request: BoundedWorkerRequest,
+    *,
+    base_url: str = "http://127.0.0.1:11434",
+    model: str = "qwen3:8b",
+    timeout_seconds: float = 30.0,
+) -> BoundedWorkerResponse:
+    """Call Ollama without native tools and strictly parse a passive Candidate."""
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": _bounded_prompt(request)}],
+        "stream": False,
+        "think": False,
+        "options": {"num_ctx": 8192, "temperature": 0, "seed": 424242},
+    }
+    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    http_request = Request(
+        f"{base_url.rstrip('/')}/api/chat",
+        data=body,
+        headers={"Content-Type": "application/json"}, method="POST",
+    )
+    started = time.perf_counter()
+    try:
+        with urlopen(http_request, timeout=timeout_seconds) as response:
+            decoded = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        return BoundedWorkerResponse(False, None, str(exc), {"model": model, "elapsed_seconds": time.perf_counter() - started})
+    elapsed = time.perf_counter() - started
+    try:
+        content = decoded["message"]["content"]
+        candidate = _parse_bounded_candidate(content)
+    except (KeyError, TypeError, ValueError) as exc:
+        return BoundedWorkerResponse(True, None, str(exc), {"model": model, "elapsed_seconds": elapsed, "parse_ok": False})
+    return BoundedWorkerResponse(True, candidate, None, {"model": model, "elapsed_seconds": elapsed, "parse_ok": True})
 
 
 DEFAULT_BASE_URL = "http://127.0.0.1:11434"
