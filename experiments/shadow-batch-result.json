@@ -1,0 +1,124 @@
+{
+  "target_baseline": "3c05219d50a51f2bdad8e6671e702e8c5d575e50",
+  "target_status_before": "?? team_project_os-main.zip\\n",
+  "results": [
+    {
+      "task_id": "SHADOW-002",
+      "target": "app/delivery_documents.py",
+      "function": "_safe",
+      "goal": "Preserve meaningful falsy scalar values in _safe. None and empty string remain empty; integer 0 and boolean False must serialize as \"0\" and \"False\"; pipes become slashes and newlines become spaces.",
+      "inference_count": 1,
+      "latency": 2.800890700003947,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 2.8005551999958698,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/delivery_documents.py",
+          "content": "",
+          "old_text": "def _safe(value: Any) -> str:\n    return str(value or \"\").replace(\"|\", \"/\").replace(\"\\n\", \" \").strip()\n\n",
+          "new_text": "def _safe(value: Any) -> str:\n    return str(value or \"\").replace(\"|\", \"/\").replace(\"\\n\", \" \").strip()\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": {
+        "valid": true,
+        "errors": []
+      },
+      "apply": {
+        "success": true,
+        "error": null
+      },
+      "semantic": {
+        "passed": false,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _safe(0)==\"0\"\n           ^^^^^^^^^^^^^\nAssertionError\n",
+        "exit_code": 1
+      },
+      "outcome": "FAILED"
+    },
+    {
+      "task_id": "SHADOW-003",
+      "target": "app/live_state.py",
+      "function": "_text",
+      "goal": "Preserve meaningful numeric zero in live-state text normalization while retaining existing limit and None/empty behavior. _text(0,10) returns \"0\", _text(None,10) returns \"\", and long strings are truncated.",
+      "inference_count": 1,
+      "latency": 3.7602819000021555,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 3.7600345000100788,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/live_state.py",
+          "content": "",
+          "old_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n\n",
+          "new_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    if value is None:\n        return \"\"\n    return str(value).strip()[:limit]\n\n'}]}]}}.json",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": {
+        "valid": true,
+        "errors": []
+      },
+      "apply": {
+        "success": true,
+        "error": null
+      },
+      "semantic": {
+        "passed": false,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from app.live_state import _text\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\qh-vnext-snapshot-zpbxlj7a\\app\\live_state.py\", line 28\n    '}]}]}}.json\n    ^\nSyntaxError: unterminated string literal (detected at line 28)\n",
+        "exit_code": 1
+      },
+      "outcome": "FAILED"
+    },
+    {
+      "task_id": "SHADOW-004",
+      "target": "app/conversation.py",
+      "function": "_clip",
+      "goal": "Preserve numeric zero in _clip while None and empty remain empty and values are trimmed/truncated.",
+      "inference_count": 1,
+      "latency": 3.0038629000046058,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 3.003666800010251,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n\n",
+          "new_text": "def _clip(value: Any, limit: int) -> str:\n    if value is None:\n        return \"\"\n    if isinstance(value, str):\n        value = value.strip()\n    if limit <= 0:\n        return \"0\"\n    return str(value)[:limit]\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": {
+        "valid": true,
+        "errors": []
+      },
+      "apply": {
+        "success": true,
+        "error": null
+      },
+      "semantic": {
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      },
+      "outcome": "COMPLETED"
+    }
+  ],
+  "target_status_after": "?? team_project_os-main.zip\n"
+}
