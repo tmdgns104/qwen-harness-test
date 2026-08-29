@@ -141,6 +141,7 @@ def validate_candidate(
     protected_paths: tuple[str, ...] = ("STATUS.md",),
     max_operations: int = 20,
     max_content_chars: int = 200_000,
+    allowed_operation_types: tuple[CandidateOperationType, ...] | None = None,
 ) -> CandidateValidationResult:
     """Fail-closed schema, path, scope, and bounded-size validation."""
     errors: list[str] = []
@@ -154,6 +155,8 @@ def validate_candidate(
         if not isinstance(operation, CandidateOperation) or not isinstance(operation.operation_type, CandidateOperationType):
             errors.append("unsupported operation type")
             continue
+        if allowed_operation_types is not None and operation.operation_type not in allowed_operation_types:
+            errors.append("unauthorized operation type")
         if not isinstance(operation.path, str) or not operation.path or "\x00" in operation.path:
             errors.append("invalid path")
             continue
@@ -191,6 +194,7 @@ class BoundedWorkerRequest:
     task: str
     context_pack: Mapping[str, object]
     output_contract: Mapping[str, object]
+    allowed_operation_types: tuple[CandidateOperationType, ...] | None = None
 
 
 @dataclass(frozen=True)

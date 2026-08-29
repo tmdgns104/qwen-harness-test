@@ -87,6 +87,11 @@ def call_bounded_stateless_worker(
                 variant["properties"]["path"] = path_schema
         else:
             items["properties"]["path"] = path_schema
+    if request.allowed_operation_types:
+        allowed = {x.value for x in request.allowed_operation_types}
+        items = schema["properties"]["operations"]["items"]
+        if "oneOf" in items:
+            items["oneOf"] = [v for v in items["oneOf"] if v["properties"]["operation_type"].get("const") in allowed]
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": _bounded_prompt(request)}],

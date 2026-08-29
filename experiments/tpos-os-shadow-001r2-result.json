@@ -1,0 +1,12 @@
+{
+  "target_baseline": "3c05219d50a51f2bdad8e6671e702e8c5d575e50",
+  "target_status_before": "?? team_project_os-main.zip\n",
+  "inference_count": 1,
+  "inference_seconds": 14.049272999996901,
+  "wall_seconds": 14.117266200002632,
+  "candidate": null,
+  "validator": null,
+  "apply": null,
+  "outcome": "FAILED",
+  "target_status_after": "?? team_project_os-main.zip\n"
+}
