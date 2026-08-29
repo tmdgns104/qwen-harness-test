@@ -89,27 +89,45 @@
   "results": [
     {
       "label": "minimal",
-      "elapsed_wall": 1.2355437000078382,
+      "elapsed_wall": 4.779770200009807,
       "transport_ok": true,
-      "error": "invalid Candidate operation schema",
+      "error": null,
       "metadata": {
         "model": "qwen3:8b",
-        "elapsed_seconds": 1.2352315000025555,
-        "parse_ok": false
+        "elapsed_seconds": 4.779418899997836,
+        "parse_ok": true
       },
-      "candidate": null
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "src/module.py",
+          "content": "",
+          "old_text": "return a - b",
+          "new_text": "return a + b",
+          "expected_occurrences": 1
+        }
+      ]
     },
     {
       "label": "r2-replay",
-      "elapsed_wall": 14.450162299996009,
+      "elapsed_wall": 10.98944279999705,
       "transport_ok": true,
-      "error": "invalid Candidate operation schema",
+      "error": null,
       "metadata": {
         "model": "qwen3:8b",
-        "elapsed_seconds": 14.449976799995056,
-        "parse_ok": false
+        "elapsed_seconds": 10.98912320000818,
+        "parse_ok": true
       },
-      "candidate": null
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def extract_json_object(text: str) -> dict[str, Any]:\n    \"\"\"Extract the first complete JSON object from common CLI model output.\"\"\"\n    raw = (text or \"\").strip()\n    if not raw:\n        raise ValueError(\"AI output is empty\")\n    try:\n        value = json.loads(raw)\n        if isinstance(value, dict):\n            return value\n    except json.JSONDecodeError:\n        pass\n\n    in_string = False\n    escaped = False\n    depth = 0\n    start = None\n    for index, char in enumerate(raw):\n        if start is None:\n            if char == \"{\":\n                start = index\n                depth = 1\n            continue\n        if in_string:\n            if escaped:\n                escaped = False\n            elif char == \"\\\\\":\n                escaped = True\n            elif char == '\"':\n                in_string = False\n            continue\n        if char == '\"':\n            in_string = True\n        elif char == \"{\":\n            depth += 1\n        elif char == \"}\":\n            depth -= 1\n            if depth == 0:\n                candidate = raw[start : index + 1]\n                value = json.loads(candidate)\n                if not isinstance(value, dict):\n                    raise ValueError(\"AI JSON root must be an object\")\n                return value\n    raise ValueError(\"No complete JSON object found in AI output\")\n\n\n",
+          "new_text": "def extract_json_object(text: str) -> dict[str, Any]:\n    \"\"\"Extract the first complete JSON object from common CLI model output.\"\"\"\n    raw = (text or \"\").strip()\n    if not raw:\n        raise ValueError(\"AI output is empty\")\n    try:\n        value = json.loads(raw)\n        if isinstance(value, dict):\n            return value\n    except json.JSONDecodeError:\n        pass\n\n    in_string = False\n    escaped = False\n    depth = 0\n    start = None\n    for index, char in enumerate(raw):\n        if start is None:\n            if char == \"{\":\n                start = index\n                depth = 1\n            continue\n        if in_string:\n            if escaped:\n                escaped = False\n            elif char == \"\\\\\":\n                escaped = True\n            elif char == '\"':\n                in_string = False\n            continue\n        if char == '\"':\n            in_string = True\n        elif char == \"{\":\n            depth += 1\n        elif char == \"}\":\n            depth -= 1\n            if depth == 0:\n                candidate = raw[start : index + 1]\n                try:\n                    value = json.loads(candidate)\n                    if not isinstance(value, dict):\n                        raise ValueError(\"AI JSON root must be an object\")\n                    return value\n                except json.JSONDecodeError:\n                    pass\n    raise ValueError(\"No complete JSON object found in AI output\")\n\n\n",
+          "expected_occurrences": 1
+        }
+      ]
     }
   ]
 }

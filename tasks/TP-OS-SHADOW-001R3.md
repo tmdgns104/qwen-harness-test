@@ -13,6 +13,7 @@ Task Baseline: 89a459d
 - `experiments/tpos-os-shadow-001r3.py`
 - `experiments/tpos-os-shadow-001r3-result.json`
 - `experiments/tpos-os-shadow-001r3-report.md`
+- `experiments/tpos-os-shadow-001r2f-result.json`
 
 ## Forbidden Changes
 - Original Team Project OS repository
