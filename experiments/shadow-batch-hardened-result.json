@@ -1,0 +1,189 @@
+{
+  "target_baseline": "3c05219d50a51f2bdad8e6671e702e8c5d575e50",
+  "target_status_before": "?? team_project_os-main.zip\\n",
+  "results": [
+    {
+      "task_id": "SHADOW-003R",
+      "target": "app/live_state.py",
+      "function": "_text",
+      "goal": "Return \"0\" for numeric zero, empty for None, and truncate strings to the limit.",
+      "context_chars": 156,
+      "inference_count": 1,
+      "latency": 13.954175599996233,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 13.95384259999264,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/live_state.py",
+          "content": "",
+          "old_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n",
+          "new_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": {
+        "valid": true,
+        "errors": []
+      },
+      "apply": {
+        "success": true,
+        "error": null
+      },
+      "semantic": {
+        "passed": false,
+        "exit_code": 1,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _text(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n"
+      },
+      "outcome": "FAILED"
+    },
+    {
+      "task_id": "SHADOW-005",
+      "target": "app/delivery_documents.py",
+      "function": "_safe",
+      "goal": "Serialize 0 and False without treating them as missing; None and empty remain empty; sanitize pipe/newline.",
+      "context_chars": 103,
+      "inference_count": 1,
+      "latency": 2.7552160000050208,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 2.755019000003813,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/delivery_documents.py",
+          "content": "",
+          "old_text": "def _safe(value: Any) -> str:\n    return str(value or \"\").replace(\"|\", \"/\").replace(\"\\n\", \" \").strip()",
+          "new_text": "def _safe(value: Any) -> str:\n    return str(value or \"\").replace(\"|\", \"/\").replace(\"\\n\", \" \").strip()\n\nassert _safe(0)==\"0\"\nassert _safe(False)==\"False\"\nassert _safe(None)==\"\"\nassert _safe(\"a|b\\nc\")==\"a/b c\".",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": {
+        "valid": true,
+        "errors": []
+      },
+      "apply": {
+        "success": true,
+        "error": null
+      },
+      "semantic": {
+        "passed": false,
+        "exit_code": 1,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from app.delivery_documents import _safe\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\qh-vnext-snapshot-4uw80y4c\\app\\delivery_documents.py\", line 28\n    assert _safe(\"a|b\\nc\")==\"a/b c\".\n                                    ^\nSyntaxError: invalid syntax\n"
+      },
+      "outcome": "FAILED"
+    },
+    {
+      "task_id": "SHADOW-006",
+      "target": "app/conversation.py",
+      "function": "_clip",
+      "goal": "Preserve numeric zero, trim strings, truncate to limit, and keep None empty.",
+      "context_chars": 86,
+      "inference_count": 1,
+      "latency": 1.7358268999960274,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 1.7356575999874622,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n",
+          "new_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": {
+        "valid": true,
+        "errors": []
+      },
+      "apply": {
+        "success": true,
+        "error": null
+      },
+      "semantic": {
+        "passed": false,
+        "exit_code": 1,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _clip(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n"
+      },
+      "outcome": "FAILED"
+    },
+    {
+      "task_id": "SHADOW-007",
+      "target": "app/conversation.py",
+      "function": "merge_project_brief",
+      "goal": "Merge only recognized non-empty project fields and normalize an invalid project_type to generic.",
+      "context_chars": 380,
+      "inference_count": 1,
+      "latency": 4.941183099988848,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 4.941041199999745,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged",
+          "new_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged\n\nassert merge_project_brief({\"name\":\"A\",\"project_type\":\"generic\"},{\"goal\":\"G\"})[\"goal\"]==\"G\"\nassert merge_project_brief({}, {\"project_type\":\"invalid\"})[\"project_type\"]==\"generic\".",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": {
+        "valid": true,
+        "errors": []
+      },
+      "apply": {
+        "success": true,
+        "error": null
+      },
+      "semantic": {
+        "passed": false,
+        "exit_code": 1,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from app.conversation import merge_project_brief\n  File \"C:\\Users\\user\\AppData\\Local\\Temp\\qh-vnext-snapshot-2q4csasf\\app\\conversation.py\", line 254\n    assert merge_project_brief({}, {\"project_type\":\"invalid\"})[\"project_type\"]==\"generic\".\n                                                                                          ^\nSyntaxError: invalid syntax\n"
+      },
+      "outcome": "FAILED"
+    },
+    {
+      "task_id": "SHADOW-008",
+      "target": "app/live_state.py",
+      "function": "sanitize_live_state",
+      "goal": "Drop invalid project types while retaining valid project updates and ignoring malformed requirement entries.",
+      "context_chars": 4898,
+      "inference_count": 1,
+      "latency": 30.026554600000964,
+      "transport_ok": false,
+      "error": "timed out",
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 30.026335300004575,
+        "failure_stage": "TRANSPORT",
+        "exception_class": "TimeoutError"
+      },
+      "candidate": null,
+      "validator": null,
+      "apply": null,
+      "semantic": null,
+      "outcome": "FAILED"
+    }
+  ],
+  "target_status_after": "?? team_project_os-main.zip\n"
+}
