@@ -4,6 +4,10 @@ Run the frozen MODEL-001 canonical Worker Brief and deterministic contract with 
 
 Baseline: `a0246e9`. Canonical source and hashes are recorded in `experiments/tpos-v016-model-003-command-r7b/canonical_reuse_manifest.json`.
 
+## Status
+
+ACTIVE
+
 ## Benchmark Result
 
 **FAIL — TOOL_CALLING**. Evidence: `experiments/tpos-v016-model-003-command-r7b/report.md`.
