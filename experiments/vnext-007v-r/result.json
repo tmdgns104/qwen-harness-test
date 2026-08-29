@@ -1,0 +1,1098 @@
+{
+  "experiment": "VNEXT-007V-R",
+  "conditions": {
+    "A": {
+      "rows": [
+        {
+          "task_id": "boundary",
+          "condition": "A",
+          "goal": "Implement clamp(value, low, high) with inclusive bounds.",
+          "acceptance": "Implement clamp(value, low, high) with inclusive bounds.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def clamp(value, low, high):\n    return max(low, min(value, high))\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import clamp\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "expected": true,
+          "actual": true,
+          "failure_message": null,
+          "failure_classification": null,
+          "outcome": "COMPLETED",
+          "inference_seconds": 8.664013800007524,
+          "e2e_seconds": 8.675625799995032,
+          "transport": true
+        },
+        {
+          "task_id": "none",
+          "condition": "A",
+          "goal": "Implement first_or_none(items): None for empty input.",
+          "acceptance": "Implement first_or_none(items): None for empty input.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def first_or_none(*args, **kwargs):\n    raise NotImplementedError\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import first_or_none\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": "NotImplementedError: ",
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": "VERIFICATION_FAILED",
+          "inference_seconds": 1.1133276000036858,
+          "e2e_seconds": 1.1259315000061179,
+          "transport": true
+        },
+        {
+          "task_id": "whitespace",
+          "condition": "A",
+          "goal": "Implement normalize(text): strip whitespace and lowercase.",
+          "acceptance": "Implement normalize(text): strip whitespace and lowercase.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def normalize(text):\n    return text.strip().lower()\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import normalize\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "expected": true,
+          "actual": true,
+          "failure_message": null,
+          "failure_classification": null,
+          "outcome": "COMPLETED",
+          "inference_seconds": 1.2840052000101423,
+          "e2e_seconds": 1.2950272000016412,
+          "transport": true
+        },
+        {
+          "task_id": "exception",
+          "condition": "A",
+          "goal": "Implement divide(a,b), raising ValueError when b is zero.",
+          "acceptance": "Implement divide(a,b), raising ValueError when b is zero.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import divide\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def divide(a, b):\n    if b == 0:\n        raise ValueError(\"division by zero\")\n    return a / b\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "expected": true,
+          "actual": true,
+          "failure_message": null,
+          "failure_classification": null,
+          "outcome": "COMPLETED",
+          "inference_seconds": 1.650834299987764,
+          "e2e_seconds": 1.6629601000022376,
+          "transport": true
+        },
+        {
+          "task_id": "parser",
+          "condition": "A",
+          "goal": "Implement parse_flag(text): yes/no case-insensitive after trim, else ValueError.",
+          "acceptance": "Implement parse_flag(text): yes/no case-insensitive after trim, else ValueError.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def parse_flag(text):\n    text = text.strip().lower()\n    if text not in ['yes', 'no']:\n        raise ValueError('Invalid flag value. Must be yes or no.')\n    return text == 'yes'"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import parse_flag\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": null,
+          "inference_seconds": 2.047930600005202,
+          "e2e_seconds": 2.059606499999063,
+          "transport": true
+        },
+        {
+          "task_id": "state",
+          "condition": "A",
+          "goal": "Implement transition(state,event): idle/start running, running/stop idle, else unchanged.",
+          "acceptance": "Implement transition(state,event): idle/start running, running/stop idle, else unchanged.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def transition(state, event):\n    if state == 'idle' and event == 'start running':\n        return 'running'\n    elif state == 'running' and event == 'stop idle':\n        return 'idle'\n    else:\n        return state"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import transition\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": "VERIFICATION_FAILED",
+          "inference_seconds": 2.1881141000048956,
+          "e2e_seconds": 2.201035900012357,
+          "transport": true
+        },
+        {
+          "task_id": "transform",
+          "condition": "A",
+          "goal": "Implement snake_case(text) replacing spaces and hyphens with underscores.",
+          "acceptance": "Implement snake_case(text) replacing spaces and hyphens with underscores.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import snake_case\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def snake_case(text):\n    return text.replace(' ', '_').replace('-', '_')\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/module.py",
+              "content": "def snake_case(text):\n    return text.replace(' ', '_').replace('-', '_')\n"
+            }
+          ],
+          "validator": {
+            "valid": false,
+            "errors": [
+              "duplicate path"
+            ]
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "OTHER",
+          "outcome": null,
+          "inference_seconds": 2.1789580000040587,
+          "e2e_seconds": 2.17926720000105,
+          "transport": true
+        },
+        {
+          "task_id": "offbyone",
+          "condition": "A",
+          "goal": "Implement take_prefix(items,n): n=0 empty, negative raises ValueError.",
+          "acceptance": "Implement take_prefix(items,n): n=0 empty, negative raises ValueError.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def take_prefix(items, n):\n    if n < 0:\n        raise ValueError('n must be non-negative')\n    return items[:n]"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import take_prefix\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "expected": true,
+          "actual": true,
+          "failure_message": null,
+          "failure_classification": null,
+          "outcome": "COMPLETED",
+          "inference_seconds": 1.7293307999934768,
+          "e2e_seconds": 1.7415811999962898,
+          "transport": true
+        },
+        {
+          "task_id": "collection",
+          "condition": "A",
+          "goal": "Implement unique_preserve(items) removing duplicates preserving first order.",
+          "acceptance": "Implement unique_preserve(items) removing duplicates preserving first order.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def unique_preserve(*args, **kwargs):\n    raise NotImplementedError\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import unique_preserve\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": "NotImplementedError: ",
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": "VERIFICATION_FAILED",
+          "inference_seconds": 1.388487800009898,
+          "e2e_seconds": 1.3993570000020554,
+          "transport": true
+        },
+        {
+          "task_id": "multi",
+          "condition": "A",
+          "goal": "Implement render_user(user) in module.py and caller.py consistently.",
+          "acceptance": "Implement render_user(user) in module.py and caller.py consistently.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def render_user(*args, **kwargs):\n    raise NotImplementedError\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import render_user\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": "NotImplementedError: ",
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": "VERIFICATION_FAILED",
+          "inference_seconds": 1.3275041000015335,
+          "e2e_seconds": 1.3381962999992538,
+          "transport": true
+        },
+        {
+          "task_id": "even",
+          "condition": "A",
+          "goal": "Implement is_even(n), including zero and negative integers.",
+          "acceptance": "Implement is_even(n), including zero and negative integers.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def is_even(n):\n    return n % 2 == 0\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import is_even\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "expected": true,
+          "actual": true,
+          "failure_message": null,
+          "failure_classification": null,
+          "outcome": "COMPLETED",
+          "inference_seconds": 1.3634329000051366,
+          "e2e_seconds": 1.3747904999909224,
+          "transport": true
+        },
+        {
+          "task_id": "pair",
+          "condition": "A",
+          "goal": "Implement parse_pair(text) returning key/value for one colon, else ValueError.",
+          "acceptance": "Implement parse_pair(text) returning key/value for one colon, else ValueError.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def parse_pair(text):\n    if ':' in text:\n        key, value = text.split(':', 1)\n        return key.strip(), value.strip()\n    else:\n        raise ValueError(\"Invalid format: no colon found\")\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import parse_pair\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": null,
+          "inference_seconds": 2.044084199995268,
+          "e2e_seconds": 2.0535626000055345,
+          "transport": true
+        }
+      ],
+      "inference_count": 12,
+      "transport": 12,
+      "parse": 12,
+      "validator": 11,
+      "apply": 9,
+      "visible": 9,
+      "independent": 5,
+      "completed": 5,
+      "inference_mean": 2.2483352833357153,
+      "inference_median": 1.6900825499906205,
+      "e2e_mean": 2.2589118166676294,
+      "e2e_median": 1.7022706499992637
+    },
+    "B": {
+      "rows": [
+        {
+          "task_id": "boundary",
+          "condition": "B",
+          "goal": "Implement clamp(value, low, high) with inclusive bounds.",
+          "acceptance": "Implement clamp(value, low, high) with inclusive bounds.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def clamp(value, low, high):\n    return max(low, min(value, high))\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import clamp\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/module.py",
+              "content": "def clamp(value, low, high):\n    return max(low, min(value, high))\n"
+            }
+          ],
+          "validator": {
+            "valid": false,
+            "errors": [
+              "duplicate path"
+            ]
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "OTHER",
+          "outcome": null,
+          "inference_seconds": 2.0908078999927966,
+          "e2e_seconds": 2.09113640000578,
+          "transport": true
+        },
+        {
+          "task_id": "none",
+          "condition": "B",
+          "goal": "Implement first_or_none(items): None for empty input.",
+          "acceptance": "Implement first_or_none(items): None for empty input.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def first_or_none(*args, **kwargs):\n    if not args:\n        return None\n    return args[0]"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import first_or_none\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": "VERIFICATION_FAILED",
+          "inference_seconds": 1.4116957999940496,
+          "e2e_seconds": 1.42403199999535,
+          "transport": true
+        },
+        {
+          "task_id": "whitespace",
+          "condition": "B",
+          "goal": "Implement normalize(text): strip whitespace and lowercase.",
+          "acceptance": "Implement normalize(text): strip whitespace and lowercase.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def normalize(text):\n    return text.strip().lower()\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import normalize\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import normalize\n"
+            }
+          ],
+          "validator": {
+            "valid": false,
+            "errors": [
+              "duplicate path"
+            ]
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "OTHER",
+          "outcome": null,
+          "inference_seconds": 1.3722036000108346,
+          "e2e_seconds": 1.3725320000085048,
+          "transport": true
+        },
+        {
+          "task_id": "exception",
+          "condition": "B",
+          "goal": "Implement divide(a,b), raising ValueError when b is zero.",
+          "acceptance": "Implement divide(a,b), raising ValueError when b is zero.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def divide(a, b):\n    if b == 0:\n        raise ValueError('division by zero')\n    return a / b"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import divide\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/module.py",
+              "content": "def divide(a, b):\n    if b == 0:\n        raise ValueError('division by zero')\n    return a / b"
+            }
+          ],
+          "validator": {
+            "valid": false,
+            "errors": [
+              "duplicate path"
+            ]
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "OTHER",
+          "outcome": null,
+          "inference_seconds": 2.0013250000047265,
+          "e2e_seconds": 2.0016197999939322,
+          "transport": true
+        },
+        {
+          "task_id": "parser",
+          "condition": "B",
+          "goal": "Implement parse_flag(text): yes/no case-insensitive after trim, else ValueError.",
+          "acceptance": "Implement parse_flag(text): yes/no case-insensitive after trim, else ValueError.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def parse_flag(text):\n    text = text.strip().lower()\n    if text == 'yes' or text == 'no':\n        return text == 'yes'\n    else:\n        raise ValueError(\"Invalid flag value: '\" + text + \"'\")\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import parse_flag\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": null,
+          "inference_seconds": 1.7450151000084588,
+          "e2e_seconds": 1.7550255000096513,
+          "transport": true
+        },
+        {
+          "task_id": "state",
+          "condition": "B",
+          "goal": "Implement transition(state,event): idle/start running, running/stop idle, else unchanged.",
+          "acceptance": "Implement transition(state,event): idle/start running, running/stop idle, else unchanged.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def transition(state, event):\n    if state == 'idle' and event == 'start running':\n        return 'running'\n    elif state == 'running' and event == 'stop idle':\n        return 'idle'\n    else:\n        return state"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import transition\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": "VERIFICATION_FAILED",
+          "inference_seconds": 1.706061499993666,
+          "e2e_seconds": 1.7213168000016594,
+          "transport": true
+        },
+        {
+          "task_id": "transform",
+          "condition": "B",
+          "goal": "Implement snake_case(text) replacing spaces and hyphens with underscores.",
+          "acceptance": "Implement snake_case(text) replacing spaces and hyphens with underscores.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def snake_case(text):\n    return text.replace(' ', '_').replace('-', '_')\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import snake_case\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/module.py",
+              "content": "def snake_case(text):\n    return text.replace(' ', '_').replace('-', '_')\n"
+            }
+          ],
+          "validator": {
+            "valid": false,
+            "errors": [
+              "duplicate path"
+            ]
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "OTHER",
+          "outcome": null,
+          "inference_seconds": 1.6892584999877727,
+          "e2e_seconds": 1.6895738000021083,
+          "transport": true
+        },
+        {
+          "task_id": "offbyone",
+          "condition": "B",
+          "goal": "Implement take_prefix(items,n): n=0 empty, negative raises ValueError.",
+          "acceptance": "Implement take_prefix(items,n): n=0 empty, negative raises ValueError.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def take_prefix(items, n):\n    if n < 0:\n        raise ValueError('n must be non-negative')\n    return items[:n]"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import take_prefix\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": true,
+          "expected": true,
+          "actual": true,
+          "failure_message": null,
+          "failure_classification": null,
+          "outcome": "COMPLETED",
+          "inference_seconds": 1.3519173999957275,
+          "e2e_seconds": 1.3628944999945816,
+          "transport": true
+        },
+        {
+          "task_id": "collection",
+          "condition": "B",
+          "goal": "Implement unique_preserve(items) removing duplicates preserving first order.",
+          "acceptance": "Implement unique_preserve(items) removing duplicates preserving first order.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def unique_preserve(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import unique_preserve\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": null,
+          "inference_seconds": 1.6032030999922426,
+          "e2e_seconds": 1.6120826999976998,
+          "transport": true
+        },
+        {
+          "task_id": "multi",
+          "condition": "B",
+          "goal": "Implement render_user(user) in module.py and caller.py consistently.",
+          "acceptance": "Implement render_user(user) in module.py and caller.py consistently.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def render_user(*args, **kwargs):\n    raise NotImplementedError\n"
+            },
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import render_user\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": true,
+          "visible": true,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": "NotImplementedError: ",
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": "VERIFICATION_FAILED",
+          "inference_seconds": 1.0151011999987531,
+          "e2e_seconds": 1.0253134999948088,
+          "transport": true
+        },
+        {
+          "task_id": "even",
+          "condition": "B",
+          "goal": "Implement is_even(n), including zero and negative integers.",
+          "acceptance": "Implement is_even(n), including zero and negative integers.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def is_even(n):\n    return n % 2 == 0\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import is_even\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": null,
+          "inference_seconds": 1.0265341000049375,
+          "e2e_seconds": 1.0338883999938844,
+          "transport": true
+        },
+        {
+          "task_id": "pair",
+          "condition": "B",
+          "goal": "Implement parse_pair(text) returning key/value for one colon, else ValueError.",
+          "acceptance": "Implement parse_pair(text) returning key/value for one colon, else ValueError.",
+          "fixture_integrity": {
+            "broken_fails": true,
+            "reference_passes": true
+          },
+          "candidate": [
+            {
+              "operation_type": "REPLACE_FILE",
+              "path": "src/module.py",
+              "content": "def parse_pair(text):\n    if ':' in text:\n        key, value = text.split(':', 1)\n        return key.strip(), value.strip()\n    else:\n        raise ValueError(\"Invalid format: no colon found\")\n"
+            },
+            {
+              "operation_type": "CREATE_FILE",
+              "path": "src/caller.py",
+              "content": "from .module import parse_pair\n"
+            }
+          ],
+          "validator": {
+            "valid": true,
+            "errors": []
+          },
+          "apply": false,
+          "visible": false,
+          "independent": false,
+          "expected": true,
+          "actual": false,
+          "failure_message": null,
+          "failure_classification": "WRONG_LOGIC",
+          "outcome": null,
+          "inference_seconds": 1.6158663999958662,
+          "e2e_seconds": 1.6269549999997253,
+          "transport": true
+        }
+      ],
+      "inference_count": 12,
+      "transport": 12,
+      "parse": 12,
+      "validator": 8,
+      "apply": 4,
+      "visible": 4,
+      "independent": 1,
+      "completed": 1,
+      "inference_mean": 1.5524157999983192,
+      "inference_median": 1.6095347499940544,
+      "e2e_mean": 1.5596975333331404,
+      "e2e_median": 1.6195188499987125
+    }
+  },
+  "C": {
+    "rows": [
+      {
+        "task_id": "boundary",
+        "condition": "C",
+        "goal": "Implement clamp(value, low, high) with inclusive bounds.",
+        "acceptance": "Implement clamp(value, low, high) with inclusive bounds.",
+        "fixture_integrity": {
+          "broken_fails": true,
+          "reference_passes": true
+        },
+        "candidate": [
+          {
+            "operation_type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content": "def clamp(value, low, high):\n    return max(low, min(value, high))\n"
+          },
+          {
+            "operation_type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content": "from .module import clamp\n"
+          },
+          {
+            "operation_type": "CREATE_FILE",
+            "path": "src/module.py",
+            "content": "def clamp(value, low, high):\n    return max(low, min(value, high))\n"
+          }
+        ],
+        "validator": {
+          "valid": false,
+          "errors": [
+            "duplicate path"
+          ]
+        },
+        "apply": false,
+        "visible": false,
+        "independent": false,
+        "expected": true,
+        "actual": false,
+        "failure_message": null,
+        "failure_classification": "OTHER",
+        "outcome": null,
+        "inference_seconds": 2.4161107999971136,
+        "e2e_seconds": 2.416726399998879,
+        "transport": true
+      },
+      {
+        "task_id": "none",
+        "condition": "C",
+        "goal": "Implement first_or_none(items): None for empty input.",
+        "acceptance": "Implement first_or_none(items): None for empty input.",
+        "fixture_integrity": {
+          "broken_fails": true,
+          "reference_passes": true
+        },
+        "candidate": [
+          {
+            "operation_type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content": "def first_or_none(*args, **kwargs):\n    if not args:\n        return None\n    return args[0]"
+          },
+          {
+            "operation_type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content": "from .module import first_or_none\n"
+          }
+        ],
+        "validator": {
+          "valid": true,
+          "errors": []
+        },
+        "apply": true,
+        "visible": true,
+        "independent": false,
+        "expected": true,
+        "actual": false,
+        "failure_message": null,
+        "failure_classification": "WRONG_LOGIC",
+        "outcome": "VERIFICATION_FAILED",
+        "inference_seconds": 1.7986009000014747,
+        "e2e_seconds": 1.8103932000085479,
+        "transport": true
+      },
+      {
+        "task_id": "whitespace",
+        "condition": "C",
+        "goal": "Implement normalize(text): strip whitespace and lowercase.",
+        "acceptance": "Implement normalize(text): strip whitespace and lowercase.",
+        "fixture_integrity": {
+          "broken_fails": true,
+          "reference_passes": true
+        },
+        "candidate": [
+          {
+            "operation_type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content": "def normalize(text):\n    return text.strip().lower()\n"
+          },
+          {
+            "operation_type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content": "from .module import normalize\n"
+          },
+          {
+            "operation_type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content": "from .module import normalize\n"
+          }
+        ],
+        "validator": {
+          "valid": false,
+          "errors": [
+            "duplicate path"
+          ]
+        },
+        "apply": false,
+        "visible": false,
+        "independent": false,
+        "expected": true,
+        "actual": false,
+        "failure_message": null,
+        "failure_classification": "OTHER",
+        "outcome": null,
+        "inference_seconds": 1.7036396999901626,
+        "e2e_seconds": 1.7040181999909692,
+        "transport": true
+      }
+    ],
+    "inference_count": 3,
+    "validator": 1,
+    "apply": 1,
+    "independent": 0,
+    "completed": 0,
+    "inference_mean": 1.9727837999962503,
+    "inference_median": 1.7986009000014747,
+    "e2e_mean": 1.9770459333327988,
+    "e2e_median": 1.8103932000085479
+  }
+}
