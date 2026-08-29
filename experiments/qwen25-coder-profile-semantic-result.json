@@ -1,0 +1,75 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "additional_inference_count": 0,
+  "results": [
+    {
+      "task_id": "SHADOW-003R",
+      "operation": "CandidateOperationType.REPLACE_TEXT",
+      "path": "app/live_state.py",
+      "old_text_chars": 157,
+      "new_text_chars": 157,
+      "syntax": true,
+      "semantic": {
+        "passed": false,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _text(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n",
+        "exit_code": 1
+      },
+      "validator": true,
+      "apply": true,
+      "latency": 3.0812175999890314,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "task_id": "SHADOW-005",
+      "operation": "CandidateOperationType.REPLACE_TEXT",
+      "path": "app/delivery_documents.py",
+      "old_text_chars": 104,
+      "new_text_chars": 104,
+      "syntax": true,
+      "semantic": {
+        "passed": false,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _safe(0)==\"0\"\n           ^^^^^^^^^^^^^\nAssertionError\n",
+        "exit_code": 1
+      },
+      "validator": true,
+      "apply": true,
+      "latency": 2.7772107000055257,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "task_id": "SHADOW-006",
+      "operation": "CandidateOperationType.REPLACE_TEXT",
+      "path": "app/conversation.py",
+      "old_text_chars": 87,
+      "new_text_chars": 145,
+      "syntax": true,
+      "semantic": {
+        "passed": false,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _clip(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n",
+        "exit_code": 1
+      },
+      "validator": true,
+      "apply": true,
+      "latency": 2.8810014000046067,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "task_id": "SHADOW-007",
+      "operation": "CandidateOperationType.REPLACE_TEXT",
+      "path": "app/conversation.py",
+      "old_text_chars": 381,
+      "new_text_chars": 381,
+      "syntax": true,
+      "semantic": {
+        "passed": true,
+        "stderr": "",
+        "exit_code": 0
+      },
+      "validator": true,
+      "apply": true,
+      "latency": 4.966437900002347,
+      "outcome": "COMPLETED"
+    }
+  ],
+  "target_mutation": 0
+}
