@@ -34,9 +34,15 @@ Run:
 
 `python -m unittest discover -s tests -p "test_bounded_stateless_contract.py"`
 
+Then run:
+
 `python -m unittest tests.test_harness_core -q`
 
+Then run:
+
 `python -m unittest discover -s tests -q`
+
+Then run:
 
 `git diff --check`
 
