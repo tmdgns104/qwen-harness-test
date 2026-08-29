@@ -38,6 +38,8 @@ Then run:
 
 `python -m unittest tests.test_harness_core -q`
 
+Then run:
+
 `git diff --check`
 
 Focused contract tests and existing Harness regression must pass. A broader discovery run was executed separately; unrelated historical markdown/doctor failures are recorded in Evidence.
