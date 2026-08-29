@@ -1,9 +1,9 @@
-Current Task: VNEXT-001 - COMPLETE - VERIFIED - commit 52607dee2cf7ec696e961072db40fcea869f3da0
+Current Task: VNEXT-002 - ACTIVE
 
-Previous Task: QH-V2-MODEL-PROTOCOL-CAPABILITY-002 - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/model-protocol-capability-002/report.md
+Previous Task: VNEXT-001 - COMPLETE - VERIFIED - commit 52607dee2cf7ec696e961072db40fcea869f3da0
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 480f341b62289302e3b29203f12ac8b7788b6b1d
+Task Baseline: 55b79c6271b0e1dc737dd4b741a6cb58b2034420
 
 Handoff:
 - 2026-08-29 TPOS-V016-MODEL-002-MISTRAL-NEMO-12B benchmark is pending unsuccessful close after evidence commit. First attempt generated a native read and ToolResult but timed out at 60.014106s; bounded retry emitted `[TOOL_CALLS]` ordinary text with zero native ToolRequests. Preliminary verdict is `FAIL — TOOL_CALLING`; total wall-clock 75.702831s, `26%/74% CPU/GPU`, 31/41 layers, 6110 MiB GPU memory. No target or original Team Project OS change.
