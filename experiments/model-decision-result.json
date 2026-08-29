@@ -1,0 +1,197 @@
+{
+  "models": [
+    "qwen3:8b",
+    "qwen2.5-coder:7b"
+  ],
+  "target_baseline": null,
+  "results": [
+    {
+      "model": "qwen3:8b",
+      "task_id": "SHADOW-003R",
+      "latency": 6.610311399999773,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 6.609931500002858,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/live_state.py",
+          "content": "",
+          "old_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n\n",
+          "new_text": "def _text(value: Any, limit: int) -> str:\n    if isinstance(value, (dict, list, tuple, set)):\n        return \"\"\n    return str(value or \"\").strip()[:limit]\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": true,
+      "apply": true,
+      "syntax": true,
+      "semantic": {
+        "passed": false,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _text(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n"
+      },
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "model": "qwen3:8b",
+      "task_id": "SHADOW-005",
+      "latency": 30.021555200000876,
+      "transport_ok": false,
+      "error": "timed out",
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 30.02132349999738,
+        "failure_stage": "TRANSPORT",
+        "exception_class": "TimeoutError"
+      },
+      "candidate": null,
+      "validator": null,
+      "apply": null,
+      "syntax": null,
+      "semantic": null,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "model": "qwen3:8b",
+      "task_id": "SHADOW-006",
+      "latency": 1.843146599989268,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 1.842384999996284,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n\n",
+          "new_text": "def _clip(value: Any, limit: int) -> str:\n    return str(value or \"\").strip()[:limit]\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": true,
+      "apply": true,
+      "syntax": true,
+      "semantic": {
+        "passed": false,
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert _clip(0,10)==\"0\"\n           ^^^^^^^^^^^^^^^^\nAssertionError\n"
+      },
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "model": "qwen3:8b",
+      "task_id": "SHADOW-007",
+      "latency": 3.9724836999957915,
+      "transport_ok": true,
+      "error": null,
+      "metadata": {
+        "model": "qwen3:8b",
+        "elapsed_seconds": 3.972198399991612,
+        "parse_ok": true
+      },
+      "candidate": [
+        {
+          "operation_type": "CandidateOperationType.REPLACE_TEXT",
+          "path": "app/conversation.py",
+          "content": "",
+          "old_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged\n\n",
+          "new_text": "def merge_project_brief(current: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:\n    merged = dict(current or {})\n    for field in PROJECT_FIELDS:\n        if field in updates and str(updates[field]).strip():\n            merged[field] = updates[field]\n    if merged.get(\"project_type\") not in PROJECT_TYPES:\n        merged[\"project_type\"] = \"generic\"\n    return merged\n\n",
+          "expected_occurrences": 1
+        }
+      ],
+      "validator": true,
+      "apply": true,
+      "syntax": true,
+      "semantic": {
+        "passed": true,
+        "stderr": ""
+      },
+      "outcome": "COMPLETED"
+    },
+    {
+      "model": "qwen2.5-coder:7b",
+      "task_id": "SHADOW-003R",
+      "latency": 30.01187679999566,
+      "transport_ok": false,
+      "error": "timed out",
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 30.011654000001727,
+        "failure_stage": "TRANSPORT",
+        "exception_class": "TimeoutError"
+      },
+      "candidate": null,
+      "validator": null,
+      "apply": null,
+      "syntax": null,
+      "semantic": null,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "model": "qwen2.5-coder:7b",
+      "task_id": "SHADOW-005",
+      "latency": 4.011659499999951,
+      "transport_ok": true,
+      "error": "invalid Candidate JSON: Unterminated string starting at: line 7 column 19 (char 267)",
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 4.011365700003807,
+        "parse_ok": false,
+        "failure_stage": "CANDIDATE_PARSE",
+        "exception_class": "ValueError"
+      },
+      "candidate": null,
+      "validator": null,
+      "apply": null,
+      "syntax": null,
+      "semantic": null,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "model": "qwen2.5-coder:7b",
+      "task_id": "SHADOW-006",
+      "latency": 30.03617820001091,
+      "transport_ok": false,
+      "error": "timed out",
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 30.035924700001488,
+        "failure_stage": "TRANSPORT",
+        "exception_class": "TimeoutError"
+      },
+      "candidate": null,
+      "validator": null,
+      "apply": null,
+      "syntax": null,
+      "semantic": null,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    },
+    {
+      "model": "qwen2.5-coder:7b",
+      "task_id": "SHADOW-007",
+      "latency": 4.346761900000274,
+      "transport_ok": true,
+      "error": "invalid Candidate JSON: Unterminated string starting at: line 7 column 19 (char 539)",
+      "metadata": {
+        "model": "qwen2.5-coder:7b",
+        "elapsed_seconds": 4.3464182000025176,
+        "parse_ok": false,
+        "failure_stage": "CANDIDATE_PARSE",
+        "exception_class": "ValueError"
+      },
+      "candidate": null,
+      "validator": null,
+      "apply": null,
+      "syntax": null,
+      "semantic": null,
+      "outcome": "MODEL_LOGIC_FAILURE"
+    }
+  ],
+  "target_mutation": 0
+}
