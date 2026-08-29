@@ -23,8 +23,9 @@ existing authority and safety boundaries.
 
 ## Forbidden Changes
 
-Do not modify the native agent, strict parser semantics, candidate validator,
-retry policy, production timeout, authority boundaries, or VNEXT-008.
+- Native Agent, strict parser semantics, Candidate Validator
+- Retry policy, production timeout, authority boundaries
+- VNEXT-008 and unrelated files
 
 ## Verification
 
