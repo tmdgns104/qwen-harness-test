@@ -53,6 +53,57 @@ class Candidate:
 
 
 @dataclass(frozen=True)
+class CandidateValidationResult:
+    """Deterministic validation decision; it never applies a Candidate."""
+
+    valid: bool
+    errors: tuple[str, ...]
+
+
+def validate_candidate(
+    candidate: Candidate | None,
+    scope: "ChangeScope",
+    *,
+    protected_paths: tuple[str, ...] = ("STATUS.md",),
+    max_operations: int = 20,
+    max_content_chars: int = 200_000,
+) -> CandidateValidationResult:
+    """Fail-closed schema, path, scope, and bounded-size validation."""
+    errors: list[str] = []
+    if not isinstance(candidate, Candidate):
+        return CandidateValidationResult(False, ("candidate must be Candidate",))
+    if len(candidate.operations) > max_operations:
+        errors.append("operation count exceeds limit")
+    seen: set[str] = set()
+    protected = {p.replace("\\", "/").casefold() if os.name == "nt" else p.replace("\\", "/") for p in protected_paths}
+    for operation in candidate.operations:
+        if not isinstance(operation, CandidateOperation) or not isinstance(operation.operation_type, CandidateOperationType):
+            errors.append("unsupported operation type")
+            continue
+        if not isinstance(operation.path, str) or not operation.path or "\x00" in operation.path:
+            errors.append("invalid path")
+            continue
+        normalized = operation.path.replace("\\", "/")
+        path_obj = Path(normalized)
+        if path_obj.is_absolute() or path_obj.drive or normalized.startswith("/") or any(part == ".." for part in path_obj.parts):
+            errors.append("unsafe path")
+            continue
+        identity = normalized.casefold() if os.name == "nt" else normalized
+        if identity in seen:
+            errors.append("duplicate path")
+        seen.add(identity)
+        if identity in protected:
+            errors.append("protected lifecycle path")
+        if not is_path_allowed(normalized, scope):
+            errors.append("path outside allowed scope")
+        if not isinstance(operation.content, str):
+            errors.append("content must be string")
+        elif len(operation.content) > max_content_chars:
+            errors.append("content exceeds limit")
+    return CandidateValidationResult(not errors, tuple(errors))
+
+
+@dataclass(frozen=True)
 class BoundedWorkerRequest:
     """Self-contained request for a stateless bounded Worker."""
 
