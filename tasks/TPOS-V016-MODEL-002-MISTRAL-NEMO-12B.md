@@ -134,3 +134,22 @@ changes.
 ## Next Task
 
 NONE. Command-R7B is not part of this Task.
+
+## Benchmark Result
+
+Final disposition: **FAIL — TOOL_CALLING**.
+
+Attempt 1 produced a native read ToolRequest and ToolResult, then timed out at
+the unchanged 60-second continuation limit. Attempt 2, under the unchanged
+bounded Retry policy, emitted `[TOOL_CALLS]` ordinary text with zero native
+ToolRequests. Harness ended `NORMAL` after 2 attempts without a write; the
+isolated target and original Team Project OS were unchanged. Canonical direct
+positive/negative probes PASS, full isolated regression is 64/64 PASS, and the
+Worker test is absent.
+
+Measured total wall-clock was 75.702831s; model digest
+`5bba7a13afefd3f2f58abe383c4f775d9238e0b4f2c24e56b72b33290fef719d`, `Q3_K_S`,
+5,534,238,669 bytes, context 16384, `26%/74% CPU/GPU`, 31/41 offloaded layers,
+and 6,110 MiB GPU memory. Evidence is preserved under
+`experiments/tpos-v016-model-002-mistral-nemo-12b/`. MODEL-001 and qwen3:8b
+Evidence remain unchanged.
