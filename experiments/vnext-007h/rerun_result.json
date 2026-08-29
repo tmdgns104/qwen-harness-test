@@ -1,0 +1,51 @@
+{
+  "rows": [
+    {
+      "task_id": "R0",
+      "elapsed": 1.1181140000044252,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": true,
+      "candidate_ops": 1,
+      "error": null
+    },
+    {
+      "task_id": "R1",
+      "elapsed": 0.9175143000029493,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": true,
+      "candidate_ops": 1,
+      "error": null
+    },
+    {
+      "task_id": "R2",
+      "elapsed": 1.830213699999149,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": true,
+      "candidate_ops": 1,
+      "error": null
+    },
+    {
+      "task_id": "R3",
+      "elapsed": 1.3203627000038978,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": true,
+      "candidate_ops": 1,
+      "error": null
+    },
+    {
+      "task_id": "R4",
+      "elapsed": 1.5625157999966177,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": true,
+      "candidate_ops": 1,
+      "error": null
+    }
+  ],
+  "mean_elapsed": 1.3497441000014079,
+  "median_elapsed": 1.3203627000038978
+}

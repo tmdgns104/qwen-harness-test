@@ -1,9 +1,9 @@
-Current Task: VNEXT-007 - COMPLETE - VERIFIED - commit 524781818debcf4b48e305bdf55a525c5e3584c8
+Current Task: VNEXT-007H - ACTIVE
 
 Previous Task: VNEXT-006 - COMPLETE - VERIFIED - commit 9269c8f9a864f857086cc6278eef4b0b9ba29205
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 6969a557fc1d0c2ec6df362247c220a485d8c10f
+Task Baseline: 9fbadebf87c3c02c56bc37f3654170ec76a6718
 
 Handoff:
 - 2026-08-29 TPOS-V016-MODEL-002-MISTRAL-NEMO-12B benchmark is pending unsuccessful close after evidence commit. First attempt generated a native read and ToolResult but timed out at 60.014106s; bounded retry emitted `[TOOL_CALLS]` ordinary text with zero native ToolRequests. Preliminary verdict is `FAIL — TOOL_CALLING`; total wall-clock 75.702831s, `26%/74% CPU/GPU`, 31/41 layers, 6110 MiB GPU memory. No target or original Team Project OS change.

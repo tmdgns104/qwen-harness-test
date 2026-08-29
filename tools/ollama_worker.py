@@ -24,11 +24,17 @@ from tools.harness_core import (
 
 def _bounded_prompt(request: BoundedWorkerRequest) -> str:
     """Serialize only the self-contained bounded request in stable JSON order."""
-    return json.dumps({
+    serialized = json.dumps({
         "task": request.task,
         "context_pack": request.context_pack,
         "output_contract": request.output_contract,
     }, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return (
+        "Return ONLY one JSON object. Do not explain, use markdown, or add code fences. "
+        "The object must contain exactly operations; each operation must contain exactly "
+        "operation_type, path, content; operation_type is CREATE_FILE or REPLACE_FILE.\n"
+        + serialized
+    )
 
 
 def _parse_bounded_candidate(content: str) -> Candidate:
@@ -67,6 +73,7 @@ def call_bounded_stateless_worker(
         "messages": [{"role": "user", "content": _bounded_prompt(request)}],
         "stream": False,
         "think": False,
+        "format": BOUNDED_CANDIDATE_SCHEMA,
         "options": {"num_ctx": 8192, "temperature": 0, "seed": 424242},
     }
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -94,6 +101,27 @@ DEFAULT_BASE_URL = "http://127.0.0.1:11434"
 DEFAULT_MODEL = "qwen3:8b"
 DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_CONTINUATION_TIMEOUT_SECONDS = 60.0
+
+BOUNDED_CANDIDATE_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["operations"],
+    "properties": {
+        "operations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["operation_type", "path", "content"],
+                "properties": {
+                    "operation_type": {"type": "string", "enum": ["CREATE_FILE", "REPLACE_FILE"]},
+                    "path": {"type": "string"},
+                    "content": {"type": "string"},
+                },
+            },
+        },
+    },
+}
 
 
 def call_ollama_worker(
