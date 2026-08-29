@@ -1,0 +1,640 @@
+{
+  "experiment": "VNEXT-007A",
+  "A_current": {
+    "summary": {
+      "transport": 12,
+      "parse": 12,
+      "validator": 11,
+      "apply": 3,
+      "mean": 1.6305648416667584,
+      "median": 1.2199789499973122,
+      "apply_reliability": 0.2727272727272727
+    },
+    "rows": [
+      {
+        "task_id": "t1",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 4.674687899998389
+      },
+      {
+        "task_id": "t2",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 1.206521200001589
+      },
+      {
+        "task_id": "t3",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 1.2104775999978301
+      },
+      {
+        "task_id": "t4",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 1.2294802999967942
+      },
+      {
+        "task_id": "t5",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 1.2531589999998687
+      },
+      {
+        "task_id": "t6",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 1.2057106000065687
+      },
+      {
+        "task_id": "semantic",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.7748267999995733
+      },
+      {
+        "task_id": "boundary",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": false,
+        "apply": false,
+        "apply_error": null,
+        "elapsed": 1.8285528999986127
+      },
+      {
+        "task_id": "exception",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 2.1750144000034197
+      },
+      {
+        "task_id": "parser",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 0.9456693999964045
+      },
+      {
+        "task_id": "multi",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.0347151000023587
+      },
+      {
+        "task_id": "coordination",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "CREATE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": false,
+        "apply_error": "src/caller.py",
+        "elapsed": 1.027962899999693
+      }
+    ]
+  },
+  "B_target_state": {
+    "summary": {
+      "transport": 12,
+      "parse": 12,
+      "validator": 12,
+      "apply": 12,
+      "mean": 1.211645625001135,
+      "median": 1.0846340500029328,
+      "apply_reliability": 1.0
+    },
+    "rows": [
+      {
+        "task_id": "t1",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.0733590000018012
+      },
+      {
+        "task_id": "t2",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.094050799998513
+      },
+      {
+        "task_id": "t3",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.0680705000049784
+      },
+      {
+        "task_id": "t4",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.074902699998347
+      },
+      {
+        "task_id": "t5",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.0904068000018015
+      },
+      {
+        "task_id": "t6",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.078861300004064
+      },
+      {
+        "task_id": "semantic",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.317055799998343
+      },
+      {
+        "task_id": "boundary",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.4249742000029073
+      },
+      {
+        "task_id": "exception",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 2.2422514999998384
+      },
+      {
+        "task_id": "parser",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 0.9535478000034345
+      },
+      {
+        "task_id": "multi",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.0312938999995822
+      },
+      {
+        "task_id": "coordination",
+        "operations": [
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/module.py",
+            "content_present": true
+          },
+          {
+            "type": "REPLACE_FILE",
+            "path": "src/caller.py",
+            "content_present": true
+          }
+        ],
+        "target_exists": {
+          "src/module.py": true,
+          "src/caller.py": true
+        },
+        "transport": true,
+        "parse": true,
+        "validator": true,
+        "apply": true,
+        "apply_error": null,
+        "elapsed": 1.0909732000000076
+      }
+    ]
+  },
+  "fixture_integrity": "PASS",
+  "safety": {
+    "auto_correction": 0,
+    "original_mutation": 0,
+    "false_completed": 0
+  }
+}
