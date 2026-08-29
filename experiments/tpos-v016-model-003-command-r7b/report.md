@@ -1,5 +1,9 @@
 # TPOS-V016-MODEL-003-COMMAND-R7B
 
+## Task Status
+
+UNSUCCESSFUL
+
 ## Verdict
 **FAIL — TOOL_CALLING**
 
