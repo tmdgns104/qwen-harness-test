@@ -59,7 +59,12 @@ def _parse_bounded_candidate(content: str) -> Candidate:
             raise ValueError("unsupported Candidate operation type") from exc
         if not isinstance(raw["path"], str) or not isinstance(raw["content"], str):
             raise ValueError("Candidate path/content types are invalid")
-        operations.append(CandidateOperation(operation_type, raw["path"], raw["content"]))
+        if operation_type is CandidateOperationType.REPLACE_TEXT:
+            if set(raw) != {"operation_type", "path", "old_text", "new_text", "expected_occurrences"}:
+                raise ValueError("invalid REPLACE_TEXT fields")
+            operations.append(CandidateOperation(operation_type, raw["path"], "", raw["old_text"], raw["new_text"], raw["expected_occurrences"]))
+        else:
+            operations.append(CandidateOperation(operation_type, raw["path"], raw["content"]))
     return Candidate(tuple(operations))
 
 
@@ -119,16 +124,11 @@ BOUNDED_CANDIDATE_SCHEMA = {
     "properties": {
         "operations": {
             "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": False,
-                "required": ["operation_type", "path", "content"],
-                "properties": {
-                    "operation_type": {"type": "string", "enum": ["CREATE_FILE", "REPLACE_FILE"]},
-                    "path": {"type": "string"},
-                    "content": {"type": "string"},
-                },
-            },
+            "items": {"oneOf": [
+                {"type":"object","additionalProperties":False,"required":["operation_type","path","content"],"properties":{"operation_type":{"const":"CREATE_FILE"},"path":{"type":"string"},"content":{"type":"string"}}},
+                {"type":"object","additionalProperties":False,"required":["operation_type","path","content"],"properties":{"operation_type":{"const":"REPLACE_FILE"},"path":{"type":"string"},"content":{"type":"string"}}},
+                {"type":"object","additionalProperties":False,"required":["operation_type","path","old_text","new_text","expected_occurrences"],"properties":{"operation_type":{"const":"REPLACE_TEXT"},"path":{"type":"string"},"old_text":{"type":"string"},"new_text":{"type":"string"},"expected_occurrences":{"const":1}}}
+            ]},
         },
     },
 }

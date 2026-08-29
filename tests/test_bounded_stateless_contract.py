@@ -27,7 +27,7 @@ class BoundedStatelessContractTests(unittest.TestCase):
         self.assertFalse(any(name in dir(op) for name in ("apply", "execute", "write", "save")))
 
     def test_operation_and_outcome_values_are_closed(self):
-        self.assertEqual(set(CandidateOperationType), {CandidateOperationType.CREATE_FILE, CandidateOperationType.REPLACE_FILE})
+        self.assertEqual(set(CandidateOperationType), {CandidateOperationType.CREATE_FILE, CandidateOperationType.REPLACE_FILE, CandidateOperationType.REPLACE_TEXT})
         self.assertEqual({x.value for x in BoundedOutcome}, {"COMPLETED", "NO_ACTION", "CANDIDATE_INVALID", "VERIFICATION_FAILED", "SAFETY_FAIL", "TRANSPORT_FAIL", "PERFORMANCE_FAIL", "BLOCKED"})
 
     def test_native_contract_remains_distinct(self):

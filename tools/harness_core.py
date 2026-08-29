@@ -36,6 +36,7 @@ class CandidateOperationType(Enum):
 
     CREATE_FILE = "CREATE_FILE"
     REPLACE_FILE = "REPLACE_FILE"
+    REPLACE_TEXT = "REPLACE_TEXT"
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,9 @@ class CandidateOperation:
     operation_type: CandidateOperationType
     path: str
     content: str
+    old_text: str | None = None
+    new_text: str | None = None
+    expected_occurrences: int | None = None
 
 
 @dataclass(frozen=True)
@@ -108,6 +112,17 @@ def apply_candidate_to_snapshot(
             elif operation.operation_type is CandidateOperationType.REPLACE_FILE:
                 if not target.is_file():
                     raise FileNotFoundError(relative)
+            elif operation.operation_type is CandidateOperationType.REPLACE_TEXT:
+                if not target.is_file():
+                    raise FileNotFoundError(relative)
+                if not operation.old_text or not isinstance(operation.new_text, str) or operation.expected_occurrences != 1:
+                    raise ValueError("invalid REPLACE_TEXT contract")
+                existing = target.read_text(encoding="utf-8")
+                if existing.count(operation.old_text) != operation.expected_occurrences:
+                    raise ValueError("REPLACE_TEXT occurrence mismatch")
+                target.write_text(existing.replace(operation.old_text, operation.new_text), encoding="utf-8")
+                applied.append(relative)
+                continue
             else:
                 raise ValueError("unsupported operation type")
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -159,6 +174,13 @@ def validate_candidate(
             errors.append("content must be string")
         elif len(operation.content) > max_content_chars:
             errors.append("content exceeds limit")
+        if operation.operation_type is CandidateOperationType.REPLACE_TEXT:
+            if not isinstance(operation.old_text, str) or not operation.old_text:
+                errors.append("REPLACE_TEXT old_text must be non-empty")
+            if not isinstance(operation.new_text, str):
+                errors.append("REPLACE_TEXT new_text must be string")
+            if operation.expected_occurrences != 1:
+                errors.append("REPLACE_TEXT expected_occurrences must equal 1")
     return CandidateValidationResult(not errors, tuple(errors))
 
 
