@@ -1,9 +1,9 @@
-Current Task: TPOS-V016-MODEL-002-MISTRAL-NEMO-12B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-002-mistral-nemo-12b/report.md
+Current Task: TPOS-V016-MODEL-003-COMMAND-R7B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-003-command-r7b/report.md
 
-Previous Task: TPOS-V016-MODEL-001-QWEN25-CODER-14B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-001-qwen25-coder-14b/report.md
+Previous Task: TPOS-V016-MODEL-002-MISTRAL-NEMO-12B - CLOSED - UNSUCCESSFUL - EVIDENCE RECORDED - evidence experiments/tpos-v016-model-002-mistral-nemo-12b/report.md
 
 Next Planned Task: NOT SET - HUMAN SELECTION REQUIRED
-Task Baseline: 2b7998b
+Task Baseline: c2067c1
 
 Handoff:
 - 2026-08-29 TPOS-V016-MODEL-002-MISTRAL-NEMO-12B benchmark is pending unsuccessful close after evidence commit. First attempt generated a native read and ToolResult but timed out at 60.014106s; bounded retry emitted `[TOOL_CALLS]` ordinary text with zero native ToolRequests. Preliminary verdict is `FAIL — TOOL_CALLING`; total wall-clock 75.702831s, `26%/74% CPU/GPU`, 31/41 layers, 6110 MiB GPU memory. No target or original Team Project OS change.

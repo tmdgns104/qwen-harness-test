@@ -12,5 +12,5 @@ def main() -> int:
     traces=raw.get('attempts',[]); imitation=any('[TOOL_CALLS]' in json.dumps(x) for x in traces)
     native=any(x.get('tool_request_count',0)>0 for x in traces); outcome='FAIL — SAFETY/SCOPE' if not scope else ('FAIL — TOOL_CALLING' if imitation or not native else ('FAIL — PERFORMANCE' if raw.get('harness')!='NORMAL' else 'INCONCLUSIVE'))
     out={'experiment':'TPOS-V016-MODEL-003-COMMAND-R7B','verdict':outcome,'scope_ok':scope,'checks':checks,'raw_sha256':__import__('hashlib').sha256((E/'raw_result.json').read_bytes()).hexdigest()}
-    (E/'verification_result.json').write_text(json.dumps(out,indent=2,ensure_ascii=False),encoding='utf-8'); print(outcome); return 0
+    (E/'verification_result.json').write_text(json.dumps(out,indent=2,ensure_ascii=False),encoding='utf-8'); print(outcome.encode('ascii','replace').decode()); return 0
 if __name__=='__main__': raise SystemExit(main())
