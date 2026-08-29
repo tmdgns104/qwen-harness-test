@@ -25,6 +25,7 @@ Freeze the bounded_stateless contract as a backend-neutral, machine-validatable 
 - Request/response and Candidate schemas are explicit and reject unknown operations.
 - Limits and all eight outcomes are represented deterministically.
 - Existing native tests remain green; no Worker receives direct side-effect authority.
+- Contract permits capable reasoning and failure-guided retries while preserving stateless Worker ownership and Harness-managed state.
 - Evidence and diff show only allowed files.
 
 ## Verification

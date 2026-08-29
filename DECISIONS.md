@@ -13,11 +13,15 @@ The model protocol capability experiments showed that native tool autonomy is no
 
 Add a `bounded_stateless` Worker mode alongside (not replacing) `native_agent`. Deterministic Harness orchestration builds a bounded Context Pack and sends a self-contained request. The Local LLM returns only a schema-validated Candidate proposal. Harness-owned validation and temporary-snapshot verification control all application and evidence decisions.
 
+The Worker is **Smart Worker, Bounded Authority**: capability is not intentionally reduced. It may perform requirement interpretation, Architecture/code understanding, multi-file planning, code/test generation, self-review, and failure-guided re-reasoning using only supplied context and evidence. It has no Repository, filesystem, Git, shell, test execution, direct write, or Candidate-apply authority. Statelessness applies to durable Worker-owned state; Harness may manage bounded attempts and feed prior failure Evidence into a later request.
+
 Candidate operations are explicit structured file operations, not free-form text or parser-promoted JSON. Unified diff may be represented inside a candidate only after schema validation; text imitation is never upgraded into authority. Context selection is manifest-bound and budget overflow fails closed. Outcomes distinguish completion, no action, invalid candidate, verification, safety, transport, performance, and blocked states.
 
 ### Consequences
 
 Native Agent mode, tool schemas, authority, retry, production timeout, and existing evidence remain unchanged. Stateless mode improves determinism and makes model capability a bounded proposal concern, at the cost of more Harness implementation and stricter context preparation. Team Project OS remains an independent read-only pilot target; promotion requires Codex Final Gate. No quantization or model choice is implied by this ADR.
+
+Qwen3:8B is the current practical hardware baseline (RTX 5070 Laptop, 8GB VRAM, 32GB RAM). A larger model is considered only when benchmark accuracy gain and runtime/memory remain practical; this is a selection criterion, not an authority expansion.
 
 ### Implementation decomposition
 
