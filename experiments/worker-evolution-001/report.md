@@ -13,9 +13,9 @@ H1: explicit acceptance/allowed scope/tests and complete source context improve 
 | single-function | 2/2 | 2/2 | 5.22 / 0.83 |
 | bug-fix | 0/2 | 2/2 | 1.62 / 3.96 |
 | multi-file | 0/2 | 0/2 | 1.30 / 0.90 |
-| **Total** | **4/6 (66.7%)** | **4/6 (66.7%)** | **2.71 / 1.90** |
+| **Total** | **2/6 (33.3%)** | **4/6 (66.7%)** | **2.71 / 1.90** |
 
-All successful candidates were parsed as structured JSON and passed the temporary fixture tests. Multi-file work remained unsuccessful, so one success is not evidence of broad engineering capability. Rich context fixed the parser bug task but did not improve aggregate success; the sample is intentionally small and exploratory.
+All successful candidates were parsed as structured JSON and passed the temporary fixture tests. The original report incorrectly summed Minimal as 4/6; raw `result.json` shows 2/6 (single-function 2/2, bug-fix 0/2, multi-file 0/2). Rich context achieved 4/6 (66.7%). Multi-file work remained unsuccessful; the sample is intentionally small and exploratory.
 
 ## Hardware and bottlenecks
 
