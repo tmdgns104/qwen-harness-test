@@ -1,0 +1,261 @@
+{
+  "experiment": "VNEXT-007R",
+  "model": "qwen3:8b",
+  "settings": {
+    "think": false,
+    "temperature": 0,
+    "seed": 424242,
+    "num_ctx": 8192
+  },
+  "task_count": 12,
+  "tasks": [
+    [
+      "single-1",
+      "Implement function task_1(value) in src/module.py. Return value + 1."
+    ],
+    [
+      "single-2",
+      "Implement function task_2(value) in src/module.py. Return value + 2."
+    ],
+    [
+      "single-3",
+      "Implement function task_3(value) in src/module.py. Return value + 3."
+    ],
+    [
+      "single-4",
+      "Implement function task_4(value) in src/module.py. Return value + 4."
+    ],
+    [
+      "single-5",
+      "Implement function task_5(value) in src/module.py. Return value + 5."
+    ],
+    [
+      "single-6",
+      "Implement function task_6(value) in src/module.py. Return value + 6."
+    ],
+    [
+      "semantic",
+      "Implement is_valid(value): return False for None or empty string, otherwise True."
+    ],
+    [
+      "boundary",
+      "Implement clamp(value, low, high) with inclusive bounds."
+    ],
+    [
+      "exception",
+      "Implement divide(a, b) and raise ValueError when b is zero."
+    ],
+    [
+      "parser",
+      "Implement parse_flag(text): trimmed case-insensitive yes/no, otherwise ValueError."
+    ],
+    [
+      "multi",
+      "Implement format_status(value) in src/module.py and caller_status(value) in src/caller.py consistently."
+    ],
+    [
+      "coordination",
+      "Implement normalize_name(value) in src/module.py and use it from src/caller.py."
+    ]
+  ],
+  "funnel": {
+    "total": 12,
+    "transport_ok": 12,
+    "parse_ok": 12,
+    "validator_pass": 2,
+    "snapshot_apply_pass": 0,
+    "visible_verification_pass": 0,
+    "independent_verification_pass": 0,
+    "completed": 0
+  },
+  "rows": [
+    {
+      "task_id": "single-1",
+      "context_chars": 76,
+      "request_chars": 546,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 2.014418700004171,
+      "elapsed_seconds": 2.0150802999996813,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "single-2",
+      "context_chars": 76,
+      "request_chars": 546,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 0.9672513999976218,
+      "elapsed_seconds": 0.9675065999981598,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "single-3",
+      "context_chars": 76,
+      "request_chars": 546,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 0.9586297000059858,
+      "elapsed_seconds": 0.9589224999945145,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "single-4",
+      "context_chars": 76,
+      "request_chars": 546,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 0.9617939000017941,
+      "elapsed_seconds": 0.9621741000009933,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "single-5",
+      "context_chars": 76,
+      "request_chars": 546,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 0.9537478000056581,
+      "elapsed_seconds": 0.9540707999985898,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "single-6",
+      "context_chars": 76,
+      "request_chars": 546,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 0.9314881999962381,
+      "elapsed_seconds": 0.931716500002949,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "semantic",
+      "context_chars": 76,
+      "request_chars": 559,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 1.3306985999952303,
+      "elapsed_seconds": 1.33098389999941,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "boundary",
+      "context_chars": 76,
+      "request_chars": 534,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 2.4401078000009875,
+      "elapsed_seconds": 2.440474399998493,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "exception",
+      "context_chars": 76,
+      "request_chars": 538,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 1.8725507999988622,
+      "elapsed_seconds": 1.8728436000019428,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "parser",
+      "context_chars": 76,
+      "request_chars": 558,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": false,
+      "apply_ok": false,
+      "verification_outcome": "CANDIDATE_INVALID",
+      "inference_seconds": 2.9718033999961335,
+      "elapsed_seconds": 2.9720902999979444,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "multi",
+      "context_chars": 76,
+      "request_chars": 578,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": true,
+      "apply_ok": false,
+      "verification_outcome": "SAFETY_FAIL",
+      "inference_seconds": 0.9909982000026503,
+      "elapsed_seconds": 4.748075600000448,
+      "candidate_ops": 2,
+      "error": null
+    },
+    {
+      "task_id": "coordination",
+      "context_chars": 76,
+      "request_chars": 561,
+      "transport_ok": true,
+      "parse_ok": true,
+      "validator_ok": true,
+      "apply_ok": false,
+      "verification_outcome": "SAFETY_FAIL",
+      "inference_seconds": 1.1196238000047742,
+      "elapsed_seconds": 4.778347100000246,
+      "candidate_ops": 2,
+      "error": null
+    }
+  ],
+  "latency": {
+    "inference_mean": 1.4594260250008422,
+    "inference_median": 1.0553110000037123,
+    "e2e_mean": 2.077690474999448,
+    "e2e_median": 1.6019137500006764
+  },
+  "safety": {
+    "malformed_promoted": 0,
+    "scope_applied": 0,
+    "original_mutations": 0,
+    "false_completed": 0
+  },
+  "hardware_before": {
+    "ollama_ps": "NAME        ID              SIZE      PROCESSOR    CONTEXT    UNTIL              \nqwen3:8b    500a1f067a9f    6.2 GB    100% GPU     8192       4 minutes from now",
+    "nvidia_smi": "6080 MiB, 8151 MiB"
+  },
+  "hardware_after": {
+    "ollama_ps": "NAME        ID              SIZE      PROCESSOR    CONTEXT    UNTIL              \nqwen3:8b    500a1f067a9f    6.2 GB    100% GPU     8192       4 minutes from now",
+    "nvidia_smi": "6080 MiB, 8151 MiB"
+  }
+}
