@@ -1,0 +1,7 @@
+{
+  "experiment": "VNEXT-007V",
+  "status": "INCONCLUSIVE",
+  "reason": "A/B/C full run did not complete within the diagnostic execution window; no partial metrics were promoted.",
+  "model": "qwen3:8b",
+  "safety": {"false_completed": 0, "original_mutation": 0}
+}
